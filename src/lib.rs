@@ -2,7 +2,6 @@ extern crate extprim;
 #[cfg(feature = "serde")]
 #[macro_use]
 extern crate serde;
-extern crate test;
 
 use std::fmt;
 use std::cmp;
