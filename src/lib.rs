@@ -768,10 +768,8 @@ impl fmt::Display for IpNetworkParseError {
 
 #[cfg(test)]
 mod tests {
-    use test::Bencher;
     use std::net::{Ipv4Addr, Ipv6Addr};
     use {Ipv6Network, Ipv4Network};
-    use std::str::FromStr;
 
     #[test]
     fn test_new_ipv4_host_bits_set() {
