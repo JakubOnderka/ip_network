@@ -215,13 +215,38 @@ mod tests {
     use super::{Ipv4NetworkIterator, Ipv4RangeIterator, Ipv6NetworkIterator};
 
     #[test]
-    fn test_ipv4iterator_length() {
-        let iterator = Ipv4RangeIterator::new(
+    fn test_ipv4_range_iterator() {
+        let mut iterator = Ipv4RangeIterator::new(
+            Ipv4Addr::new(192, 168, 2, 0),
+            Ipv4Addr::new(192, 168, 2, 255)
+        );
+        assert_eq!(iterator.next().unwrap(), Ipv4Addr::new(192, 168, 2, 0));
+        assert_eq!(iterator.next().unwrap(), Ipv4Addr::new(192, 168, 2, 1));
+        assert_eq!(iterator.last().unwrap(), Ipv4Addr::new(192, 168, 2, 255));
+    }
+
+    #[test]
+    fn test_ipv4_range_iterator_length() {
+        let mut iterator = Ipv4RangeIterator::new(
             Ipv4Addr::new(192, 168, 2, 0),
             Ipv4Addr::new(192, 168, 2, 255)
         );
         assert_eq!(iterator.len(), 256);
-        assert_eq!(iterator.collect::<Vec<_>>().len(), 256);
+        iterator.next().unwrap();
+        assert_eq!(iterator.len(), 255);
+        assert_eq!(iterator.collect::<Vec<_>>().len(), 255);
+    }
+
+    #[test]
+    fn test_ipv4_range_iterator_same_values() {
+        let mut iterator = Ipv4RangeIterator::new(
+            Ipv4Addr::new(255, 255, 255, 255),
+            Ipv4Addr::new(255, 255, 255, 255)
+        );
+        assert_eq!(iterator.len(), 1);
+        assert_eq!(iterator.next().unwrap(), Ipv4Addr::new(255, 255, 255, 255));
+        assert!(iterator.next().is_none());
+        assert_eq!(iterator.len(), 0);
     }
 
     #[test]
@@ -229,6 +254,7 @@ mod tests {
         let network = Ipv4Network::from(Ipv4Addr::new(127, 0, 0, 0), 8).unwrap();
         let mut iterator = Ipv4NetworkIterator::new(network, 16);
 
+        assert_eq!(iterator.len(), 256);
         assert_eq!(iterator.next().unwrap(), Ipv4Network::from(Ipv4Addr::new(127, 0, 0, 0), 16).unwrap());
         assert_eq!(iterator.next().unwrap(), Ipv4Network::from(Ipv4Addr::new(127, 1, 0, 0), 16).unwrap());
         assert_eq!(iterator.next().unwrap(), Ipv4Network::from(Ipv4Addr::new(127, 2, 0, 0), 16).unwrap());

@@ -769,31 +769,96 @@ impl fmt::Display for IpNetworkParseError {
 #[cfg(test)]
 mod tests {
     use std::net::{Ipv4Addr, Ipv6Addr};
-    use {Ipv6Network, Ipv4Network};
+    use {IpNetwork, Ipv6Network, Ipv4Network};
+
+    fn return_test_ipv4_network() -> Ipv4Network {
+        Ipv4Network::from(Ipv4Addr::new(192, 168, 0, 0), 16).unwrap()
+    }
+
+    fn return_test_ipv6_network() -> Ipv6Network {
+        Ipv6Network::from(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0), 32).unwrap()
+    }
 
     #[test]
-    fn test_new_ipv4_host_bits_set() {
+    fn test_ip_network_is_ipv4() {
+        let ip_network = IpNetwork::V4(return_test_ipv4_network());
+        assert!(ip_network.is_ipv4());
+        assert!(!ip_network.is_ipv6());
+    }
+
+    #[test]
+    fn test_ip_network_is_ipv6() {
+        let ip_network = IpNetwork::V6(return_test_ipv6_network());
+        assert!(ip_network.is_ipv6());
+        assert!(!ip_network.is_ipv4());
+    }
+
+    #[test]
+    fn test_ip_network_parse_ipv4() {
+        let ip_network: IpNetwork = "192.168.0.0/16".parse().unwrap();
+        assert_eq!(ip_network, IpNetwork::V4(return_test_ipv4_network()));
+    }
+
+    #[test]
+    fn test_ip_network_parse_ipv6() {
+        let ip_network: IpNetwork = "2001:db8::/32".parse().unwrap();
+        assert_eq!(ip_network, IpNetwork::V6(return_test_ipv6_network()));
+    }
+
+    #[test]
+    fn test_ip_network_format_ipv4() {
+        let ip_network = IpNetwork::V4(return_test_ipv4_network());
+        assert_eq!(format!("{}", ip_network), "192.168.0.0/16");
+    }
+
+    #[test]
+    fn test_ip_network_format_ipv6() {
+        let ip_network = IpNetwork::V6(return_test_ipv6_network());
+        assert_eq!(format!("{}", ip_network), "2001:db8::/32");
+    }
+
+    #[test]
+    fn test_ipv4_network_from_host_bits_set() {
         let ip = Ipv4Addr::new(127, 0, 0, 1);
         let network = Ipv4Network::from(ip, 8);
         assert!(network.is_err());
     }
 
     #[test]
-    fn test_cmd_different_ip_ipv4() {
+    fn test_ipv4_network_from_truncate_host_bits_set() {
+        let ip = Ipv4Addr::new(127, 0, 0, 1);
+        let ip_network = Ipv4Network::from_truncate(ip, 8).unwrap();
+        assert_eq!(ip_network.get_network_address(), Ipv4Addr::new(127, 0, 0, 0));
+    }
+
+    #[test]
+    fn test_ipv4_network_parse() {
+        let ip_network: Ipv4Network = "192.168.0.0/16".parse().unwrap();
+        assert_eq!(ip_network, return_test_ipv4_network());
+    }
+
+    #[test]
+    fn test_ipv4_network_format() {
+        let ip_network = return_test_ipv4_network();
+        assert_eq!(format!("{}", ip_network), "192.168.0.0/16");
+    }
+
+    #[test]
+    fn test_ipv4_network_cmd_different_ip() {
         let a = Ipv4Network::from(Ipv4Addr::new(127, 0, 0, 0), 8).unwrap();
         let b = Ipv4Network::from(Ipv4Addr::new(128, 0, 0, 0), 8).unwrap();
         assert!(b > a);
     }
 
     #[test]
-    fn test_cmd_different_netmask_ipv4() {
+    fn test_ipv4_network_cmd_different_netmask() {
         let a = Ipv4Network::from(Ipv4Addr::new(127, 0, 0, 0), 8).unwrap();
         let b = Ipv4Network::from(Ipv4Addr::new(127, 0, 0, 0), 16).unwrap();
         assert!(b > a);
     }
 
     #[test]
-    fn test_hashmap_ipv4() {
+    fn test_ipv4_network_hashmap() {
         use std::collections::HashMap;
 
         let ip = Ipv4Addr::new(127, 0, 0, 0);
@@ -812,7 +877,7 @@ mod tests {
     }
 
     #[test]
-    fn test_summarize_address_range_ipv4() {
+    fn test_ipv4_network_summarize_address_range() {
         let networks = Ipv4Network::summarize_address_range(
             Ipv4Addr::new(194, 249, 198, 0),
             Ipv4Addr::new(194, 249, 198, 159)
@@ -829,7 +894,7 @@ mod tests {
     }
 
     #[test]
-    fn test_summarize_address_range_ipv4_2() {
+    fn test_ipv4_network_summarize_address_range_whole_range() {
         let networks = Ipv4Network::summarize_address_range(
             Ipv4Addr::new(0, 0, 0, 0),
             Ipv4Addr::new(255, 255, 255, 255)
@@ -842,10 +907,23 @@ mod tests {
     }
 
     #[test]
-    fn test_new_ipv6() {
+    fn test_ipv6_network_from() {
         let ip = Ipv6Addr::new(0xfc00, 0, 0, 0, 0, 0, 0, 0);
-        let network = Ipv6Network::from(ip, 7);
-        assert!(network.is_ok());
+        let network = Ipv6Network::from(ip, 7).unwrap();
+        assert_eq!(network.get_network_address(), Ipv6Addr::new(0xfc00, 0, 0, 0, 0, 0, 0, 0));
+        assert_eq!(network.get_netmask(), 7);
+    }
+
+    #[test]
+    fn test_ipv6_network_parse() {
+        let ip_network: Ipv6Network = "2001:db8::/32".parse().unwrap();
+        assert_eq!(ip_network, return_test_ipv6_network());
+    }
+
+    #[test]
+    fn test_ipv6_network_format() {
+        let ip_network = return_test_ipv6_network();
+        assert_eq!(format!("{}", ip_network), "2001:db8::/32");
     }
 
     // TODO
