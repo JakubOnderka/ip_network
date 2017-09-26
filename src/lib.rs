@@ -47,7 +47,7 @@ impl FromStr for IpNetwork {
     /// ```
     /// use std::net::Ipv4Addr;
     /// use std::str::FromStr;
-    /// use ipnetwork::{IpNetwork, Ipv4Network};
+    /// use ip_network::{IpNetwork, Ipv4Network};
     ///
     /// let ip_network = IpNetwork::from_str("192.168.1.0/24").unwrap();
     /// assert_eq!(ip_network, IpNetwork::V4(Ipv4Network::from(Ipv4Addr::new(192, 168, 1, 0), 24).unwrap()));
@@ -84,7 +84,7 @@ impl fmt::Display for IpNetwork {
     ///
     /// ```
     /// use std::net::Ipv4Addr;
-    /// use ipnetwork::{IpNetwork, Ipv4Network};
+    /// use ip_network::{IpNetwork, Ipv4Network};
     ///
     /// let ip_network = IpNetwork::V4(Ipv4Network::from(Ipv4Addr::new(192, 168, 1, 0), 24).unwrap());
     /// assert_eq!(format!("{}", ip_network), "192.168.1.0/24");
@@ -114,7 +114,7 @@ impl Ipv4Network {
     ///
     /// ```
     /// use std::net::Ipv4Addr;
-    /// use ipnetwork::Ipv4Network;
+    /// use ip_network::Ipv4Network;
     ///
     /// let ip_network = Ipv4Network::from(Ipv4Addr::new(192, 168, 1, 0), 24).unwrap();
     /// assert_eq!(ip_network.get_network_address(), Ipv4Addr::new(192, 168, 1, 0));
@@ -145,7 +145,7 @@ impl Ipv4Network {
     ///
     /// ```
     /// use std::net::Ipv4Addr;
-    /// use ipnetwork::Ipv4Network;
+    /// use ip_network::Ipv4Network;
     ///
     /// let ip_network = Ipv4Network::from_truncate(Ipv4Addr::new(192, 168, 1, 100), 24).unwrap();
     /// assert_eq!(ip_network.get_network_address(), Ipv4Addr::new(192, 168, 1, 0));
@@ -170,7 +170,7 @@ impl Ipv4Network {
     ///
     /// ```
     /// use std::net::Ipv4Addr;
-    /// use ipnetwork::Ipv4Network;
+    /// use ip_network::Ipv4Network;
     ///
     /// let ip_network = Ipv4Network::from(Ipv4Addr::new(192, 168, 1, 0), 24).unwrap();
     /// assert_eq!(ip_network.get_network_address(), Ipv4Addr::new(192, 168, 1, 0));
@@ -185,7 +185,7 @@ impl Ipv4Network {
     ///
     /// ```
     /// use std::net::Ipv4Addr;
-    /// use ipnetwork::Ipv4Network;
+    /// use ip_network::Ipv4Network;
     ///
     /// let ip_network = Ipv4Network::from(Ipv4Addr::new(192, 168, 1, 0), 24).unwrap();
     /// assert_eq!(ip_network.get_broadcast_address(), Ipv4Addr::new(192, 168, 1, 255));
@@ -200,7 +200,7 @@ impl Ipv4Network {
     ///
     /// ```
     /// use std::net::Ipv4Addr;
-    /// use ipnetwork::Ipv4Network;
+    /// use ip_network::Ipv4Network;
     ///
     /// let ip_network = Ipv4Network::from(Ipv4Addr::new(192, 168, 1, 0), 24).unwrap();
     /// assert_eq!(ip_network.get_netmask(), 24);
@@ -215,7 +215,7 @@ impl Ipv4Network {
     ///
     /// ```
     /// use std::net::Ipv4Addr;
-    /// use ipnetwork::Ipv4Network;
+    /// use ip_network::Ipv4Network;
     ///
     /// let ip_network = Ipv4Network::from(Ipv4Addr::new(192, 168, 1, 0), 24).unwrap();
     /// assert_eq!(ip_network.get_full_netmask(), Ipv4Addr::new(255, 255, 255, 0));
@@ -232,7 +232,7 @@ impl Ipv4Network {
     ///
     /// ```
     /// use std::net::Ipv4Addr;
-    /// use ipnetwork::Ipv4Network;
+    /// use ip_network::Ipv4Network;
     ///
     /// let ip_network = Ipv4Network::from(Ipv4Addr::new(192, 168, 1, 0), 24).unwrap();
     /// assert!(ip_network.contains(Ipv4Addr::new(192, 168, 1, 2)));
@@ -248,7 +248,7 @@ impl Ipv4Network {
     ///
     /// ```
     /// use std::net::Ipv4Addr;
-    /// use ipnetwork::Ipv4Network;
+    /// use ip_network::Ipv4Network;
     ///
     /// let ip = Ipv4Addr::new(192, 168, 1, 0);
     /// let mut hosts = Ipv4Network::from(ip, 24).unwrap().hosts();
@@ -267,7 +267,7 @@ impl Ipv4Network {
     ///
     /// ```
     /// use std::net::Ipv4Addr;
-    /// use ipnetwork::Ipv4Network;
+    /// use ip_network::Ipv4Network;
     ///
     /// let ip = Ipv4Addr::new(192, 168, 1, 0);
     /// let mut hosts = Ipv4Network::from(ip, 24).unwrap();
@@ -283,7 +283,7 @@ impl Ipv4Network {
     ///
     /// ```
     /// use std::net::Ipv4Addr;
-    /// use ipnetwork::Ipv4Network;
+    /// use ip_network::Ipv4Network;
     ///
     /// let ip = Ipv4Addr::new(192, 168, 1, 0);
     /// let mut iterator = Ipv4Network::from(ip, 24).unwrap().subnets();
@@ -300,7 +300,7 @@ impl Ipv4Network {
     ///
     /// ```
     /// use std::net::Ipv4Addr;
-    /// use ipnetwork::Ipv4Network;
+    /// use ip_network::Ipv4Network;
     ///
     /// let ip = Ipv4Addr::new(192, 168, 1, 0);
     /// let mut iterator = Ipv4Network::from(ip, 24).unwrap().subnets_with_prefix(25);
@@ -322,7 +322,7 @@ impl Ipv4Network {
     ///
     /// ```
     /// use std::net::Ipv4Addr;
-    /// use ipnetwork::Ipv4Network;
+    /// use ip_network::Ipv4Network;
     ///
     /// let ip_network = Ipv4Network::from(Ipv4Addr::new(127, 0, 0, 0), 8).unwrap();
     /// assert!(ip_network.is_loopback());
@@ -342,7 +342,7 @@ impl Ipv4Network {
     ///
     /// ```
     /// use std::net::Ipv4Addr;
-    /// use ipnetwork::Ipv4Network;
+    /// use ip_network::Ipv4Network;
     ///
     /// let ip_network = Ipv4Network::from(Ipv4Addr::new(255, 255, 255, 255), 32).unwrap();
     /// assert!(ip_network.is_broadcast());
@@ -366,7 +366,7 @@ impl Ipv4Network {
     ///
     /// ```
     /// use std::net::Ipv4Addr;
-    /// use ipnetwork::Ipv4Network;
+    /// use ip_network::Ipv4Network;
     ///
     /// let ip_network = Ipv4Network::from(Ipv4Addr::new(192, 168, 1, 0), 24).unwrap();
     /// assert!(ip_network.is_private());
@@ -386,7 +386,7 @@ impl Ipv4Network {
     ///
     /// ```
     /// use std::net::Ipv4Addr;
-    /// use ipnetwork::Ipv4Network;
+    /// use ip_network::Ipv4Network;
     ///
     /// let ip_network = Ipv4Network::from(Ipv4Addr::new(169, 254, 1, 0), 24).unwrap();
     /// assert!(ip_network.is_link_local());
@@ -407,7 +407,7 @@ impl Ipv4Network {
     ///
     /// ```
     /// use std::net::Ipv4Addr;
-    /// use ipnetwork::Ipv4Network;
+    /// use ip_network::Ipv4Network;
     ///
     /// let ip_network = Ipv4Network::from(Ipv4Addr::new(224, 168, 1, 0), 24).unwrap();
     /// assert!(ip_network.is_multicast());
@@ -431,7 +431,7 @@ impl Ipv4Network {
     ///
     /// ```
     /// use std::net::Ipv4Addr;
-    /// use ipnetwork::Ipv4Network;
+    /// use ip_network::Ipv4Network;
     ///
     /// let ip_network = Ipv4Network::from(Ipv4Addr::new(192, 0, 2, 0), 24).unwrap();
     /// assert!(ip_network.is_documentation());
@@ -485,7 +485,7 @@ impl fmt::Display for Ipv4Network {
     ///
     /// ```
     /// use std::net::Ipv4Addr;
-    /// use ipnetwork::Ipv4Network;
+    /// use ip_network::Ipv4Network;
     ///
     /// let ip_network = Ipv4Network::from(Ipv4Addr::new(192, 168, 1, 0), 24).unwrap();
     /// assert_eq!(format!("{}", ip_network), "192.168.1.0/24");
@@ -504,7 +504,7 @@ impl FromStr for Ipv4Network {
     ///
     /// ```
     /// use std::net::Ipv4Addr;
-    /// use ipnetwork::Ipv4Network;
+    /// use ip_network::Ipv4Network;
     /// use std::str::FromStr;
     ///
     /// let ip_network = Ipv4Network::from_str("192.168.1.0/24").unwrap();
@@ -536,7 +536,7 @@ impl IntoIterator for Ipv4Network {
     ///
     /// ```
     /// use std::net::Ipv4Addr;
-    /// use ipnetwork::Ipv4Network;
+    /// use ip_network::Ipv4Network;
     ///
     /// let ip = Ipv4Addr::new(192, 168, 1, 0);
     /// let mut iter = Ipv4Network::from(ip, 24).unwrap().into_iter();
@@ -594,7 +594,7 @@ impl Ipv6Network {
     ///
     /// ```
     /// use std::net::Ipv6Addr;
-    /// use ipnetwork::Ipv6Network;
+    /// use ip_network::Ipv6Network;
     ///
     /// let ip = Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0);
     /// let ip_network = Ipv6Network::from(ip, 32).unwrap();
@@ -610,7 +610,7 @@ impl Ipv6Network {
     ///
     /// ```
     /// use std::net::Ipv6Addr;
-    /// use ipnetwork::Ipv6Network;
+    /// use ip_network::Ipv6Network;
     ///
     /// let ip = Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0);
     /// let ip_network = Ipv6Network::from(ip, 32).unwrap();
@@ -628,7 +628,7 @@ impl Ipv6Network {
     ///
     /// ```
     /// use std::net::Ipv6Addr;
-    /// use ipnetwork::Ipv6Network;
+    /// use ip_network::Ipv6Network;
     ///
     /// let ip_network = Ipv6Network::from(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0), 64).unwrap();
     /// assert!(ip_network.contains(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 1)));
@@ -645,7 +645,7 @@ impl Ipv6Network {
     ///
     /// ```
     /// use std::net::Ipv6Addr;
-    /// use ipnetwork::Ipv6Network;
+    /// use ip_network::Ipv6Network;
     ///
     /// let network = Ipv6Network::from(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0), 32).unwrap();
     /// assert_eq!(network.supernet(), Ipv6Network::from(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0), 31).unwrap());
@@ -660,7 +660,7 @@ impl Ipv6Network {
     ///
     /// ```
     /// use std::net::Ipv6Addr;
-    /// use ipnetwork::Ipv6Network;
+    /// use ip_network::Ipv6Network;
     ///
     /// let network = Ipv6Network::from(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0), 32).unwrap();
     /// let mut iterator = network.subnets();
@@ -677,7 +677,7 @@ impl Ipv6Network {
     ///
     /// ```
     /// use std::net::Ipv6Addr;
-    /// use ipnetwork::Ipv6Network;
+    /// use ip_network::Ipv6Network;
     ///
     /// let network = Ipv6Network::from(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0), 32).unwrap();
     /// let mut iterator = network.subnets_with_prefix(33);

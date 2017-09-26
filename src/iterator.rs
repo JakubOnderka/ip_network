@@ -27,7 +27,7 @@ impl Ipv4RangeIterator {
     ///
     /// ```
     /// use std::net::Ipv4Addr;
-    /// use ipnetwork::iterator::Ipv4RangeIterator;
+    /// use ip_network::iterator::Ipv4RangeIterator;
     ///
     /// let mut iterator = Ipv4RangeIterator::new(
     ///     Ipv4Addr::new(192, 168, 2, 0),
