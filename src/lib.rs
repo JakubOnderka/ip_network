@@ -440,6 +440,7 @@ impl Ipv4Network {
         self.network_address.is_documentation() && self.get_broadcast_address().is_documentation()
     }
 
+    // TODO: Documentation
     pub fn summarize_address_range(first: Ipv4Addr, last: Ipv4Addr) -> Vec<Self> {
         let mut first_int = u32::from(first);
         let last_int = u32::from(last);
@@ -558,6 +559,7 @@ pub struct Ipv6Network {
 }
 
 impl Ipv6Network {
+    // TODO
     pub fn from(network_address: Ipv6Addr, netmask: u8) -> Result<Self, IpNetworkError> {
         if netmask > IPV6_LENGTH {
             return Err(IpNetworkError::NetmaskError(netmask));
@@ -574,6 +576,7 @@ impl Ipv6Network {
         })
     }
 
+    // TODO
     pub fn from_truncate(network_address: Ipv6Addr, netmask: u8) -> Result<Self, IpNetworkError> {
         if netmask > IPV6_LENGTH {
             return Err(IpNetworkError::NetmaskError(netmask));
@@ -690,6 +693,7 @@ impl Ipv6Network {
 }
 
 impl fmt::Display for Ipv6Network {
+    // TODO
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}/{}", self.network_address, self.netmask)
     }
@@ -698,6 +702,7 @@ impl fmt::Display for Ipv6Network {
 impl FromStr for Ipv6Network {
     type Err = IpNetworkParseError;
 
+    // TODO
     fn from_str(s: &str) -> Result<Ipv6Network, IpNetworkParseError> {
         let (ip, netmask) = match helpers::split_ip_netmask(s) {
             Some(a) => a,
@@ -769,7 +774,7 @@ impl fmt::Display for IpNetworkParseError {
 #[cfg(test)]
 mod tests {
     use std::net::{Ipv4Addr, Ipv6Addr};
-    use {IpNetwork, Ipv6Network, Ipv4Network};
+    use {IpNetwork, Ipv6Network, Ipv4Network, IpNetworkParseError, IpNetworkError};
 
     fn return_test_ipv4_network() -> Ipv4Network {
         Ipv4Network::from(Ipv4Addr::new(192, 168, 0, 0), 16).unwrap()
@@ -806,6 +811,56 @@ mod tests {
     }
 
     #[test]
+    fn test_ip_network_parse_empty() {
+        let ip_network = "".parse::<IpNetwork>();
+        assert!(ip_network.is_err());
+        assert!(match ip_network.err().unwrap() {
+            IpNetworkParseError::InvalidFormatError => true,
+            _ => false,
+        });
+    }
+
+    #[test]
+    fn test_ip_network_parse_invalid_netmask() {
+        let ip_network = "192.168.0.0/a".parse::<IpNetwork>();
+        assert!(ip_network.is_err());
+        assert!(match ip_network.err().unwrap() {
+            IpNetworkParseError::InvalidNetmaskFormat => true,
+            _ => false,
+        });
+    }
+
+    #[test]
+    fn test_ip_network_parse_invalid_ip() {
+        let ip_network = "192.168.0.0a/16".parse::<IpNetwork>();
+        assert!(ip_network.is_err());
+        assert!(match ip_network.err().unwrap() {
+            IpNetworkParseError::AddrParseError => true,
+            _ => false,
+        });
+    }
+
+    #[test]
+    fn test_ip_network_parse_ipv4_host_bits_set() {
+        let ip_network = "192.168.0.1/16".parse::<IpNetwork>();
+        assert!(ip_network.is_err());
+        assert!(match ip_network.err().unwrap() {
+            IpNetworkParseError::IpNetworkError(_) => true,
+            _ => false,
+        });
+    }
+
+    #[test]
+    fn test_ip_network_parse_ipv6_host_bits_set() {
+        let ip_network = "2001:db8::1/32".parse::<IpNetwork>();
+        assert!(ip_network.is_err());
+        assert!(match ip_network.err().unwrap() {
+            IpNetworkParseError::IpNetworkError(_) => true,
+            _ => false,
+        });
+    }
+
+    #[test]
     fn test_ip_network_format_ipv4() {
         let ip_network = IpNetwork::V4(return_test_ipv4_network());
         assert_eq!(format!("{}", ip_network), "192.168.0.0/16");
@@ -818,10 +873,60 @@ mod tests {
     }
 
     #[test]
+    fn test_ipv4_network_basic_getters() {
+        let ip_network = return_test_ipv4_network();
+        assert_eq!(ip_network.get_network_address(), Ipv4Addr::new(192, 168, 0, 0));
+        assert_eq!(ip_network.get_netmask(), 16);
+        assert_eq!(ip_network.get_broadcast_address(), Ipv4Addr::new(192, 168, 255, 255));
+        assert_eq!(ip_network.get_full_netmask(), Ipv4Addr::new(255, 255, 0, 0));
+        assert_eq!(ip_network.supernet(), Ipv4Network::from(Ipv4Addr::new(192, 168, 0, 0), 15).unwrap());
+        assert_eq!(ip_network.hosts().len(), 256 * 256 - 2);
+    }
+
+    #[test]
+    fn test_ipv4_network_iterator() {
+        let ip_network = return_test_ipv4_network();
+        assert_eq!(ip_network.into_iter().len(), 256 * 256);
+    }
+
+    #[test]
+    fn test_ipv4_network_iterator_for() {
+        let mut i = 0;
+        for _ in return_test_ipv4_network() {
+            i += 1;
+        }
+        assert_eq!(i, 256 * 256);
+    }
+
+    #[test]
+    fn test_ipv4_network_contains() {
+        let ip_network = return_test_ipv4_network();
+        assert!(!ip_network.contains(Ipv4Addr::new(192, 167, 255, 255)));
+        assert!(ip_network.contains(Ipv4Addr::new(192, 168, 0, 0)));
+        assert!(ip_network.contains(Ipv4Addr::new(192, 168, 255, 255)));
+        assert!(!ip_network.contains(Ipv4Addr::new(192, 169, 0, 0)));
+    }
+
+    #[test]
     fn test_ipv4_network_from_host_bits_set() {
         let ip = Ipv4Addr::new(127, 0, 0, 1);
-        let network = Ipv4Network::from(ip, 8);
-        assert!(network.is_err());
+        let ip_network = Ipv4Network::from(ip, 8);
+        assert!(ip_network.is_err());
+        assert!(match ip_network.err().unwrap() {
+            IpNetworkError::HostBitsSet => true,
+            _ => false,
+        });
+    }
+
+    #[test]
+    fn test_ipv4_network_from_big_invalid_netmask() {
+        let ip = Ipv4Addr::new(127, 0, 0, 1);
+        let ip_network = Ipv4Network::from(ip, 35);
+        assert!(ip_network.is_err());
+        assert!(match ip_network.err().unwrap() {
+            IpNetworkError::NetmaskError(_) => true,
+            _ => false,
+        });
     }
 
     #[test]
@@ -882,14 +987,14 @@ mod tests {
             Ipv4Addr::new(194, 249, 198, 0),
             Ipv4Addr::new(194, 249, 198, 159)
         );
-        assert_eq!(2, networks.len());
+        assert_eq!(networks.len(), 2);
         assert_eq!(
-            Ipv4Network::from(Ipv4Addr::new(194, 249, 198, 0), 25).unwrap(),
-            networks[0]
+            networks[0],
+            Ipv4Network::from(Ipv4Addr::new(194, 249, 198, 0), 25).unwrap()
         );
         assert_eq!(
-            Ipv4Network::from(Ipv4Addr::new(194, 249, 198, 128), 27).unwrap(),
-            networks[1]
+            networks[1],
+            Ipv4Network::from(Ipv4Addr::new(194, 249, 198, 128), 27).unwrap()
         );
     }
 
@@ -899,10 +1004,10 @@ mod tests {
             Ipv4Addr::new(0, 0, 0, 0),
             Ipv4Addr::new(255, 255, 255, 255)
         );
-        assert_eq!(1, networks.len());
+        assert_eq!(networks.len(), 1);
         assert_eq!(
-            Ipv4Network::from(Ipv4Addr::new(0, 0, 0, 0), 0).unwrap(),
-            networks[0]
+            networks[0],
+            Ipv4Network::from(Ipv4Addr::new(0, 0, 0, 0), 0).unwrap()
         );
     }
 
@@ -912,6 +1017,30 @@ mod tests {
         let network = Ipv6Network::from(ip, 7).unwrap();
         assert_eq!(network.get_network_address(), Ipv6Addr::new(0xfc00, 0, 0, 0, 0, 0, 0, 0));
         assert_eq!(network.get_netmask(), 7);
+    }
+
+    #[test]
+    fn test_ipv6_network_contains() {
+        let ip_network = return_test_ipv6_network();
+        assert!(!ip_network.contains(Ipv6Addr::new(0x2001, 0x0db7, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff)));
+        assert!(ip_network.contains(Ipv6Addr::new(0x2001, 0x0db8, 0, 0, 0, 0, 0, 0)));
+        assert!(ip_network.contains(Ipv6Addr::new(0x2001, 0x0db8, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff)));
+        assert!(!ip_network.contains(Ipv6Addr::new(0x2001, 0x0db9, 0, 0, 0, 0, 0, 0)));
+    }
+
+    #[test]
+    fn test_ipv6_network_supernet() {
+        let ip_network = return_test_ipv6_network();
+        assert_eq!(ip_network.supernet(), Ipv6Network::from(Ipv6Addr::new(0x2001, 0x0db8, 0, 0, 0, 0, 0, 0), 31).unwrap());
+    }
+
+    #[test]
+    fn test_ipv6_network_subnets() {
+        let mut subnets = return_test_ipv6_network().subnets();
+        assert_eq!(subnets.len(), 2);
+        assert_eq!(subnets.next().unwrap(), Ipv6Network::from(Ipv6Addr::new(0x2001, 0x0db8, 0, 0, 0, 0, 0, 0), 33).unwrap());
+        assert_eq!(subnets.next().unwrap(), Ipv6Network::from(Ipv6Addr::new(0x2001, 0x0db8, 0x8000, 0, 0, 0, 0, 0), 33).unwrap());
+        assert!(subnets.next().is_none());
     }
 
     #[test]
