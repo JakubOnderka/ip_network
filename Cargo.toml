@@ -2,7 +2,7 @@
 name = "ip_network"
 version = "0.1.0"
 authors = ["Jakub Onderka <ahoj@jakubonderka.cz>"]
-license = "MIT/Apache-2.0" # TODO
+license = "BSD-2-Clause"
 keywords = ["ip", "ipv4", "ipv6", "network", "address"]
 categories = ["network-programming", "parsing", "data-structures"]
 readme = "README.md"
