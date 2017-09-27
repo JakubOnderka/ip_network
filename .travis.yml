@@ -1,5 +1,6 @@
 sudo: false
 language: rust
+cache: cargo
 
 addons:
   apt:
@@ -20,7 +21,7 @@ rust:
 
 before_script:
   - |
-      cargo install cargo-travis &&
+      which cargo-coveralls || cargo install cargo-travis &&
       export PATH=$HOME/.cargo/bin:$PATH
 
 script:
