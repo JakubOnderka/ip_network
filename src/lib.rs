@@ -40,7 +40,7 @@ impl IpNetwork {
 impl FromStr for IpNetwork {
     type Err = IpNetworkParseError;
 
-    /// Converts string in format IPv4 (X.X.X.X/Y) or IPv6 (X:X::X/Y) network format to `IpNetwork`.
+    /// Converts string in format IPv4 (X.X.X.X/Y) or IPv6 (X:X::X/Y) CIDR notation to `IpNetwork`.
     ///
     /// # Examples
     ///
@@ -78,7 +78,7 @@ impl FromStr for IpNetwork {
 }
 
 impl fmt::Display for IpNetwork {
-    /// Converts `IpNetwork` to string in format X.X.X.X/Y for IPv4 and X:X::X/Y for IPv6.
+    /// Converts `IpNetwork` to string in format X.X.X.X/Y for IPv4 and X:X::X/Y for IPv6 (CIDR notation).
     ///
     /// # Examples
     ///
@@ -209,7 +209,7 @@ impl Ipv4Network {
         self.netmask
     }
 
-    /// Returns network mask in IP address format.
+    /// Returns network mask as IPv4 address.
     ///
     /// # Examples
     ///
@@ -480,7 +480,7 @@ impl Ipv4Network {
 }
 
 impl fmt::Display for Ipv4Network {
-    /// Converts `Ipv4Network` to string in format X.X.X.X/Y.
+    /// Converts `Ipv4Network` to string in format X.X.X.X/Y (CIDR notation).
     ///
     /// # Examples
     ///
@@ -499,7 +499,7 @@ impl fmt::Display for Ipv4Network {
 impl FromStr for Ipv4Network {
     type Err = IpNetworkParseError;
 
-    /// Converts string in format X.X.X.X/Y to `Ipv4Network`.
+    /// Converts string in format X.X.X.X/Y (CIDR notation) to `Ipv4Network`.
     ///
     /// # Examples
     ///
@@ -531,7 +531,7 @@ impl IntoIterator for Ipv4Network {
     type Item = Ipv4Addr;
     type IntoIter = iterator::Ipv4RangeIterator;
 
-    /// Returns iterator over all IP addresses in range including network and broadcast address.
+    /// Returns iterator over all IP addresses in range including network and broadcast addresses.
     ///
     /// # Examples
     ///
@@ -559,7 +559,21 @@ pub struct Ipv6Network {
 }
 
 impl Ipv6Network {
-    // TODO
+    /// Constructs new `Ipv6Network` based on `Ipv6Addr` and `netmask`.
+    ///
+    /// Returns error if netmask is bigger than 128 or if host bits are set in `network_address`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::net::Ipv6Addr;
+    /// use ip_network::Ipv6Network;
+    ///
+    /// let ip = Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0);
+    /// let ip_network = Ipv6Network::from(ip, 32).unwrap();
+    /// assert_eq!(ip_network.get_network_address(), ip);
+    /// assert_eq!(ip_network.get_netmask(), 32);
+    /// ```
     pub fn from(network_address: Ipv6Addr, netmask: u8) -> Result<Self, IpNetworkError> {
         if netmask > IPV6_LENGTH {
             return Err(IpNetworkError::NetmaskError(netmask));
@@ -576,7 +590,22 @@ impl Ipv6Network {
         })
     }
 
-    // TODO
+    /// Constructs new `Ipv6Network` based on `Ipv6Addr` and `netmask` with truncating host bits
+    /// from given `network_address`.
+    ///
+    /// Returns error if netmask is bigger than 128.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::net::Ipv6Addr;
+    /// use ip_network::Ipv6Network;
+    ///
+    /// let ip = Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 1, 0, 0);
+    /// let ip_network = Ipv6Network::from_truncate(ip, 32).unwrap();
+    /// assert_eq!(ip_network.get_network_address(), Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0));
+    /// assert_eq!(ip_network.get_netmask(), 32);
+    /// ```
     pub fn from_truncate(network_address: Ipv6Addr, netmask: u8) -> Result<Self, IpNetworkError> {
         if netmask > IPV6_LENGTH {
             return Err(IpNetworkError::NetmaskError(netmask));
@@ -721,7 +750,7 @@ impl FromStr for Ipv6Network {
 /// Errors when creating new IPv4 or IPv6 networks
 #[derive(Debug)]
 pub enum IpNetworkError {
-    /// Netmask is bigger than possible for given IP version (32 for IPv4, 128 for IPv6)
+    /// Network mask is bigger than possible for given IP version (32 for IPv4, 128 for IPv6)
     NetmaskError(u8),
     /// Host bits are set in given network IP address
     HostBitsSet,
@@ -745,7 +774,7 @@ impl fmt::Display for IpNetworkError {
 /// Errors from IPv4 or IPv6 network parsing
 #[derive(Debug)]
 pub enum IpNetworkParseError {
-    /// Netmask is not valid integer between 0-255
+    /// Network mask is not valid integer between 0-255
     InvalidNetmaskFormat,
     // Network address has invalid format (not X/Y)
     InvalidFormatError,
