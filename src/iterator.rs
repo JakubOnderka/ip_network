@@ -173,7 +173,7 @@ impl Ipv6NetworkIterator {
             return u128::new(0);
         }
 
-        (self.to - self.current) / self.step() + u128::new(1)
+        ((self.to - self.current) / self.step()).saturating_add(u128::new(1))
     }
 }
 
@@ -213,6 +213,7 @@ mod tests {
     use std::net::{Ipv4Addr, Ipv6Addr};
     use {Ipv4Network, Ipv6Network};
     use super::{Ipv4NetworkIterator, Ipv4RangeIterator, Ipv6NetworkIterator};
+    use extprim::u128::u128;
 
     #[test]
     fn test_ipv4_range_iterator() {
@@ -278,5 +279,34 @@ mod tests {
         assert_eq!(iterator.next().unwrap(), Ipv6Network::from(ip, 17).unwrap());
         assert_eq!(iterator.next().unwrap(), Ipv6Network::from(Ipv6Addr::new(0x2001, 0x8000, 0, 0, 0, 0, 0, 0), 17).unwrap());
         assert!(iterator.next().is_none());
+    }
+
+    #[test]
+    #[should_panic] // because range is bigger than `usize` on 64bit machine
+    fn test_ipv6_network_iterator_whole_range_len() {
+        let ip = Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 0);
+        let network = Ipv6Network::from(ip, 0).unwrap();
+        let iterator = Ipv6NetworkIterator::new(network, 128);
+
+        iterator.len();
+    }
+
+    #[test]
+    fn test_ipv6_network_iterator_whole_range_real_len() {
+        let ip = Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 0);
+        let network = Ipv6Network::from(ip, 0).unwrap();
+        let iterator = Ipv6NetworkIterator::new(network, 128);
+
+        assert_eq!(iterator.real_len(), u128::max_value());
+    }
+
+    #[test]
+    fn test_ipv6_network_iterator_whole_range() {
+        let ip = Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 0);
+        let network = Ipv6Network::from(ip, 0).unwrap();
+        let mut iterator = Ipv6NetworkIterator::new(network, 128);
+
+        assert_eq!(iterator.next().unwrap(), Ipv6Network::from(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 0), 128).unwrap());
+        assert_eq!(iterator.next().unwrap(), Ipv6Network::from(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 1), 128).unwrap());
     }
 }
