@@ -4,6 +4,7 @@ version = "0.1.0"
 authors = ["Jakub Onderka <ahoj@jakubonderka.cz>"]
 license = "MIT/Apache-2.0" # TODO
 keywords = ["ip", "ipv4", "ipv6", "network", "address"]
+categories = ["network-programming", "parsing", "data-structures"]
 readme = "README.md"
 repository = "https://github.com/JakubOnderka/ip_network"
 homepage = "https://github.com/JakubOnderka/ip_network"
@@ -14,6 +15,7 @@ IPv4 and IPv6 network structs.
 
 [badges]
 travis-ci = { repository = "JakubOnderka/ip_network" }
+coveralls = { repository = "JakubOnderka/ip_network" }
 
 [dependencies.extprim]
 version = "1.3"
