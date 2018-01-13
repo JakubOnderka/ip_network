@@ -33,3 +33,12 @@ use ip_network::Ipv4Network;
 let ip_network = Ipv4Network::from(Ipv4Addr::new(192, 168, 0, 0), 16).unwrap();
 assert_eq!(format!("{}", ip_network), "192.168.0.0/16");
 ```
+
+## Serde support
+
+To enable serialization, just add `serde` feature to package in `Cargo.toml`:
+
+```toml
+[dependencies]
+ip_network = { version = "0.1", features = ["serde"] }
+``` 
