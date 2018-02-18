@@ -2,6 +2,9 @@ extern crate extprim;
 #[cfg(feature = "serde")]
 #[macro_use]
 extern crate serde;
+#[cfg(feature = "postgres")]
+#[macro_use]
+extern crate postgres;
 
 use std::fmt;
 use std::cmp;
@@ -12,6 +15,8 @@ use std::error::Error;
 mod helpers;
 /// `Ipv4RangeIterator`, `Ipv4NetworkIterator` and `Ipv6NetworkIterator`
 pub mod iterator;
+#[cfg(feature = "postgres")]
+mod postgres_support;
 
 const IPV4_LENGTH: u8 = 32;
 const IPV6_LENGTH: u8 = 128;
@@ -54,7 +59,7 @@ impl FromStr for IpNetwork {
     /// ```
     fn from_str(s: &str) -> Result<IpNetwork, IpNetworkParseError> {
         let (ip, netmask) = match helpers::split_ip_netmask(s) {
-            Some(a) => a,
+            Some(output) => output,
             None => return Err(IpNetworkParseError::InvalidFormatError),
         };
 

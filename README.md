@@ -42,3 +42,12 @@ To enable serialization, just add `serde` feature to package in `Cargo.toml`:
 [dependencies]
 ip_network = { version = "0.1", features = ["serde"] }
 ``` 
+
+## Postgres support
+
+To enable support for [postgres](https://github.com/sfackler/rust-postgres) crate CIDR type, just add `postgres` feature to package in `Cargo.toml`:
+
+```toml
+[dependencies]
+ip_network = { version = "0.1", features = ["postgres"] }
+``` 
