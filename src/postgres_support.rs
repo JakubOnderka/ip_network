@@ -82,7 +82,7 @@ impl FromSql for Ipv6Network {
             return Err(format!("CIDR is IP version 6, but have bad length '{}'", raw[3]).into())
         }
 
-        let mut octets: [u8; 16] = [0; 16];
+        let mut octets = [0; 16];
         octets.copy_from_slice(&raw[4..]);
         let network_address = Ipv6Addr::from(octets);
 
