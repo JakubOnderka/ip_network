@@ -26,5 +26,9 @@ version = "1.0"
 optional = true
 features = ["derive"]
 
+[dependencies.postgres]
+version = "0.15"
+optional = true
+
 [features]
 default = []
