@@ -17,7 +17,6 @@ rust:
   - nightly
   - beta
   - stable
-  - 1.18.0
 
 before_script:
   - |
