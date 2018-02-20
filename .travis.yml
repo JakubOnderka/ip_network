@@ -25,7 +25,9 @@ before_script:
 
 script:
   - |
-      cargo build &&
+      cargo check &&
+      cargo check --features extrim &&
+      cargo check --features postgres &&
       cargo test
 
 after_success:
