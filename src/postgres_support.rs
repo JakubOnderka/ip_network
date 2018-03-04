@@ -1,23 +1,12 @@
-use {Ipv4Network, Ipv6Network, IpNetwork, IPV4_LENGTH, IPV6_LENGTH};
-use std::net::{Ipv4Addr, Ipv6Addr};
+use postgres_common;
+
+use {Ipv4Network, Ipv6Network, IpNetwork};
 use std::error::Error;
 use postgres::types::{FromSql, ToSql, Type, IsNull, CIDR};
 
-const IPV4_TYPE: u8 = 2;
-const IPV6_TYPE: u8 = 3;
-
 impl ToSql for Ipv4Network {
     fn to_sql(&self, _: &Type, w: &mut Vec<u8>) -> Result<IsNull, Box<Error + Sync + Send>> {
-        let ip_octets = self.network_address.octets();
-        let mut bytes = [0; 8];
-        bytes[0] = IPV4_TYPE;
-        bytes[1] = self.netmask;
-        bytes[2] = 1;
-        bytes[3] = IPV4_LENGTH / 8;
-        bytes[4] = ip_octets[0];
-        bytes[5] = ip_octets[1];
-        bytes[6] = ip_octets[2];
-        bytes[7] = ip_octets[3];
+        let bytes = postgres_common::to_sql_ipv4_network(self);
         w.extend_from_slice(&bytes);
 
         Ok(IsNull::No)
@@ -29,15 +18,8 @@ impl ToSql for Ipv4Network {
 
 impl ToSql for Ipv6Network {
     fn to_sql(&self, _: &Type, w: &mut Vec<u8>) -> Result<IsNull, Box<Error + Sync + Send>> {
-        let mut bytes = [0; 4];
-        bytes[0] = IPV6_TYPE;
-        bytes[1] = self.netmask;
-        bytes[2] = 1;
-        bytes[3] = IPV6_LENGTH / 8;
+        let bytes = postgres_common::to_sql_ipv6_network(self);
         w.extend_from_slice(&bytes);
-
-        let ip_octets = self.network_address.octets();
-        w.extend_from_slice(&ip_octets);
 
         Ok(IsNull::No)
     }
@@ -48,21 +30,7 @@ impl ToSql for Ipv6Network {
 
 impl FromSql for Ipv4Network {
     fn from_sql(_: &Type, raw: &[u8]) -> Result<Ipv4Network, Box<Error + Sync + Send>> {
-        if raw[0] != IPV4_TYPE {
-            return Err("CIDR is not IP version 4".into())
-        }
-
-        if raw[2] != 1 {
-            return Err("This field is not CIDR type, probably INET type".into())
-        }
-
-        if raw[3] != IPV4_LENGTH / 8 {
-            return Err(format!("CIDR is IP version 4, but have bad length '{}'", raw[3]).into())
-        }
-
-        let network_address = Ipv4Addr::new(raw[4], raw[5], raw[6], raw[7]);
-        let netmask = raw[1];
-        Ok(Ipv4Network::from(network_address, netmask)?)
+        postgres_common::from_sql_ipv4_network(raw)
     }
 
     accepts!(CIDR);
@@ -70,24 +38,7 @@ impl FromSql for Ipv4Network {
 
 impl FromSql for Ipv6Network {
     fn from_sql(_: &Type, raw: &[u8]) -> Result<Ipv6Network, Box<Error + Sync + Send>> {
-        if raw[0] != IPV6_TYPE {
-            return Err("CIDR is not IP version 6".into())
-        }
-
-        if raw[2] != 1 {
-            return Err("This field is not CIDR type, probably INET type".into())
-        }
-
-        if raw[3] != IPV6_LENGTH / 8 {
-            return Err(format!("CIDR is IP version 6, but have bad length '{}'", raw[3]).into())
-        }
-
-        let mut octets = [0; 16];
-        octets.copy_from_slice(&raw[4..]);
-        let network_address = Ipv6Addr::from(octets);
-
-        let netmask = raw[1];
-        Ok(Ipv6Network::from(network_address, netmask)?)
+        postgres_common::from_sql_ipv6_network(raw)
     }
 
     accepts!(CIDR);
@@ -96,8 +47,8 @@ impl FromSql for Ipv6Network {
 impl FromSql for IpNetwork {
     fn from_sql(t: &Type, raw: &[u8]) -> Result<IpNetwork, Box<Error + Sync + Send>> {
         match raw[0] {
-            IPV4_TYPE => Ok(IpNetwork::V4(Ipv4Network::from_sql(t, raw)?)),
-            IPV6_TYPE => Ok(IpNetwork::V6(Ipv6Network::from_sql(t, raw)?)),
+            postgres_common::IPV4_TYPE => Ok(IpNetwork::V4(Ipv4Network::from_sql(t, raw)?)),
+            postgres_common::IPV6_TYPE => Ok(IpNetwork::V6(Ipv6Network::from_sql(t, raw)?)),
             _ => Err("CIDR is not IP version 4 or 6".into()),
         }
     }
@@ -115,4 +66,88 @@ impl ToSql for IpNetwork {
 
     accepts!(CIDR);
     to_sql_checked!();
+}
+
+#[cfg(test)]
+mod tests {
+    use std::net::{Ipv4Addr, Ipv6Addr};
+    use {Ipv4Network, Ipv6Network, IpNetwork};
+    use postgres::types::{FromSql, ToSql, CIDR};
+
+    fn return_test_ipv4_network() -> Ipv4Network {
+        Ipv4Network::from(Ipv4Addr::new(192, 168, 0, 0), 16).unwrap()
+    }
+
+    fn return_test_ipv6_network() -> Ipv6Network {
+        Ipv6Network::from(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0), 32).unwrap()
+    }
+
+    #[test]
+    fn test_ivp4_to_sql() {
+        let ip_network = return_test_ipv4_network();
+        let mut output = vec![];
+        assert!(ip_network.to_sql(&CIDR, &mut output).is_ok());
+        assert_eq!(2, output[0]);
+        assert_eq!(16, output[1]);
+        assert_eq!(1, output[2]);
+        assert_eq!(4, output[3]);
+        assert_eq!(192, output[4]);
+        assert_eq!(168, output[5]);
+        assert_eq!(0, output[6]);
+        assert_eq!(0, output[7]);
+    }
+
+    #[test]
+    fn test_ivp4_both_direction() {
+        let ip_network = return_test_ipv4_network();
+        let mut output = vec![];
+
+        assert!(ip_network.to_sql(&CIDR, &mut output).is_ok());
+
+        let result = Ipv4Network::from_sql(&CIDR, &output);
+        assert!(result.is_ok());
+
+        let ip_network_converted = result.unwrap();
+        assert_eq!(ip_network, ip_network_converted);
+    }
+
+    #[test]
+    fn test_ivp6_to_sql() {
+        let ip_network = return_test_ipv6_network();
+        let mut output = vec![];
+        assert!(ip_network.to_sql(&CIDR, &mut output).is_ok());
+        assert_eq!(3, output[0]);
+        assert_eq!(32, output[1]);
+        assert_eq!(1, output[2]);
+        assert_eq!(16, output[3]);
+        // TODO: IPv6 comparsion
+    }
+
+    #[test]
+    fn test_ivp6_both_direction() {
+        let ip_network = return_test_ipv6_network();
+        let mut output = vec![];
+
+        assert!(ip_network.to_sql(&CIDR, &mut output).is_ok());
+
+        let result = Ipv6Network::from_sql(&CIDR, &output);
+        assert!(result.is_ok());
+
+        let ip_network_converted = result.unwrap();
+        assert_eq!(ip_network, ip_network_converted);
+    }
+
+    #[test]
+    fn test_ipnetwork_to_sql_v4() {
+        let ip_network = IpNetwork::V4(return_test_ipv4_network());
+        let mut output = vec![];
+        assert!(ip_network.to_sql(&CIDR, &mut output).is_ok());
+    }
+
+    #[test]
+    fn test_ipnetwork_to_sql_v6() {
+        let ip_network = IpNetwork::V6(return_test_ipv6_network());
+        let mut output = vec![];
+        assert!(ip_network.to_sql(&CIDR, &mut output).is_ok());
+    }
 }

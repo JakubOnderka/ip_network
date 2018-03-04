@@ -5,6 +5,8 @@ extern crate serde;
 #[cfg(feature = "postgres")]
 #[macro_use]
 extern crate postgres;
+#[cfg(feature = "diesel")]
+extern crate diesel;
 
 use std::fmt;
 use std::cmp;
@@ -15,8 +17,13 @@ use std::error::Error;
 mod helpers;
 /// `Ipv4RangeIterator`, `Ipv4NetworkIterator` and `Ipv6NetworkIterator`
 pub mod iterator;
+
+#[cfg(any(feature = "diesel", feature = "postgres"))]
+mod postgres_common;
 #[cfg(feature = "postgres")]
 mod postgres_support;
+#[cfg(feature = "diesel")]
+mod diesel_support;
 
 const IPV4_LENGTH: u8 = 32;
 const IPV6_LENGTH: u8 = 128;

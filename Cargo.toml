@@ -30,5 +30,10 @@ features = ["derive"]
 version = "0.15"
 optional = true
 
+[dependencies.diesel]
+version = "1.0.0"
+optional = true
+features = ["postgres"]
+
 [features]
 default = []

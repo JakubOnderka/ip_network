@@ -51,3 +51,12 @@ To enable support for [postgres](https://github.com/sfackler/rust-postgres) crat
 [dependencies]
 ip_network = { version = "0.1", features = ["postgres"] }
 ``` 
+
+## Diesel support
+
+To enable support for [diesel](https://diesel.rs) crate CIDR type, just add `diesel` feature to package in `Cargo.toml`:
+
+```toml
+[dependencies]
+ip_network = { version = "0.1", features = ["diesel"] }
+``` 
