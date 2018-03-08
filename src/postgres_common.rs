@@ -8,6 +8,8 @@ pub const IPV6_TYPE: u8 = 3;
 
 #[inline]
 pub fn from_sql_ipv4_network(raw: &[u8]) -> Result<Ipv4Network, Box<Error + Sync + Send>> {
+    assert!(raw.len() >= 7);
+
     if raw[0] != IPV4_TYPE {
         return Err("CIDR is not IP version 4".into())
     }
@@ -27,6 +29,8 @@ pub fn from_sql_ipv4_network(raw: &[u8]) -> Result<Ipv4Network, Box<Error + Sync
 
 #[inline]
 pub fn from_sql_ipv6_network(raw: &[u8]) -> Result<Ipv6Network, Box<Error + Sync + Send>> {
+    assert!(raw.len() >= 20);
+
     if raw[0] != IPV6_TYPE {
         return Err("CIDR is not IP version 6".into())
     }
