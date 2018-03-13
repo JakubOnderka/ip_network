@@ -1,8 +1,9 @@
-use std::net::Ipv4Addr;
+use std::net::{Ipv4Addr, Ipv6Addr};
 use Ipv4Network;
 use Ipv6Network;
 use helpers;
 use extprim::u128::u128;
+use ipv6addr_u128::Ipv6AddrU128;
 
 #[cfg(target_pointer_width = "16")]
 const POINTER_WIDTH: u32 = 16;
@@ -151,7 +152,7 @@ impl Ipv6NetworkIterator {
         assert!(network.get_netmask() < new_netmask);
         assert!(new_netmask <= 128);
 
-        let current = helpers::ipv6addr_to_u128(network.get_network_address());
+        let current = network.get_network_address().to_u128();
         let mask = !helpers::get_bite_mask_u128(128 - (new_netmask - network.get_netmask())) << (128 - new_netmask);
         let to = current | mask;
 
@@ -189,7 +190,7 @@ impl Iterator for Ipv6NetworkIterator {
                 None => self.is_done = true,
             };
 
-            Some(Self::Item::from(helpers::u128_to_ipv6addr(output), self.new_netmask).unwrap())
+            Some(Self::Item::from(Ipv6Addr::from_u128(output), self.new_netmask).unwrap())
         } else {
             None
         }
