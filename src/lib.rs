@@ -7,6 +7,8 @@ extern crate serde;
 extern crate postgres;
 #[cfg(feature = "diesel")]
 extern crate diesel;
+#[cfg(feature = "table")]
+extern crate treebitmap;
 
 use std::fmt;
 use std::cmp;
@@ -19,7 +21,8 @@ mod helpers;
 pub mod ipv6addr_u128;
 /// `Ipv4RangeIterator`, `Ipv4NetworkIterator` and `Ipv6NetworkIterator`
 pub mod iterator;
-
+#[cfg(feature = "table")]
+pub mod table;
 #[cfg(any(feature = "diesel", feature = "postgres"))]
 mod postgres_common;
 #[cfg(feature = "postgres")]
@@ -108,6 +111,18 @@ impl fmt::Display for IpNetwork {
             IpNetwork::V4(ref network) => network.fmt(f),
             IpNetwork::V6(ref network) => network.fmt(f),
         }
+    }
+}
+
+impl From<Ipv4Network> for IpNetwork {
+    fn from(network: Ipv4Network) -> IpNetwork {
+        IpNetwork::V4(network)
+    }
+}
+
+impl From<Ipv6Network> for IpNetwork {
+    fn from(network: Ipv6Network) -> IpNetwork {
+        IpNetwork::V6(network)
     }
 }
 
