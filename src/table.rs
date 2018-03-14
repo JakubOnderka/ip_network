@@ -93,16 +93,16 @@ impl<T> Table<T> {
 
     pub fn longest_match<A: Into<IpAddr>>(&self, ip: A) -> Option<(IpNetwork, &T)> {
         match ip.into() {
-            IpAddr::V4(ipv4) => self.longest_match_ipv4(ipv4),
-            IpAddr::V6(ipv6) => self.longest_match_ipv6(ipv6),
+            IpAddr::V4(ipv4) => self.longest_match_ipv4(ipv4).map(|(n, t)| (IpNetwork::V4(n), t)),
+            IpAddr::V6(ipv6) => self.longest_match_ipv6(ipv6).map(|(n, t)| (IpNetwork::V6(n), t)),
         }
     }
 
     #[inline]
-    pub fn longest_match_ipv4(&self, ip: Ipv4Addr) -> Option<(IpNetwork, &T)> {
+    pub fn longest_match_ipv4(&self, ip: Ipv4Addr) -> Option<(Ipv4Network, &T)> {
         match self.ipv4.longest_match(ip) {
             Some((addr, mask, data)) => Some((
-                IpNetwork::V4(Ipv4Network::from(addr, mask as u8).unwrap()),
+                Ipv4Network::from(addr, mask as u8).unwrap(),
                 data
             )),
             None => None,
@@ -110,10 +110,10 @@ impl<T> Table<T> {
     }
 
     #[inline]
-    pub fn longest_match_ipv6(&self, ip: Ipv6Addr) -> Option<(IpNetwork, &T)> {
+    pub fn longest_match_ipv6(&self, ip: Ipv6Addr) -> Option<(Ipv6Network, &T)> {
         match self.ipv6.longest_match(ip) {
             Some((addr, mask, data)) => Some((
-                IpNetwork::V6(Ipv6Network::from(addr, mask as u8).unwrap()),
+                Ipv6Network::from(addr, mask as u8).unwrap(),
                 data
             )),
             None => None,
