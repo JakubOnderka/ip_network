@@ -12,7 +12,7 @@ extern crate treebitmap;
 
 use std::fmt;
 use std::cmp;
-use std::net::{Ipv4Addr, Ipv6Addr};
+use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 use std::str::FromStr;
 use std::error::Error;
 use ipv6addr_u128::Ipv6AddrU128;
@@ -42,6 +42,27 @@ pub enum IpNetwork {
 }
 
 impl IpNetwork {
+    /// Constructs new `IpNetwork` based on `IpAddr` and `netmask`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::net::{IpAddr, Ipv4Addr};
+    /// use std::str::FromStr;
+    /// use ip_network::{IpNetwork, Ipv4Network};
+    ///
+    /// let network_address = IpAddr::from_str("192.168.1.0").unwrap();
+    /// let ip_network = IpNetwork::from(network_address, 24).unwrap();
+    /// assert_eq!(ip_network, IpNetwork::V4(Ipv4Network::from(Ipv4Addr::new(192, 168, 1, 0), 24).unwrap()));
+    /// ```
+    pub fn from(network_address: IpAddr, netmask: u8) -> Result<Self, IpNetworkError> {
+        Ok(match network_address {
+            IpAddr::V4(ip) => IpNetwork::V4(Ipv4Network::from(ip, netmask)?),
+            IpAddr::V6(ip) => IpNetwork::V6(Ipv6Network::from(ip, netmask)?),
+        })
+    }
+
+    /// Returns `true` if `IpNetwork` contains `Ipv4Network` struct
     pub fn is_ipv4(&self) -> bool {
         match *self {
             IpNetwork::V4(_) => true,
@@ -49,6 +70,7 @@ impl IpNetwork {
         }
     }
 
+    /// Returns `true` if `IpNetwork` contains `Ipv6Network` struct
     pub fn is_ipv6(&self) -> bool {
         !self.is_ipv4()
     }
