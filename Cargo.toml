@@ -18,7 +18,7 @@ travis-ci = { repository = "JakubOnderka/ip_network" }
 coveralls = { repository = "JakubOnderka/ip_network" }
 
 [dependencies.extprim]
-version = "~1.4"
+version = "~1.5"
 default-features = false
 
 [dependencies.serde]
