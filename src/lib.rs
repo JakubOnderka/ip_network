@@ -7,8 +7,6 @@ extern crate serde;
 extern crate postgres;
 #[cfg(feature = "diesel")]
 extern crate diesel;
-#[cfg(feature = "table")]
-extern crate treebitmap;
 
 use std::fmt;
 use std::cmp;
