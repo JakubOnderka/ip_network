@@ -21,8 +21,6 @@ mod helpers;
 pub mod ipv6addr_u128;
 /// `Ipv4RangeIterator`, `Ipv4NetworkIterator` and `Ipv6NetworkIterator`
 pub mod iterator;
-#[cfg(feature = "table")]
-pub mod table;
 #[cfg(any(feature = "diesel", feature = "postgres"))]
 mod postgres_common;
 #[cfg(feature = "postgres")]
