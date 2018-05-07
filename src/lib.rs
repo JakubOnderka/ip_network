@@ -16,6 +16,7 @@ use std::error::Error;
 use ipv6addr_u128::Ipv6AddrU128;
 
 mod helpers;
+/// Support for `extprim` `u128` type for `Ipv6Addr`
 pub mod ipv6addr_u128;
 /// `Ipv4RangeIterator`, `Ipv4NetworkIterator` and `Ipv6NetworkIterator`
 pub mod iterator;

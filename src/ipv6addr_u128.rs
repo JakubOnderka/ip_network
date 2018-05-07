@@ -10,7 +10,9 @@ fn transform_u64_to_array_of_u16(x: u64) -> [u16; 4] {
 }
 
 pub trait Ipv6AddrU128 {
+    /// Create `Ipv6Addr` from `extprim` u128
     fn from_u128(input: u128) -> Ipv6Addr;
+    /// Convert `Ipv6Addr` to `extprtim` u128
     fn to_u128(&self) -> u128;
 }
 
