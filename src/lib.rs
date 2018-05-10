@@ -52,8 +52,8 @@ impl IpNetwork {
     /// let ip_network = IpNetwork::from(network_address, 24).unwrap();
     /// assert_eq!(ip_network, IpNetwork::V4(Ipv4Network::from(Ipv4Addr::new(192, 168, 1, 0), 24).unwrap()));
     /// ```
-    pub fn from(network_address: IpAddr, netmask: u8) -> Result<Self, IpNetworkError> {
-        Ok(match network_address {
+    pub fn from<I: Into<IpAddr>>(network_address: I, netmask: u8) -> Result<Self, IpNetworkError> {
+        Ok(match network_address.into() {
             IpAddr::V4(ip) => IpNetwork::V4(Ipv4Network::from(ip, netmask)?),
             IpAddr::V6(ip) => IpNetwork::V6(Ipv6Network::from(ip, netmask)?),
         })
