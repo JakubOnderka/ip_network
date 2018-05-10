@@ -25,8 +25,9 @@ before_script:
 
 script:
   - cargo check
-  - cargo check --features extprim
+  - cargo check --features serde
   - cargo check --features postgres
+  - cargo check --features diesel
   - cargo test
 
 after_success:
