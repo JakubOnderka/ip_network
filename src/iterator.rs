@@ -100,7 +100,6 @@ impl Ipv4NetworkIterator {
         }
     }
 
-    #[inline]
     fn step(&self) -> u32 {
         1 << (32 - self.new_netmask)
     }
@@ -162,7 +161,6 @@ impl Ipv6NetworkIterator {
         }
     }
 
-    #[inline]
     fn step(&self) -> u128 {
         1 << (128 - self.new_netmask)
     }
