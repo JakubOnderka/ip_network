@@ -17,10 +17,6 @@ IPv4 and IPv6 network structs.
 travis-ci = { repository = "JakubOnderka/ip_network" }
 coveralls = { repository = "JakubOnderka/ip_network" }
 
-[dependencies.extprim]
-version = "~1.5"
-default-features = false
-
 [dependencies.serde]
 version = "1.0"
 optional = true

@@ -1,6 +1,4 @@
 use std;
-use extprim;
-use extprim::u128::u128;
 
 pub fn bit_length(number: u32) -> u8 {
     32 - number.leading_zeros() as u8
@@ -11,7 +9,7 @@ pub fn get_bite_mask(mask: u8) -> u32 {
 }
 
 pub fn get_bite_mask_u128(mask: u8) -> u128 {
-    !extprim::u128::MAX.checked_shr(mask as u32).unwrap_or(extprim::u128::MIN)
+    !std::u128::MAX.checked_shr(mask as u32).unwrap_or(0)
 }
 
 pub fn split_ip_netmask(input: &str) -> Option<(&str, &str)> {

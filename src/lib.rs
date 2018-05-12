@@ -1,4 +1,3 @@
-extern crate extprim;
 #[cfg(feature = "serde")]
 #[macro_use]
 extern crate serde;
@@ -13,11 +12,8 @@ use std::cmp;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 use std::str::FromStr;
 use std::error::Error;
-use ipv6addr_u128::Ipv6AddrU128;
 
 mod helpers;
-/// Support for `extprim` `u128` type for `Ipv6Addr`
-pub mod ipv6addr_u128;
 /// `Ipv4RangeIterator`, `Ipv4NetworkIterator` and `Ipv6NetworkIterator`
 pub mod iterator;
 #[cfg(any(feature = "diesel", feature = "postgres"))]
@@ -627,7 +623,7 @@ impl Ipv6Network {
             return Err(IpNetworkError::NetmaskError(netmask));
         }
 
-        let network_address_u128 = network_address.to_u128();
+        let network_address_u128 = u128::from(network_address);
         if network_address_u128 & helpers::get_bite_mask_u128(netmask) != network_address_u128 {
             return Err(IpNetworkError::HostBitsSet);
         }
@@ -659,8 +655,8 @@ impl Ipv6Network {
             return Err(IpNetworkError::NetmaskError(netmask));
         }
 
-        let network_address_u128 = network_address.to_u128() & helpers::get_bite_mask_u128(netmask);
-        let network_address = Ipv6Addr::from_u128(network_address_u128);
+        let network_address_u128 = u128::from(network_address) & helpers::get_bite_mask_u128(netmask);
+        let network_address = Ipv6Addr::from(network_address_u128);
 
         Ok(Self {
             network_address,
@@ -715,8 +711,8 @@ impl Ipv6Network {
     /// assert!(!ip_network.contains(Ipv6Addr::new(0x2001, 0xdb9, 0, 0, 0, 0, 0, 0)));
     /// ```
     pub fn contains(&self, ip: Ipv6Addr) -> bool {
-        let truncated_ip = ip.to_u128() & helpers::get_bite_mask_u128(self.netmask);
-        truncated_ip == self.network_address.to_u128()
+        let truncated_ip = u128::from(ip) & helpers::get_bite_mask_u128(self.netmask);
+        truncated_ip == u128::from(self.network_address)
     }
 
     /// Returns network with smaller netmask by one.

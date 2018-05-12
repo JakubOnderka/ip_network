@@ -2,8 +2,6 @@ use std::net::{Ipv4Addr, Ipv6Addr};
 use Ipv4Network;
 use Ipv6Network;
 use helpers;
-use extprim::u128::u128;
-use ipv6addr_u128::Ipv6AddrU128;
 
 #[cfg(target_pointer_width = "16")]
 const POINTER_WIDTH: u32 = 16;
@@ -152,7 +150,7 @@ impl Ipv6NetworkIterator {
         assert!(network.get_netmask() < new_netmask);
         assert!(new_netmask <= 128);
 
-        let current = network.get_network_address().to_u128();
+        let current = u128::from(network.get_network_address());
         let mask = !helpers::get_bite_mask_u128(128 - (new_netmask - network.get_netmask())) << (128 - new_netmask);
         let to = current | mask;
 
@@ -166,15 +164,15 @@ impl Ipv6NetworkIterator {
 
     #[inline]
     fn step(&self) -> u128 {
-        u128::new(1) << (128 - self.new_netmask)
+        1 << (128 - self.new_netmask)
     }
 
     pub fn real_len(&self) -> u128 {
         if self.is_done {
-            return u128::new(0);
+            return 0;
         }
 
-        ((self.to - self.current) / self.step()).saturating_add(u128::new(1))
+        ((self.to - self.current) / self.step()).saturating_add(1)
     }
 }
 
@@ -190,7 +188,7 @@ impl Iterator for Ipv6NetworkIterator {
                 None => self.is_done = true,
             };
 
-            Some(Self::Item::from(Ipv6Addr::from_u128(output), self.new_netmask).unwrap())
+            Some(Self::Item::from(Ipv6Addr::from(output), self.new_netmask).unwrap())
         } else {
             None
         }
@@ -202,7 +200,8 @@ impl Iterator for Ipv6NetworkIterator {
         if 128 - remaining.leading_zeros() > POINTER_WIDTH {
             (::std::usize::MAX, None)
         } else {
-            (remaining.low64() as usize, Some(remaining.low64() as usize))
+            let remaining_u64 = remaining as u64;
+            (remaining_u64 as usize, Some(remaining_u64 as usize))
         }
     }
 }
@@ -214,7 +213,6 @@ mod tests {
     use std::net::{Ipv4Addr, Ipv6Addr};
     use {Ipv4Network, Ipv6Network};
     use super::{Ipv4NetworkIterator, Ipv4RangeIterator, Ipv6NetworkIterator};
-    use extprim::u128::u128;
 
     #[test]
     fn test_ipv4_range_iterator() {
