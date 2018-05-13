@@ -1,7 +1,6 @@
-use std::net::{Ipv4Addr, Ipv6Addr};
-use Ipv4Network;
-use Ipv6Network;
 use helpers;
+use std::net::{Ipv4Addr, Ipv6Addr};
+use {Ipv4Network, Ipv6Network};
 
 #[cfg(target_pointer_width = "16")]
 const POINTER_WIDTH: u32 = 16;
@@ -40,7 +39,11 @@ impl Ipv4RangeIterator {
         let current = u32::from(from);
         let to = u32::from(to);
         assert!(to >= current);
-        Self { current, to, is_done: false }
+        Self {
+            current,
+            to,
+            is_done: false,
+        }
     }
 }
 
@@ -64,7 +67,7 @@ impl Iterator for Ipv4RangeIterator {
 
     fn size_hint(&self) -> (usize, Option<usize>) {
         if self.is_done {
-            return (0, Some(0))
+            return (0, Some(0));
         }
 
         let remaining = (self.to - self.current + 1) as usize;
@@ -89,7 +92,8 @@ impl Ipv4NetworkIterator {
         assert!(new_netmask <= 32);
 
         let current = u32::from(network.get_network_address());
-        let mask = !helpers::get_bite_mask(32 - (new_netmask - network.get_netmask())) << (32 - new_netmask);
+        let mask = !helpers::get_bite_mask(32 - (new_netmask - network.get_netmask()))
+            << (32 - new_netmask);
         let to = current | mask;
 
         Self {
@@ -125,7 +129,7 @@ impl Iterator for Ipv4NetworkIterator {
 
     fn size_hint(&self) -> (usize, Option<usize>) {
         if self.is_done {
-            return (0, Some(0))
+            return (0, Some(0));
         }
 
         let remaining = ((self.to - self.current) / self.step() + 1) as usize;
@@ -150,7 +154,8 @@ impl Ipv6NetworkIterator {
         assert!(new_netmask <= 128);
 
         let current = u128::from(network.get_network_address());
-        let mask = !helpers::get_bite_mask_u128(128 - (new_netmask - network.get_netmask())) << (128 - new_netmask);
+        let mask = !helpers::get_bite_mask_u128(128 - (new_netmask - network.get_netmask()))
+            << (128 - new_netmask);
         let to = current | mask;
 
         Self {
@@ -208,15 +213,15 @@ impl ExactSizeIterator for Ipv6NetworkIterator {}
 
 #[cfg(test)]
 mod tests {
+    use super::{Ipv4NetworkIterator, Ipv4RangeIterator, Ipv6NetworkIterator};
     use std::net::{Ipv4Addr, Ipv6Addr};
     use {Ipv4Network, Ipv6Network};
-    use super::{Ipv4NetworkIterator, Ipv4RangeIterator, Ipv6NetworkIterator};
 
     #[test]
     fn test_ipv4_range_iterator() {
         let mut iterator = Ipv4RangeIterator::new(
             Ipv4Addr::new(192, 168, 2, 0),
-            Ipv4Addr::new(192, 168, 2, 255)
+            Ipv4Addr::new(192, 168, 2, 255),
         );
         assert_eq!(iterator.next().unwrap(), Ipv4Addr::new(192, 168, 2, 0));
         assert_eq!(iterator.next().unwrap(), Ipv4Addr::new(192, 168, 2, 1));
@@ -227,7 +232,7 @@ mod tests {
     fn test_ipv4_range_iterator_length() {
         let mut iterator = Ipv4RangeIterator::new(
             Ipv4Addr::new(192, 168, 2, 0),
-            Ipv4Addr::new(192, 168, 2, 255)
+            Ipv4Addr::new(192, 168, 2, 255),
         );
         assert_eq!(iterator.len(), 256);
         iterator.next().unwrap();
@@ -239,7 +244,7 @@ mod tests {
     fn test_ipv4_range_iterator_same_values() {
         let mut iterator = Ipv4RangeIterator::new(
             Ipv4Addr::new(255, 255, 255, 255),
-            Ipv4Addr::new(255, 255, 255, 255)
+            Ipv4Addr::new(255, 255, 255, 255),
         );
         assert_eq!(iterator.len(), 1);
         assert_eq!(iterator.next().unwrap(), Ipv4Addr::new(255, 255, 255, 255));
@@ -253,10 +258,22 @@ mod tests {
         let mut iterator = Ipv4NetworkIterator::new(network, 16);
 
         assert_eq!(iterator.len(), 256);
-        assert_eq!(iterator.next().unwrap(), Ipv4Network::from(Ipv4Addr::new(127, 0, 0, 0), 16).unwrap());
-        assert_eq!(iterator.next().unwrap(), Ipv4Network::from(Ipv4Addr::new(127, 1, 0, 0), 16).unwrap());
-        assert_eq!(iterator.next().unwrap(), Ipv4Network::from(Ipv4Addr::new(127, 2, 0, 0), 16).unwrap());
-        assert_eq!(iterator.last().unwrap(), Ipv4Network::from(Ipv4Addr::new(127, 255, 0, 0), 16).unwrap());
+        assert_eq!(
+            iterator.next().unwrap(),
+            Ipv4Network::from(Ipv4Addr::new(127, 0, 0, 0), 16).unwrap()
+        );
+        assert_eq!(
+            iterator.next().unwrap(),
+            Ipv4Network::from(Ipv4Addr::new(127, 1, 0, 0), 16).unwrap()
+        );
+        assert_eq!(
+            iterator.next().unwrap(),
+            Ipv4Network::from(Ipv4Addr::new(127, 2, 0, 0), 16).unwrap()
+        );
+        assert_eq!(
+            iterator.last().unwrap(),
+            Ipv4Network::from(Ipv4Addr::new(127, 255, 0, 0), 16).unwrap()
+        );
     }
 
     #[test]
@@ -274,7 +291,10 @@ mod tests {
 
         assert_eq!(2, iterator.len());
         assert_eq!(iterator.next().unwrap(), Ipv6Network::from(ip, 17).unwrap());
-        assert_eq!(iterator.next().unwrap(), Ipv6Network::from(Ipv6Addr::new(0x2001, 0x8000, 0, 0, 0, 0, 0, 0), 17).unwrap());
+        assert_eq!(
+            iterator.next().unwrap(),
+            Ipv6Network::from(Ipv6Addr::new(0x2001, 0x8000, 0, 0, 0, 0, 0, 0), 17).unwrap()
+        );
         assert!(iterator.next().is_none());
     }
 
@@ -303,7 +323,13 @@ mod tests {
         let network = Ipv6Network::from(ip, 0).unwrap();
         let mut iterator = Ipv6NetworkIterator::new(network, 128);
 
-        assert_eq!(iterator.next().unwrap(), Ipv6Network::from(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 0), 128).unwrap());
-        assert_eq!(iterator.next().unwrap(), Ipv6Network::from(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 1), 128).unwrap());
+        assert_eq!(
+            iterator.next().unwrap(),
+            Ipv6Network::from(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 0), 128).unwrap()
+        );
+        assert_eq!(
+            iterator.next().unwrap(),
+            Ipv6Network::from(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 1), 128).unwrap()
+        );
     }
 }

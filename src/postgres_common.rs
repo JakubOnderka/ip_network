@@ -1,6 +1,6 @@
-use {Ipv4Network, Ipv6Network, IPV4_LENGTH, IPV6_LENGTH};
-use std::net::{Ipv4Addr, Ipv6Addr};
 use std::error::Error;
+use std::net::{Ipv4Addr, Ipv6Addr};
+use {IPV4_LENGTH, IPV6_LENGTH, Ipv4Network, Ipv6Network};
 
 // TODO: These constants are true for Linux, but we have to check it for Windows and other systems
 pub const IPV4_TYPE: u8 = 2;
@@ -11,15 +11,15 @@ pub fn from_sql_ipv4_network(raw: &[u8]) -> Result<Ipv4Network, Box<Error + Sync
     assert!(raw.len() >= 7);
 
     if raw[0] != IPV4_TYPE {
-        return Err("CIDR is not IP version 4".into())
+        return Err("CIDR is not IP version 4".into());
     }
 
     if raw[2] != 1 {
-        return Err("This field is not CIDR type, probably INET type".into())
+        return Err("This field is not CIDR type, probably INET type".into());
     }
 
     if raw[3] != IPV4_LENGTH / 8 {
-        return Err(format!("CIDR is IP version 4, but have bad length '{}'", raw[3]).into())
+        return Err(format!("CIDR is IP version 4, but have bad length '{}'", raw[3]).into());
     }
 
     let network_address = Ipv4Addr::new(raw[4], raw[5], raw[6], raw[7]);
@@ -32,15 +32,15 @@ pub fn from_sql_ipv6_network(raw: &[u8]) -> Result<Ipv6Network, Box<Error + Sync
     assert!(raw.len() >= 20);
 
     if raw[0] != IPV6_TYPE {
-        return Err("CIDR is not IP version 6".into())
+        return Err("CIDR is not IP version 6".into());
     }
 
     if raw[2] != 1 {
-        return Err("This field is not CIDR type, probably INET type".into())
+        return Err("This field is not CIDR type, probably INET type".into());
     }
 
     if raw[3] != IPV6_LENGTH / 8 {
-        return Err(format!("CIDR is IP version 6, but have bad length '{}'", raw[3]).into())
+        return Err(format!("CIDR is IP version 6, but have bad length '{}'", raw[3]).into());
     }
 
     let mut octets = [0; 16];

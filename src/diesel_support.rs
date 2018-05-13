@@ -1,13 +1,13 @@
 use postgres_common;
 
-use {Ipv4Network, Ipv6Network, IpNetwork};
-use std::io::prelude::*;
 use std::error::Error;
+use std::io::prelude::*;
+use {IpNetwork, Ipv4Network, Ipv6Network};
 
 use diesel::deserialize::{self, FromSql};
+use diesel::pg::Pg;
 use diesel::serialize::{self, IsNull, Output, ToSql};
 use diesel::sql_types::Cidr;
-use diesel::pg::Pg;
 
 type BoxedError = Box<Error + Sync + Send>;
 
@@ -39,18 +39,14 @@ impl FromSql<Cidr, Pg> for IpNetwork {
 impl ToSql<Cidr, Pg> for Ipv4Network {
     fn to_sql<W: Write>(&self, out: &mut Output<W, Pg>) -> serialize::Result {
         let data = postgres_common::to_sql_ipv4_network(self);
-        out.write_all(&data)
-            .map(|_| IsNull::No)
-            .map_err(Into::into)
+        out.write_all(&data).map(|_| IsNull::No).map_err(Into::into)
     }
 }
 
 impl ToSql<Cidr, Pg> for Ipv6Network {
     fn to_sql<W: Write>(&self, out: &mut Output<W, Pg>) -> serialize::Result {
         let data = postgres_common::to_sql_ipv6_network(self);
-        out.write_all(&data)
-            .map(|_| IsNull::No)
-            .map_err(Into::into)
+        out.write_all(&data).map(|_| IsNull::No).map_err(Into::into)
     }
 }
 
