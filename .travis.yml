@@ -24,11 +24,10 @@ before_script:
       export PATH=$HOME/.cargo/bin:$PATH
 
 script:
-  - cargo check
-  - cargo check --features serde
-  - cargo check --features postgres
-  - cargo check --features diesel
   - cargo test
+  - cargo test --features serde
+  - cargo test --features postgres
+  - cargo test --features diesel
 
 after_success:
   - cargo coveralls

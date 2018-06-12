@@ -5,6 +5,7 @@ extern crate serde;
 #[macro_use]
 extern crate postgres;
 #[cfg(feature = "diesel")]
+#[macro_use]
 extern crate diesel;
 
 use std::cmp;

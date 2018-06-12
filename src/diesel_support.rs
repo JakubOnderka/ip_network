@@ -53,8 +53,57 @@ impl ToSql<Cidr, Pg> for Ipv6Network {
 impl ToSql<Cidr, Pg> for IpNetwork {
     fn to_sql<W: Write>(&self, out: &mut Output<W, Pg>) -> serialize::Result {
         match *self {
-            IpNetwork::V4(ref network) => network.to_sql(out),
-            IpNetwork::V6(ref network) => network.to_sql(out),
+            IpNetwork::V4(ref network) => {
+                let data = postgres_common::to_sql_ipv4_network(network);
+                out.write_all(&data).map(|_| IsNull::No).map_err(Into::into)
+            },
+            IpNetwork::V6(ref network) => {
+                let data = postgres_common::to_sql_ipv6_network(network);
+                out.write_all(&data).map(|_| IsNull::No).map_err(Into::into)
+            }
         }
+    }
+}
+
+#[allow(dead_code)]
+mod foreign_derives {
+    use super::*;
+
+    #[derive(FromSqlRow, AsExpression)]
+    #[diesel(foreign_derive)]
+    #[sql_type = "Cidr"]
+    struct IpNetworkProxy(IpNetwork);
+
+    #[derive(FromSqlRow, AsExpression)]
+    #[diesel(foreign_derive)]
+    #[sql_type = "Cidr"]
+    struct Ipv4NetworkProxy(Ipv4Network);
+
+    #[derive(FromSqlRow, AsExpression)]
+    #[diesel(foreign_derive)]
+    #[sql_type = "Cidr"]
+    struct Ipv6NetworkProxy(Ipv6Network);
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{IpNetwork, Ipv4Network, Ipv6Network};
+
+    table! {
+        test {
+            id -> Integer,
+            ip_network -> Cidr,
+            ipv4_network -> Cidr,
+            ipv6_network -> Cidr,
+        }
+    }
+
+    #[derive(Insertable)]
+    #[table_name="test"]
+    pub struct NewPost{
+        pub id: i32,
+        pub ip_network: IpNetwork,
+        pub ipv4_network: Ipv4Network,
+        pub ipv6_network: Ipv6Network,
     }
 }
