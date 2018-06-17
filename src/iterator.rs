@@ -88,11 +88,11 @@ pub struct Ipv4NetworkIterator {
 impl Ipv4NetworkIterator {
     // TODO: Change assert to error?
     pub fn new(network: Ipv4Network, new_netmask: u8) -> Self {
-        assert!(network.get_netmask() < new_netmask);
+        assert!(network.netmask() < new_netmask);
         assert!(new_netmask <= 32);
 
-        let current = u32::from(network.get_network_address());
-        let mask = !helpers::get_bite_mask(32 - (new_netmask - network.get_netmask()))
+        let current = u32::from(network.network_address());
+        let mask = !helpers::get_bite_mask(32 - (new_netmask - network.netmask()))
             << (32 - new_netmask);
         let to = current | mask;
 
@@ -150,11 +150,11 @@ pub struct Ipv6NetworkIterator {
 impl Ipv6NetworkIterator {
     // TODO: Change assert to error?
     pub fn new(network: Ipv6Network, new_netmask: u8) -> Self {
-        assert!(network.get_netmask() < new_netmask);
+        assert!(network.netmask() < new_netmask);
         assert!(new_netmask <= 128);
 
-        let current = u128::from(network.get_network_address());
-        let mask = !helpers::get_bite_mask_u128(128 - (new_netmask - network.get_netmask()))
+        let current = u128::from(network.network_address());
+        let mask = !helpers::get_bite_mask_u128(128 - (new_netmask - network.netmask()))
             << (128 - new_netmask);
         let to = current | mask;
 

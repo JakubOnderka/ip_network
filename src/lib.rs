@@ -159,8 +159,8 @@ impl Ipv4Network {
     /// use ip_network::Ipv4Network;
     ///
     /// let ip_network = Ipv4Network::from(Ipv4Addr::new(192, 168, 1, 0), 24).unwrap();
-    /// assert_eq!(ip_network.get_network_address(), Ipv4Addr::new(192, 168, 1, 0));
-    /// assert_eq!(ip_network.get_netmask(), 24);
+    /// assert_eq!(ip_network.network_address(), Ipv4Addr::new(192, 168, 1, 0));
+    /// assert_eq!(ip_network.netmask(), 24);
     /// ```
     pub fn from(network_address: Ipv4Addr, netmask: u8) -> Result<Self, IpNetworkError> {
         if netmask > IPV4_LENGTH {
@@ -190,8 +190,8 @@ impl Ipv4Network {
     /// use ip_network::Ipv4Network;
     ///
     /// let ip_network = Ipv4Network::from_truncate(Ipv4Addr::new(192, 168, 1, 100), 24).unwrap();
-    /// assert_eq!(ip_network.get_network_address(), Ipv4Addr::new(192, 168, 1, 0));
-    /// assert_eq!(ip_network.get_netmask(), 24);
+    /// assert_eq!(ip_network.network_address(), Ipv4Addr::new(192, 168, 1, 0));
+    /// assert_eq!(ip_network.netmask(), 24);
     /// ```
     pub fn from_truncate(network_address: Ipv4Addr, netmask: u8) -> Result<Self, IpNetworkError> {
         if netmask > IPV4_LENGTH {
@@ -216,10 +216,15 @@ impl Ipv4Network {
     /// use ip_network::Ipv4Network;
     ///
     /// let ip_network = Ipv4Network::from(Ipv4Addr::new(192, 168, 1, 0), 24).unwrap();
-    /// assert_eq!(ip_network.get_network_address(), Ipv4Addr::new(192, 168, 1, 0));
+    /// assert_eq!(ip_network.network_address(), Ipv4Addr::new(192, 168, 1, 0));
     /// ```
-    pub fn get_network_address(&self) -> Ipv4Addr {
+    pub fn network_address(&self) -> Ipv4Addr {
         self.network_address
+    }
+    
+    #[deprecated(since="0.2.2", note="please use `network_address` instead")]
+    pub fn get_network_address(&self) -> Ipv4Addr {
+        self.network_address()
     }
 
     /// Returns broadcast address of network (last address in range).
@@ -231,10 +236,15 @@ impl Ipv4Network {
     /// use ip_network::Ipv4Network;
     ///
     /// let ip_network = Ipv4Network::from(Ipv4Addr::new(192, 168, 1, 0), 24).unwrap();
-    /// assert_eq!(ip_network.get_broadcast_address(), Ipv4Addr::new(192, 168, 1, 255));
+    /// assert_eq!(ip_network.broadcast_address(), Ipv4Addr::new(192, 168, 1, 255));
     /// ```
-    pub fn get_broadcast_address(&self) -> Ipv4Addr {
+    pub fn broadcast_address(&self) -> Ipv4Addr {
         Ipv4Addr::from(u32::from(self.network_address) | !helpers::get_bite_mask(self.netmask))
+    }
+    
+    #[deprecated(since="0.2.2", note="please use `broadcast_address` instead")]
+    pub fn get_broadcast_address(&self) -> Ipv4Addr {
+        self.broadcast_address()
     }
 
     /// Returns network mask as integer.
@@ -246,10 +256,15 @@ impl Ipv4Network {
     /// use ip_network::Ipv4Network;
     ///
     /// let ip_network = Ipv4Network::from(Ipv4Addr::new(192, 168, 1, 0), 24).unwrap();
-    /// assert_eq!(ip_network.get_netmask(), 24);
+    /// assert_eq!(ip_network.netmask(), 24);
     /// ```
-    pub fn get_netmask(&self) -> u8 {
+    pub fn netmask(&self) -> u8 {
         self.netmask
+    }
+    
+    #[deprecated(since="0.2.2", note="please use `netmask` instead")]
+    pub fn get_netmask(&self) -> u8 {
+        self.netmask()
     }
 
     /// Returns network mask as IPv4 address.
@@ -261,10 +276,15 @@ impl Ipv4Network {
     /// use ip_network::Ipv4Network;
     ///
     /// let ip_network = Ipv4Network::from(Ipv4Addr::new(192, 168, 1, 0), 24).unwrap();
-    /// assert_eq!(ip_network.get_full_netmask(), Ipv4Addr::new(255, 255, 255, 0));
+    /// assert_eq!(ip_network.full_netmask(), Ipv4Addr::new(255, 255, 255, 0));
     /// ```
-    pub fn get_full_netmask(&self) -> Ipv4Addr {
+    pub fn full_netmask(&self) -> Ipv4Addr {
         Ipv4Addr::from(helpers::get_bite_mask(self.netmask))
+    }
+
+    #[deprecated(since="0.2.2", note="please use `full_netmask` instead")]
+    pub fn get_full_netmask(&self) -> Ipv4Addr {
+        self.full_netmask()
     }
 
     /// Returns [`true`] if given IP address is inside this network.
@@ -300,7 +320,7 @@ impl Ipv4Network {
     /// ```
     pub fn hosts(&self) -> iterator::Ipv4RangeIterator {
         let from = Ipv4Addr::from(u32::from(self.network_address).saturating_add(1));
-        let to = Ipv4Addr::from(u32::from(self.get_broadcast_address()).saturating_sub(1));
+        let to = Ipv4Addr::from(u32::from(self.broadcast_address()).saturating_sub(1));
         iterator::Ipv4RangeIterator::new(from, to)
     }
 
@@ -318,8 +338,8 @@ impl Ipv4Network {
     /// ```
     pub fn supernet(&self) -> Self {
         Self::from_truncate(
-            self.get_network_address(),
-            self.get_netmask().saturating_sub(1),
+            self.network_address(),
+            self.netmask().saturating_sub(1),
         ).unwrap()
     }
 
@@ -337,7 +357,7 @@ impl Ipv4Network {
     /// assert_eq!(iterator.last().unwrap(), Ipv4Network::from(Ipv4Addr::new(192, 168, 1, 128), 25).unwrap());
     /// ```
     pub fn subnets(&self) -> iterator::Ipv4NetworkIterator {
-        iterator::Ipv4NetworkIterator::new(self.clone(), self.get_netmask().saturating_add(1))
+        iterator::Ipv4NetworkIterator::new(self.clone(), self.netmask().saturating_add(1))
     }
 
     /// Returns `Ipv4NetworkIterator` over networks with defined netmask.
@@ -374,7 +394,7 @@ impl Ipv4Network {
     /// assert!(ip_network.is_loopback());
     /// ```
     pub fn is_loopback(&self) -> bool {
-        self.network_address.is_loopback() && self.get_broadcast_address().is_loopback()
+        self.network_address.is_loopback() && self.broadcast_address().is_loopback()
     }
 
     /// Returns [`true`] if this is a broadcast network (255.255.255.255/32).
@@ -418,7 +438,7 @@ impl Ipv4Network {
     /// assert!(ip_network.is_private());
     /// ```
     pub fn is_private(&self) -> bool {
-        self.network_address.is_private() && self.get_broadcast_address().is_private()
+        self.network_address.is_private() && self.broadcast_address().is_private()
     }
 
     /// Returns [`true`] if the network is is inside link-local range (169.254.0.0/16).
@@ -438,7 +458,7 @@ impl Ipv4Network {
     /// assert!(ip_network.is_link_local());
     /// ```
     pub fn is_link_local(&self) -> bool {
-        self.network_address.is_link_local() && self.get_broadcast_address().is_link_local()
+        self.network_address.is_link_local() && self.broadcast_address().is_link_local()
     }
 
     /// Returns [`true`] if this whole network is inside multicast address range (224.0.0.0/4).
@@ -459,7 +479,7 @@ impl Ipv4Network {
     /// assert!(ip_network.is_multicast());
     /// ```
     pub fn is_multicast(&self) -> bool {
-        self.network_address.is_multicast() && self.get_broadcast_address().is_multicast()
+        self.network_address.is_multicast() && self.broadcast_address().is_multicast()
     }
 
     /// Returns [`true`] if this network is in a range designated for documentation.
@@ -483,7 +503,7 @@ impl Ipv4Network {
     /// assert!(ip_network.is_documentation());
     /// ```
     pub fn is_documentation(&self) -> bool {
-        self.network_address.is_documentation() && self.get_broadcast_address().is_documentation()
+        self.network_address.is_documentation() && self.broadcast_address().is_documentation()
     }
 
     // TODO: Documentation
@@ -549,8 +569,8 @@ impl FromStr for Ipv4Network {
     /// use std::str::FromStr;
     ///
     /// let ip_network = Ipv4Network::from_str("192.168.1.0/24").unwrap();
-    /// assert_eq!(ip_network.get_network_address(), Ipv4Addr::new(192, 168, 1, 0));
-    /// assert_eq!(ip_network.get_netmask(), 24);
+    /// assert_eq!(ip_network.network_address(), Ipv4Addr::new(192, 168, 1, 0));
+    /// assert_eq!(ip_network.netmask(), 24);
     /// ```
     fn from_str(s: &str) -> Result<Ipv4Network, IpNetworkParseError> {
         let (ip, netmask) = match helpers::split_ip_netmask(s) {
@@ -585,7 +605,7 @@ impl IntoIterator for Ipv4Network {
     /// assert_eq!(iter.last().unwrap(), Ipv4Addr::new(192, 168, 1, 255));
     /// ```
     fn into_iter(self) -> Self::IntoIter {
-        Self::IntoIter::new(self.network_address, self.get_broadcast_address())
+        Self::IntoIter::new(self.network_address, self.broadcast_address())
     }
 }
 
@@ -610,8 +630,8 @@ impl Ipv6Network {
     ///
     /// let ip = Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0);
     /// let ip_network = Ipv6Network::from(ip, 32).unwrap();
-    /// assert_eq!(ip_network.get_network_address(), ip);
-    /// assert_eq!(ip_network.get_netmask(), 32);
+    /// assert_eq!(ip_network.network_address(), ip);
+    /// assert_eq!(ip_network.netmask(), 32);
     /// ```
     pub fn from(network_address: Ipv6Addr, netmask: u8) -> Result<Self, IpNetworkError> {
         if netmask > IPV6_LENGTH {
@@ -642,8 +662,8 @@ impl Ipv6Network {
     ///
     /// let ip = Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 1, 0, 0);
     /// let ip_network = Ipv6Network::from_truncate(ip, 32).unwrap();
-    /// assert_eq!(ip_network.get_network_address(), Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0));
-    /// assert_eq!(ip_network.get_netmask(), 32);
+    /// assert_eq!(ip_network.network_address(), Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0));
+    /// assert_eq!(ip_network.netmask(), 32);
     /// ```
     pub fn from_truncate(network_address: Ipv6Addr, netmask: u8) -> Result<Self, IpNetworkError> {
         if netmask > IPV6_LENGTH {
@@ -670,10 +690,15 @@ impl Ipv6Network {
     ///
     /// let ip = Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0);
     /// let ip_network = Ipv6Network::from(ip, 32).unwrap();
-    /// assert_eq!(ip_network.get_network_address(), ip);
+    /// assert_eq!(ip_network.network_address(), ip);
     /// ```
-    pub fn get_network_address(&self) -> Ipv6Addr {
+    pub fn network_address(&self) -> Ipv6Addr {
         self.network_address
+    }
+
+    #[deprecated(since="0.2.2", note="please use `network_address` instead")]
+    pub fn get_network_address(&self) -> Ipv6Addr {
+        self.network_address()
     }
 
     /// Returns network mask.
@@ -686,10 +711,15 @@ impl Ipv6Network {
     ///
     /// let ip = Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0);
     /// let ip_network = Ipv6Network::from(ip, 32).unwrap();
-    /// assert_eq!(ip_network.get_netmask(), 32);
+    /// assert_eq!(ip_network.netmask(), 32);
     /// ```
-    pub fn get_netmask(&self) -> u8 {
+    pub fn netmask(&self) -> u8 {
         self.netmask
+    }
+
+    #[deprecated(since="0.2.2", note="please use `netmask` instead")]
+    pub fn get_netmask(&self) -> u8 {
+        self.netmask()
     }
 
     /// Returns [`true`] if given IP address is inside this network.
@@ -724,8 +754,8 @@ impl Ipv6Network {
     /// ```
     pub fn supernet(&self) -> Self {
         Self::from_truncate(
-            self.get_network_address(),
-            self.get_netmask().saturating_sub(1),
+            self.network_address(),
+            self.netmask().saturating_sub(1),
         ).unwrap()
     }
 
@@ -743,7 +773,7 @@ impl Ipv6Network {
     /// assert_eq!(iterator.last().unwrap(), Ipv6Network::from(Ipv6Addr::new(0x2001, 0xdb8, 0x8000, 0, 0, 0, 0, 0), 33).unwrap());
     /// ```
     pub fn subnets(&self) -> iterator::Ipv6NetworkIterator {
-        iterator::Ipv6NetworkIterator::new(self.clone(), self.get_netmask().saturating_add(1))
+        iterator::Ipv6NetworkIterator::new(self.clone(), self.netmask().saturating_add(1))
     }
 
     /// Returns `Ipv6NetworkIterator` over networks with defined netmask.
@@ -972,7 +1002,7 @@ mod tests {
         let ip = Ipv4Addr::new(127, 0, 0, 1);
         let ip_network = Ipv4Network::from_truncate(ip, 8).unwrap();
         assert_eq!(
-            ip_network.get_network_address(),
+            ip_network.network_address(),
             Ipv4Addr::new(127, 0, 0, 0)
         );
     }
@@ -981,15 +1011,15 @@ mod tests {
     fn test_ipv4_network_basic_getters() {
         let ip_network = return_test_ipv4_network();
         assert_eq!(
-            ip_network.get_network_address(),
+            ip_network.network_address(),
             Ipv4Addr::new(192, 168, 0, 0)
         );
-        assert_eq!(ip_network.get_netmask(), 16);
+        assert_eq!(ip_network.netmask(), 16);
         assert_eq!(
-            ip_network.get_broadcast_address(),
+            ip_network.broadcast_address(),
             Ipv4Addr::new(192, 168, 255, 255)
         );
-        assert_eq!(ip_network.get_full_netmask(), Ipv4Addr::new(255, 255, 0, 0));
+        assert_eq!(ip_network.full_netmask(), Ipv4Addr::new(255, 255, 0, 0));
         assert_eq!(
             ip_network.supernet(),
             Ipv4Network::from(Ipv4Addr::new(192, 168, 0, 0), 15).unwrap()
@@ -1141,10 +1171,10 @@ mod tests {
         let ip = Ipv6Addr::new(0xfc00, 0, 0, 0, 0, 0, 0, 0);
         let network = Ipv6Network::from(ip, 7).unwrap();
         assert_eq!(
-            network.get_network_address(),
+            network.network_address(),
             Ipv6Addr::new(0xfc00, 0, 0, 0, 0, 0, 0, 0)
         );
-        assert_eq!(network.get_netmask(), 7);
+        assert_eq!(network.netmask(), 7);
     }
 
     #[test]
