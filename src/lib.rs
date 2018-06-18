@@ -795,7 +795,17 @@ impl Ipv6Network {
 }
 
 impl fmt::Display for Ipv6Network {
-    // TODO
+    /// Converts `Ipv6Network` to string in format X:X::X/Y (CIDR notation).
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::net::Ipv6Addr;
+    /// use ip_network::Ipv6Network;
+    ///
+    /// let ip_network = Ipv6Network::from(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0), 32).unwrap();
+    /// assert_eq!(format!("{}", ip_network), "2001:db8::/32");
+    /// ```
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}/{}", self.network_address, self.netmask)
     }
@@ -848,10 +858,11 @@ impl fmt::Display for IpNetworkError {
 pub enum IpNetworkParseError {
     /// Network mask is not valid integer between 0-255
     InvalidNetmaskFormat,
-    // Network address has invalid format (not X/Y)
+    /// Network address has invalid format (not X/Y)
     InvalidFormatError,
     /// Invalid IP address syntax (IPv4 or IPv6)
     AddrParseError,
+    /// Error when creating new IPv4 or IPv6 networks
     IpNetworkError(IpNetworkError),
 }
 
