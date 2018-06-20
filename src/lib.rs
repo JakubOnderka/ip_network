@@ -15,7 +15,7 @@ use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 use std::str::FromStr;
 
 #[cfg(feature = "diesel")]
-mod diesel_support;
+pub mod diesel_support;
 mod helpers;
 /// `Ipv4RangeIterator`, `Ipv4NetworkIterator` and `Ipv6NetworkIterator`
 pub mod iterator;

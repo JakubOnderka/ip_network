@@ -7,6 +7,7 @@ use {IpNetwork, Ipv4Network, Ipv6Network};
 use diesel::deserialize::{self, FromSql};
 use diesel::pg::Pg;
 use diesel::serialize::{self, IsNull, Output, ToSql};
+use diesel::expression::{AsExpression, Expression};
 use diesel::sql_types::Cidr;
 
 type BoxedError = Box<Error + Sync + Send>;
@@ -85,9 +86,34 @@ mod foreign_derives {
     struct Ipv6NetworkProxy(Ipv6Network);
 }
 
+diesel_infix_operator!(Contains, " >> ", backend: Pg);
+diesel_infix_operator!(ContainsOrEquals, " >>= ", backend: Pg);
+
+pub trait PqCidrExtensionMethods: Expression<SqlType = Cidr> + Sized {
+    fn contains<T>(self, other: T) -> Contains<Self, T::Expression>
+    where
+        T: AsExpression<Self::SqlType> {
+        Contains::new(self, other.as_expression())
+    }
+
+    fn contains_or_equals<T>(self, other: T) -> ContainsOrEquals<Self, T::Expression>
+    where
+        T: AsExpression<Self::SqlType> {
+        ContainsOrEquals::new(self, other.as_expression())
+    }
+}
+
+impl<T> PqCidrExtensionMethods for T
+    where
+        T: Expression<SqlType=Cidr>
+{
+}
+
 #[cfg(test)]
 mod tests {
+    use std::net::Ipv4Addr;
     use super::{IpNetwork, Ipv4Network, Ipv6Network};
+    use super::PqCidrExtensionMethods;
 
     table! {
         test {
@@ -100,10 +126,17 @@ mod tests {
 
     #[derive(Insertable)]
     #[table_name="test"]
-    pub struct NewPost{
+    pub struct NewPost {
         pub id: i32,
         pub ip_network: IpNetwork,
         pub ipv4_network: Ipv4Network,
         pub ipv6_network: Ipv6Network,
+    }
+
+    #[test]
+    fn operators() {
+        let ip = IpNetwork::from(Ipv4Addr::new(127, 0, 0, 1), 32).unwrap();
+        test::ip_network.contains(&ip);
+        test::ip_network.contains_or_equals(&ip);
     }
 }
