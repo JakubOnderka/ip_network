@@ -57,9 +57,11 @@ ip_network = { version = "0.2", features = ["postgres"] }
 
 ## Diesel support
 
-To enable support for [diesel](https://diesel.rs) crate CIDR type, just add `diesel` feature to package in `Cargo.toml`:
+To enable support for [diesel](https://diesel.rs) CIDR type for PostgreSQL, just add `diesel` feature to package in `Cargo.toml`:
 
 ```toml
 [dependencies]
 ip_network = { version = "0.2", features = ["diesel"] }
 ``` 
+
+You can then use `ip_network::diesel_support::PqCidrExtensionMethods` trait for CIDR operators support.

@@ -86,26 +86,63 @@ mod foreign_derives {
     struct Ipv6NetworkProxy(Ipv6Network);
 }
 
+diesel_infix_operator!(IsContainedBy, " << ", backend: Pg);
+diesel_infix_operator!(IsContainedByOrEquals, " <<= ", backend: Pg);
 diesel_infix_operator!(Contains, " >> ", backend: Pg);
 diesel_infix_operator!(ContainsOrEquals, " >>= ", backend: Pg);
+diesel_infix_operator!(ContainsOrIsContainedBy, " && ", backend: Pg);
 
+/// Support for PostgreSQL Network Address Operators for Diesel
+///
+/// See [PostgreSQL documentation for details](https://www.postgresql.org/docs/current/static/functions-net.html).
 pub trait PqCidrExtensionMethods: Expression<SqlType = Cidr> + Sized {
+    /// Creates a SQL `<<` expression.
+    fn is_contained_by<T>(self, other: T) -> IsContainedBy<Self, T::Expression>
+    where
+        T: AsExpression<Self::SqlType>,
+    {
+        IsContainedBy::new(self, other.as_expression())
+    }
+
+    /// Creates a SQL `<<=` expression.
+    fn is_contained_by_or_equals<T>(self, other: T) -> IsContainedByOrEquals<Self, T::Expression>
+    where
+        T: AsExpression<Self::SqlType>,
+    {
+        IsContainedByOrEquals::new(self, other.as_expression())
+    }
+
+    /// Creates a SQL `>>` expression.
     fn contains<T>(self, other: T) -> Contains<Self, T::Expression>
     where
-        T: AsExpression<Self::SqlType> {
+        T: AsExpression<Self::SqlType>,
+    {
         Contains::new(self, other.as_expression())
     }
 
+    /// Creates a SQL `>>=` expression.
     fn contains_or_equals<T>(self, other: T) -> ContainsOrEquals<Self, T::Expression>
     where
-        T: AsExpression<Self::SqlType> {
+        T: AsExpression<Self::SqlType>,
+    {
         ContainsOrEquals::new(self, other.as_expression())
+    }
+
+    /// Creates a SQL `&&` expression.
+    fn contains_or_is_contained_by<T>(
+        self,
+        other: T,
+    ) -> ContainsOrIsContainedBy<Self, T::Expression>
+    where
+        T: AsExpression<Self::SqlType>,
+    {
+        ContainsOrIsContainedBy::new(self, other.as_expression())
     }
 }
 
 impl<T> PqCidrExtensionMethods for T
-    where
-        T: Expression<SqlType=Cidr>
+where
+    T: Expression<SqlType = Cidr>,
 {
 }
 
@@ -136,7 +173,10 @@ mod tests {
     #[test]
     fn operators() {
         let ip = IpNetwork::from(Ipv4Addr::new(127, 0, 0, 1), 32).unwrap();
+        test::ip_network.is_contained_by(&ip);
+        test::ip_network.is_contained_by_or_equals(&ip);
         test::ip_network.contains(&ip);
         test::ip_network.contains_or_equals(&ip);
+        test::ip_network.contains_or_is_contained_by(&ip);
     }
 }
