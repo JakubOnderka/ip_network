@@ -92,8 +92,8 @@ impl Ipv4NetworkIterator {
         assert!(new_netmask <= 32);
 
         let current = u32::from(network.network_address());
-        let mask = !helpers::get_bite_mask(32 - (new_netmask - network.netmask()))
-            << (32 - new_netmask);
+        let mask =
+            !helpers::get_bite_mask(32 - (new_netmask - network.netmask())) << (32 - new_netmask);
         let to = current | mask;
 
         Self {

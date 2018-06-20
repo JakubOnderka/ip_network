@@ -5,9 +5,9 @@ use std::io::prelude::*;
 use {IpNetwork, Ipv4Network, Ipv6Network};
 
 use diesel::deserialize::{self, FromSql};
+use diesel::expression::{AsExpression, Expression};
 use diesel::pg::Pg;
 use diesel::serialize::{self, IsNull, Output, ToSql};
-use diesel::expression::{AsExpression, Expression};
 use diesel::sql_types::Cidr;
 
 type BoxedError = Box<Error + Sync + Send>;
@@ -57,7 +57,7 @@ impl ToSql<Cidr, Pg> for IpNetwork {
             IpNetwork::V4(ref network) => {
                 let data = postgres_common::to_sql_ipv4_network(network);
                 out.write_all(&data).map(|_| IsNull::No).map_err(Into::into)
-            },
+            }
             IpNetwork::V6(ref network) => {
                 let data = postgres_common::to_sql_ipv6_network(network);
                 out.write_all(&data).map(|_| IsNull::No).map_err(Into::into)
@@ -148,9 +148,9 @@ where
 
 #[cfg(test)]
 mod tests {
-    use std::net::Ipv4Addr;
-    use super::{IpNetwork, Ipv4Network, Ipv6Network};
     use super::PqCidrExtensionMethods;
+    use super::{IpNetwork, Ipv4Network, Ipv6Network};
+    use std::net::Ipv4Addr;
 
     table! {
         test {
@@ -162,7 +162,7 @@ mod tests {
     }
 
     #[derive(Insertable)]
-    #[table_name="test"]
+    #[table_name = "test"]
     pub struct NewPost {
         pub id: i32,
         pub ip_network: IpNetwork,

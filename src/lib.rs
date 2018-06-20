@@ -222,8 +222,8 @@ impl Ipv4Network {
     pub fn network_address(&self) -> Ipv4Addr {
         self.network_address
     }
-    
-    #[deprecated(since="0.2.2", note="please use `network_address` instead")]
+
+    #[deprecated(since = "0.2.2", note = "please use `network_address` instead")]
     pub fn get_network_address(&self) -> Ipv4Addr {
         self.network_address()
     }
@@ -242,8 +242,8 @@ impl Ipv4Network {
     pub fn broadcast_address(&self) -> Ipv4Addr {
         Ipv4Addr::from(u32::from(self.network_address) | !helpers::get_bite_mask(self.netmask))
     }
-    
-    #[deprecated(since="0.2.2", note="please use `broadcast_address` instead")]
+
+    #[deprecated(since = "0.2.2", note = "please use `broadcast_address` instead")]
     pub fn get_broadcast_address(&self) -> Ipv4Addr {
         self.broadcast_address()
     }
@@ -262,8 +262,8 @@ impl Ipv4Network {
     pub fn netmask(&self) -> u8 {
         self.netmask
     }
-    
-    #[deprecated(since="0.2.2", note="please use `netmask` instead")]
+
+    #[deprecated(since = "0.2.2", note = "please use `netmask` instead")]
     pub fn get_netmask(&self) -> u8 {
         self.netmask()
     }
@@ -283,7 +283,7 @@ impl Ipv4Network {
         Ipv4Addr::from(helpers::get_bite_mask(self.netmask))
     }
 
-    #[deprecated(since="0.2.2", note="please use `full_netmask` instead")]
+    #[deprecated(since = "0.2.2", note = "please use `full_netmask` instead")]
     pub fn get_full_netmask(&self) -> Ipv4Addr {
         self.full_netmask()
     }
@@ -338,10 +338,7 @@ impl Ipv4Network {
     /// assert_eq!(hosts.supernet(), Ipv4Network::from(Ipv4Addr::new(192, 168, 0, 0), 23).unwrap());
     /// ```
     pub fn supernet(&self) -> Self {
-        Self::from_truncate(
-            self.network_address(),
-            self.netmask().saturating_sub(1),
-        ).unwrap()
+        Self::from_truncate(self.network_address(), self.netmask().saturating_sub(1)).unwrap()
     }
 
     /// Returns `Ipv4NetworkIterator` over networks with bigger netmask by one.
@@ -697,7 +694,7 @@ impl Ipv6Network {
         self.network_address
     }
 
-    #[deprecated(since="0.2.2", note="please use `network_address` instead")]
+    #[deprecated(since = "0.2.2", note = "please use `network_address` instead")]
     pub fn get_network_address(&self) -> Ipv6Addr {
         self.network_address()
     }
@@ -718,7 +715,7 @@ impl Ipv6Network {
         self.netmask
     }
 
-    #[deprecated(since="0.2.2", note="please use `netmask` instead")]
+    #[deprecated(since = "0.2.2", note = "please use `netmask` instead")]
     pub fn get_netmask(&self) -> u8 {
         self.netmask()
     }
@@ -754,10 +751,7 @@ impl Ipv6Network {
     /// assert_eq!(network.supernet(), Ipv6Network::from(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0), 31).unwrap());
     /// ```
     pub fn supernet(&self) -> Self {
-        Self::from_truncate(
-            self.network_address(),
-            self.netmask().saturating_sub(1),
-        ).unwrap()
+        Self::from_truncate(self.network_address(), self.netmask().saturating_sub(1)).unwrap()
     }
 
     /// Returns `Ipv6NetworkIterator` over networks with netmask bigger one.
@@ -1013,19 +1007,13 @@ mod tests {
     fn test_ipv4_network_from_truncate_host_bits_set() {
         let ip = Ipv4Addr::new(127, 0, 0, 1);
         let ip_network = Ipv4Network::from_truncate(ip, 8).unwrap();
-        assert_eq!(
-            ip_network.network_address(),
-            Ipv4Addr::new(127, 0, 0, 0)
-        );
+        assert_eq!(ip_network.network_address(), Ipv4Addr::new(127, 0, 0, 0));
     }
 
     #[test]
     fn test_ipv4_network_basic_getters() {
         let ip_network = return_test_ipv4_network();
-        assert_eq!(
-            ip_network.network_address(),
-            Ipv4Addr::new(192, 168, 0, 0)
-        );
+        assert_eq!(ip_network.network_address(), Ipv4Addr::new(192, 168, 0, 0));
         assert_eq!(ip_network.netmask(), 16);
         assert_eq!(
             ip_network.broadcast_address(),
@@ -1193,25 +1181,11 @@ mod tests {
     fn test_ipv6_network_contains() {
         let ip_network = return_test_ipv6_network();
         assert!(!ip_network.contains(Ipv6Addr::new(
-            0x2001,
-            0x0db7,
-            0xffff,
-            0xffff,
-            0xffff,
-            0xffff,
-            0xffff,
-            0xffff
+            0x2001, 0x0db7, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff
         )));
         assert!(ip_network.contains(Ipv6Addr::new(0x2001, 0x0db8, 0, 0, 0, 0, 0, 0)));
         assert!(ip_network.contains(Ipv6Addr::new(
-            0x2001,
-            0x0db8,
-            0xffff,
-            0xffff,
-            0xffff,
-            0xffff,
-            0xffff,
-            0xffff
+            0x2001, 0x0db8, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff
         )));
         assert!(!ip_network.contains(Ipv6Addr::new(0x2001, 0x0db9, 0, 0, 0, 0, 0, 0)));
     }
