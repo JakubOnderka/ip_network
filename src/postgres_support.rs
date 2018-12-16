@@ -1,8 +1,7 @@
-use postgres_common;
-
-use postgres::types::{FromSql, IsNull, ToSql, Type, CIDR};
 use std::error::Error;
-use {IpNetwork, Ipv4Network, Ipv6Network};
+use postgres::types::{FromSql, IsNull, ToSql, Type, CIDR};
+use crate::{IpNetwork, Ipv4Network, Ipv6Network};
+use crate::postgres_common;
 
 impl ToSql for Ipv4Network {
     fn to_sql(&self, _: &Type, w: &mut Vec<u8>) -> Result<IsNull, Box<Error + Sync + Send>> {
@@ -70,9 +69,9 @@ impl ToSql for IpNetwork {
 
 #[cfg(test)]
 mod tests {
-    use postgres::types::{FromSql, ToSql, CIDR};
     use std::net::{Ipv4Addr, Ipv6Addr};
-    use {IpNetwork, Ipv4Network, Ipv6Network};
+    use postgres::types::{FromSql, ToSql, CIDR};
+    use crate::{IpNetwork, Ipv4Network, Ipv6Network};
 
     fn return_test_ipv4_network() -> Ipv4Network {
         Ipv4Network::from(Ipv4Addr::new(192, 168, 0, 0), 16).unwrap()

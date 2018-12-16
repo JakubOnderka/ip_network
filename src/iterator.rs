@@ -1,6 +1,6 @@
-use helpers;
 use std::net::{Ipv4Addr, Ipv6Addr};
-use {Ipv4Network, Ipv6Network};
+use crate::{Ipv4Network, Ipv6Network};
+use crate::helpers;
 
 #[cfg(target_pointer_width = "16")]
 const POINTER_WIDTH: u32 = 16;
@@ -213,9 +213,9 @@ impl ExactSizeIterator for Ipv6NetworkIterator {}
 
 #[cfg(test)]
 mod tests {
-    use super::{Ipv4NetworkIterator, Ipv4RangeIterator, Ipv6NetworkIterator};
     use std::net::{Ipv4Addr, Ipv6Addr};
-    use {Ipv4Network, Ipv6Network};
+    use crate::{Ipv4Network, Ipv6Network};
+    use super::{Ipv4NetworkIterator, Ipv4RangeIterator, Ipv6NetworkIterator};
 
     #[test]
     fn test_ipv4_range_iterator() {

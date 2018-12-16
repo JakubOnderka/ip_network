@@ -151,7 +151,7 @@ pub struct Ipv4Network {
 impl Ipv4Network {
     /// Constructs new `Ipv4Network` based on `Ipv4Addr` and `netmask`.
     ///
-    /// Returns error if netmask is biger than 32 or if host bits are set in `network_address`.
+    /// Returns error if netmask is bigger than 32 or if host bits are set in `network_address`.
     ///
     /// # Examples
     ///
@@ -182,7 +182,7 @@ impl Ipv4Network {
     /// Constructs new `Ipv4Network` based on `Ipv4Addr` and `netmask` with truncating host bits
     /// from given `network_address`.
     ///
-    /// Returns error if netmask is biger than 32.
+    /// Returns error if netmask is bigger than 32.
     ///
     /// # Examples
     ///
@@ -883,7 +883,7 @@ impl fmt::Display for IpNetworkParseError {
 #[cfg(test)]
 mod tests {
     use std::net::{Ipv4Addr, Ipv6Addr};
-    use {IpNetwork, IpNetworkError, IpNetworkParseError, Ipv4Network, Ipv6Network};
+    use crate::{IpNetwork, IpNetworkError, IpNetworkParseError, Ipv4Network, Ipv6Network};
 
     fn return_test_ipv4_network() -> Ipv4Network {
         Ipv4Network::from(Ipv4Addr::new(192, 168, 0, 0), 16).unwrap()

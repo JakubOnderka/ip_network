@@ -1,14 +1,12 @@
-use postgres_common;
-
 use std::error::Error;
 use std::io::prelude::*;
-use {IpNetwork, Ipv4Network, Ipv6Network};
-
 use diesel::deserialize::{self, FromSql};
 use diesel::expression::{AsExpression, Expression};
 use diesel::pg::Pg;
 use diesel::serialize::{self, IsNull, Output, ToSql};
 use diesel::sql_types::Cidr;
+use crate::{IpNetwork, Ipv4Network, Ipv6Network};
+use crate::postgres_common;
 
 type BoxedError = Box<Error + Sync + Send>;
 

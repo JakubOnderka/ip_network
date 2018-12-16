@@ -29,7 +29,7 @@ pub fn split_ip_netmask(input: &str) -> Option<(&str, &str)> {
 
 #[cfg(test)]
 mod tests {
-    use helpers::{get_bite_mask, split_ip_netmask};
+    use super::{get_bite_mask, split_ip_netmask};
     use std;
 
     #[test]

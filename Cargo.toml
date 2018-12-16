@@ -12,6 +12,7 @@ documentation = "https://docs.rs/ip_network"
 description = """
 IPv4 and IPv6 network structs.
 """
+edition = "2018"
 
 [badges]
 travis-ci = { repository = "JakubOnderka/ip_network" }

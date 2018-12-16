@@ -1,6 +1,6 @@
 use std::error::Error;
 use std::net::{Ipv4Addr, Ipv6Addr};
-use {IPV4_LENGTH, IPV6_LENGTH, Ipv4Network, Ipv6Network};
+use crate::{IPV4_LENGTH, IPV6_LENGTH, Ipv4Network, Ipv6Network};
 
 // TODO: These constants are true for Linux, but we have to check it for Windows and other systems
 pub const IPV4_TYPE: u8 = 2;
