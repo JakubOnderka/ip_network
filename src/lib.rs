@@ -219,6 +219,7 @@ impl Ipv4Network {
     /// let ip_network = Ipv4Network::from(Ipv4Addr::new(192, 168, 1, 0), 24).unwrap();
     /// assert_eq!(ip_network.network_address(), Ipv4Addr::new(192, 168, 1, 0));
     /// ```
+    #[inline]
     pub fn network_address(&self) -> Ipv4Addr {
         self.network_address
     }
@@ -249,6 +250,7 @@ impl Ipv4Network {
     /// let ip_network = Ipv4Network::from(Ipv4Addr::new(192, 168, 1, 0), 24).unwrap();
     /// assert_eq!(ip_network.netmask(), 24);
     /// ```
+    #[inline]
     pub fn netmask(&self) -> u8 {
         self.netmask
     }
@@ -670,6 +672,7 @@ impl Ipv6Network {
     /// let ip_network = Ipv6Network::from(ip, 32).unwrap();
     /// assert_eq!(ip_network.network_address(), ip);
     /// ```
+    #[inline]
     pub fn network_address(&self) -> Ipv6Addr {
         self.network_address
     }
@@ -686,6 +689,7 @@ impl Ipv6Network {
     /// let ip_network = Ipv6Network::from(ip, 32).unwrap();
     /// assert_eq!(ip_network.netmask(), 32);
     /// ```
+    #[inline]
     pub fn netmask(&self) -> u8 {
         self.netmask
     }
