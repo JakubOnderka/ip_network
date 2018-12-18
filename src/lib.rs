@@ -57,6 +57,42 @@ impl IpNetwork {
         })
     }
 
+    /// Returns network IP address.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::net::{IpAddr, Ipv4Addr};
+    /// use ip_network::IpNetwork;
+    ///
+    /// let ip_network = IpNetwork::from(Ipv4Addr::new(192, 168, 1, 0), 24).unwrap();
+    /// assert_eq!(ip_network.network_address(), IpAddr::V4(Ipv4Addr::new(192, 168, 1, 0)));
+    /// ```
+    pub fn network_address(&self) -> IpAddr {
+        match *self {
+            IpNetwork::V4(ref ip_network) => IpAddr::V4(ip_network.network_address),
+            IpNetwork::V6(ref ip_network) => IpAddr::V6(ip_network.network_address),
+        }
+    }
+
+    /// Returns network mask as integer.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::net::{IpAddr, Ipv4Addr};
+    /// use ip_network::IpNetwork;
+    ///
+    /// let ip_network = IpNetwork::from(Ipv4Addr::new(192, 168, 1, 0), 24).unwrap();
+    /// assert_eq!(ip_network.netmask(), 24);
+    /// ```
+    pub fn netmask(&self) -> u8 {
+        match *self {
+            IpNetwork::V4(ref ip_network) => ip_network.netmask,
+            IpNetwork::V6(ref ip_network) => ip_network.netmask,
+        }
+    }
+
     /// Returns `true` if `IpNetwork` contains `Ipv4Network` struct
     pub fn is_ipv4(&self) -> bool {
         match *self {
