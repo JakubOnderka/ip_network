@@ -223,11 +223,6 @@ impl Ipv4Network {
         self.network_address
     }
 
-    #[deprecated(since = "0.2.2", note = "please use `network_address` instead")]
-    pub fn get_network_address(&self) -> Ipv4Addr {
-        self.network_address()
-    }
-
     /// Returns broadcast address of network (last address in range).
     ///
     /// # Examples
@@ -241,11 +236,6 @@ impl Ipv4Network {
     /// ```
     pub fn broadcast_address(&self) -> Ipv4Addr {
         Ipv4Addr::from(u32::from(self.network_address) | !helpers::get_bite_mask(self.netmask))
-    }
-
-    #[deprecated(since = "0.2.2", note = "please use `broadcast_address` instead")]
-    pub fn get_broadcast_address(&self) -> Ipv4Addr {
-        self.broadcast_address()
     }
 
     /// Returns network mask as integer.
@@ -263,11 +253,6 @@ impl Ipv4Network {
         self.netmask
     }
 
-    #[deprecated(since = "0.2.2", note = "please use `netmask` instead")]
-    pub fn get_netmask(&self) -> u8 {
-        self.netmask()
-    }
-
     /// Returns network mask as IPv4 address.
     ///
     /// # Examples
@@ -281,11 +266,6 @@ impl Ipv4Network {
     /// ```
     pub fn full_netmask(&self) -> Ipv4Addr {
         Ipv4Addr::from(helpers::get_bite_mask(self.netmask))
-    }
-
-    #[deprecated(since = "0.2.2", note = "please use `full_netmask` instead")]
-    pub fn get_full_netmask(&self) -> Ipv4Addr {
-        self.full_netmask()
     }
 
     /// Returns [`true`] if given IP address is inside this network.
@@ -694,11 +674,6 @@ impl Ipv6Network {
         self.network_address
     }
 
-    #[deprecated(since = "0.2.2", note = "please use `network_address` instead")]
-    pub fn get_network_address(&self) -> Ipv6Addr {
-        self.network_address()
-    }
-
     /// Returns network mask.
     ///
     /// # Examples
@@ -713,11 +688,6 @@ impl Ipv6Network {
     /// ```
     pub fn netmask(&self) -> u8 {
         self.netmask
-    }
-
-    #[deprecated(since = "0.2.2", note = "please use `netmask` instead")]
-    pub fn get_netmask(&self) -> u8 {
-        self.netmask()
     }
 
     /// Returns [`true`] if given IP address is inside this network.
