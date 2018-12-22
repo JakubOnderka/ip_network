@@ -406,7 +406,7 @@ impl Ipv4Network {
     /// W. Richard Stevens, p. 891; see also [ip7].
     ///
     /// [ip7]: http://man7.org/linux/man-pages/man7/ip.7.html
-    /// [`true`]: ../../std/primitive.bool.html
+    /// [`true`]: https://doc.rust-lang.org/std/primitive.bool.html
     ///
     /// # Examples
     ///
@@ -570,7 +570,7 @@ impl Ipv4Network {
     /// - the unspecified address (0.0.0.0/32)
     ///
     /// [ipv4-sr]: https://www.iana.org/assignments/iana-ipv4-special-registry/iana-ipv4-special-registry.xhtml
-    /// [`true`]: ../../std/primitive.bool.html
+    /// [`true`]: https://doc.rust-lang.org/std/primitive.bool.html
     ///
     /// # Examples
     ///
@@ -870,7 +870,7 @@ impl Ipv6Network {
     /// This property is defined in [IETF RFC 4291].
     ///
     /// [IETF RFC 4291]: https://tools.ietf.org/html/rfc4291
-    /// [`true`]: ../../std/primitive.bool.html
+    /// [`true`]: https://doc.rust-lang.org/std/primitive.bool.html
     ///
     /// # Examples
     ///
@@ -890,7 +890,7 @@ impl Ipv6Network {
     /// This property is defined in [IETF RFC 4291].
     ///
     /// [IETF RFC 4291]: https://tools.ietf.org/html/rfc4291
-    /// [`true`]: ../../std/primitive.bool.html
+    /// [`true`]: https://doc.rust-lang.org/std/primitive.bool.html
     ///
     /// # Examples
     ///
@@ -913,8 +913,8 @@ impl Ipv6Network {
     /// - link-local, site-local, and unique local unicast networks
     /// - interface-, link-, realm-, admin- and site-local multicast networks
     ///
-    /// [`true`]: ../../std/primitive.bool.html
-    /// [`false`]: ../../std/primitive.bool.html
+    /// [`true`]: https://doc.rust-lang.org/std/primitive.bool.html
+    /// [`false`]: https://doc.rust-lang.org/std/primitive.bool.html
     ///
     /// # Examples
     ///
@@ -939,7 +939,7 @@ impl Ipv6Network {
     /// This property is defined in [IETF RFC 4193].
     ///
     /// [IETF RFC 4193]: https://tools.ietf.org/html/rfc4193
-    /// [`true`]: ../../std/primitive.bool.html
+    /// [`true`]: https://doc.rust-lang.org/std/primitive.bool.html
     ///
     /// # Examples
     ///
@@ -959,7 +959,7 @@ impl Ipv6Network {
     /// This property is defined in [IETF RFC 4291].
     ///
     /// [IETF RFC 4291]: https://tools.ietf.org/html/rfc4291
-    /// [`true`]: ../../std/primitive.bool.html
+    /// [`true`]: https://doc.rust-lang.org/std/primitive.bool.html
     ///
     /// # Examples
     ///
@@ -976,7 +976,7 @@ impl Ipv6Network {
 
     /// Returns [`true`] if this is a deprecated unicast site-local network (fec0::/10).
     ///
-    /// [`true`]: ../../std/primitive.bool.html
+    /// [`true`]: https://doc.rust-lang.org/std/primitive.bool.html
     ///
     /// # Examples
     ///
@@ -996,7 +996,7 @@ impl Ipv6Network {
     /// This property is defined in [IETF RFC 3849].
     ///
     /// [IETF RFC 3849]: https://tools.ietf.org/html/rfc3849
-    /// [`true`]: ../../std/primitive.bool.html
+    /// [`true`]: https://doc.rust-lang.org/std/primitive.bool.html
     ///
     /// # Examples
     ///
@@ -1014,7 +1014,7 @@ impl Ipv6Network {
 
     /// Returns [`true`] if the network is a globally routable unicast network.
     ///
-    /// The following return false:
+    /// The following return [`false`]:
     ///
     /// - the loopback network
     /// - the link-local network
@@ -1023,7 +1023,8 @@ impl Ipv6Network {
     /// - the unspecified network
     /// - the network range reserved for documentation
     ///
-    /// [`true`]: ../../std/primitive.bool.html
+    /// [`true`]: https://doc.rust-lang.org/std/primitive.bool.html
+    /// [`false`]: https://doc.rust-lang.org/std/primitive.bool.html
     ///
     /// # Examples
     ///
@@ -1046,7 +1047,7 @@ impl Ipv6Network {
     /// This property is defined by [IETF RFC 4291].
     ///
     /// [IETF RFC 4291]: https://tools.ietf.org/html/rfc4291
-    /// [`true`]: ../../std/primitive.bool.html
+    /// [`true`]: https://doc.rust-lang.org/std/primitive.bool.html
     ///
     /// # Examples
     ///
