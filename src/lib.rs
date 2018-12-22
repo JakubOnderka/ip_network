@@ -103,7 +103,7 @@ impl IpNetwork {
         }
     }
 
-    /// Returns `true` if `IpNetwork` contains `Ipv4Network` struct
+    /// Returns `true` if `IpNetwork` contains `Ipv4Network` struct.
     pub fn is_ipv4(&self) -> bool {
         match *self {
             IpNetwork::V4(_) => true,
@@ -111,9 +111,41 @@ impl IpNetwork {
         }
     }
 
-    /// Returns `true` if `IpNetwork` contains `Ipv6Network` struct
+    /// Returns `true` if `IpNetwork` contains `Ipv6Network` struct.
     pub fn is_ipv6(&self) -> bool {
         !self.is_ipv4()
+    }
+
+    /// Returns `true` if the network is part of multicast network range.
+    pub fn is_multicast(&self) -> bool {
+        match *self {
+            IpNetwork::V4(ref ip_network) => ip_network.is_multicast(),
+            IpNetwork::V6(ref ip_network) => ip_network.is_multicast(),
+        }
+    }
+
+    /// Returns `true` if this is a part of network reserved for documentation.
+    pub fn is_documentation(&self) -> bool {
+        match *self {
+            IpNetwork::V4(ref ip_network) => ip_network.is_documentation(),
+            IpNetwork::V6(ref ip_network) => ip_network.is_documentation(),
+        }
+    }
+
+    /// Returns `true` if this network is inside loopback address range.
+    pub fn is_loopback(&self) -> bool {
+        match *self {
+            IpNetwork::V4(ref ip_network) => ip_network.is_loopback(),
+            IpNetwork::V6(ref ip_network) => ip_network.is_loopback(),
+        }
+    }
+
+    /// Returns `true` if the network appears to be globally routable.
+    pub fn is_global(&self) -> bool {
+        match *self {
+            IpNetwork::V4(ref ip_network) => ip_network.is_global(),
+            IpNetwork::V6(ref ip_network) => ip_network.is_global(),
+        }
     }
 }
 
