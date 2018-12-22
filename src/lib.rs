@@ -393,6 +393,27 @@ impl Ipv4Network {
         iterator::Ipv4NetworkIterator::new(self.clone(), prefix)
     }
 
+    /// Returns [`true`] for the special 'unspecified' network (0.0.0.0/32).
+    ///
+    /// This property is defined in _UNIX Network Programming, Second Edition_,
+    /// W. Richard Stevens, p. 891; see also [ip7].
+    ///
+    /// [ip7]: http://man7.org/linux/man-pages/man7/ip.7.html
+    /// [`true`]: ../../std/primitive.bool.html
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::net::Ipv4Addr;
+    /// use ip_network::Ipv4Network;
+    ///
+    /// let ip_network = Ipv4Network::from(Ipv4Addr::new(0, 0, 0, 0), 32).unwrap();
+    /// assert!(ip_network.is_unspecified());
+    /// ```
+    pub fn is_unspecified(&self) -> bool {
+        u32::from(self.network_address) == 0 && self.netmask == 32
+    }
+
     /// Returns [`true`] if this network is inside loopback address range (127.0.0.0/8).
     ///
     /// This property is defined by [IETF RFC 1122].
