@@ -431,7 +431,7 @@ impl Ipv4Network {
     /// assert!(ip_network.is_loopback());
     /// ```
     pub fn is_loopback(&self) -> bool {
-        self.network_address.is_loopback() && self.broadcast_address().is_loopback()
+        self.network_address.is_loopback()
     }
 
     /// Returns [`true`] if this is a broadcast network (255.255.255.255/32).
@@ -475,7 +475,13 @@ impl Ipv4Network {
     /// assert!(ip_network.is_private());
     /// ```
     pub fn is_private(&self) -> bool {
-        self.network_address.is_private() && self.broadcast_address().is_private()
+        let octets = self.network_address.octets();
+        match octets[0] {
+            10 if self.netmask >= 8 => true,
+            172 if octets[1] >= 16 && octets[1] <= 31 && self.netmask >= 12 => true,
+            192 if octets[1] == 168 && self.netmask >= 16 => true,
+            _ => false,
+        }
     }
 
     /// Returns [`true`] if the network is is inside link-local range (169.254.0.0/16).
@@ -495,7 +501,8 @@ impl Ipv4Network {
     /// assert!(ip_network.is_link_local());
     /// ```
     pub fn is_link_local(&self) -> bool {
-        self.network_address.is_link_local() && self.broadcast_address().is_link_local()
+        let octets = self.network_address.octets();
+        octets[0] == 169 && octets[1] == 254 && self.netmask >= 16
     }
 
     /// Returns [`true`] if this whole network is inside multicast address range (224.0.0.0/4).
@@ -516,7 +523,7 @@ impl Ipv4Network {
     /// assert!(ip_network.is_multicast());
     /// ```
     pub fn is_multicast(&self) -> bool {
-        self.network_address.is_multicast() && self.broadcast_address().is_multicast()
+        self.network_address.is_multicast() && self.netmask >= 4
     }
 
     /// Returns [`true`] if this network is in a range designated for documentation.
@@ -540,7 +547,7 @@ impl Ipv4Network {
     /// assert!(ip_network.is_documentation());
     /// ```
     pub fn is_documentation(&self) -> bool {
-        self.network_address.is_documentation() && self.broadcast_address().is_documentation()
+        self.network_address.is_documentation() && self.netmask >= 24
     }
 
     // TODO: Documentation
@@ -1146,6 +1153,23 @@ mod tests {
         let a = Ipv4Network::from(Ipv4Addr::new(127, 0, 0, 0), 8).unwrap();
         let b = Ipv4Network::from(Ipv4Addr::new(127, 0, 0, 0), 16).unwrap();
         assert!(b > a);
+    }
+
+    #[test]
+    fn test_ipv4_network_is_private() {
+        assert!(Ipv4Network::from(Ipv4Addr::new(10, 0, 0, 0), 8).unwrap().is_private());
+        assert!(!Ipv4Network::from(Ipv4Addr::new(10, 0, 0, 0), 7).unwrap().is_private());
+        assert!(Ipv4Network::from(Ipv4Addr::new(10, 0, 0, 0), 32).unwrap().is_private());
+        assert!(!Ipv4Network::from(Ipv4Addr::new(11, 0, 0, 0), 32).unwrap().is_private());
+
+        assert!(Ipv4Network::from(Ipv4Addr::new(172, 16, 0, 0), 12).unwrap().is_private());
+        assert!(Ipv4Network::from(Ipv4Addr::new(172, 16, 0, 0), 32).unwrap().is_private());
+        assert!(Ipv4Network::from(Ipv4Addr::new(172, 31, 255, 255), 32).unwrap().is_private());
+        assert!(!Ipv4Network::from(Ipv4Addr::new(172, 32, 0, 0), 32).unwrap().is_private());
+
+        assert!(Ipv4Network::from(Ipv4Addr::new(192, 168, 0, 0), 16).unwrap().is_private());
+        assert!(Ipv4Network::from(Ipv4Addr::new(192, 168, 0, 0), 32).unwrap().is_private());
+        assert!(!Ipv4Network::from(Ipv4Addr::new(192, 168, 0, 0), 15).unwrap().is_private());
     }
 
     #[test]
