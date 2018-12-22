@@ -24,6 +24,7 @@ mod postgres_support;
 const IPV4_LENGTH: u8 = 32;
 const IPV6_LENGTH: u8 = 128;
 
+/// IPv6 Multicast Address Scopes
 #[derive(Copy, PartialEq, Eq, Clone, Hash, Debug)]
 pub enum Ipv6MulticastScope {
     InterfaceLocal,
@@ -44,7 +45,9 @@ pub enum IpNetwork {
 }
 
 impl IpNetwork {
-    /// Constructs new `IpNetwork` based on `IpAddr` and `netmask`.
+    /// Constructs new `IpNetwork` based on [`IpAddr`] and `netmask`.
+    ///
+    /// [`IpAddr`]: https://doc.rust-lang.org/std/net/enum.IpAddr.html
     ///
     /// # Examples
     ///
@@ -192,9 +195,11 @@ pub struct Ipv4Network {
 }
 
 impl Ipv4Network {
-    /// Constructs new `Ipv4Network` based on `Ipv4Addr` and `netmask`.
+    /// Constructs new `Ipv4Network` based on [`Ipv4Addr`] and `netmask`.
     ///
     /// Returns error if netmask is bigger than 32 or if host bits are set in `network_address`.
+    ///
+    /// [`Ipv4Addr`]: https://doc.rust-lang.org/std/net/struct.Ipv4Addr.html
     ///
     /// # Examples
     ///
@@ -222,10 +227,12 @@ impl Ipv4Network {
         })
     }
 
-    /// Constructs new `Ipv4Network` based on `Ipv4Addr` and `netmask` with truncating host bits
+    /// Constructs new `Ipv4Network` based on [`Ipv4Addr`] and `netmask` with truncating host bits
     /// from given `network_address`.
     ///
     /// Returns error if netmask is bigger than 32.
+    ///
+    /// [`Ipv4Addr`]: https://doc.rust-lang.org/std/net/struct.Ipv4Addr.html
     ///
     /// # Examples
     ///
@@ -313,9 +320,10 @@ impl Ipv4Network {
         Ipv4Addr::from(helpers::get_bite_mask(self.netmask))
     }
 
-    /// Returns [`true`] if given IP address is inside this network.
+    /// Returns [`true`] if given [`IPv4Addr`] is inside this network.
     ///
     /// [`true`]: https://doc.rust-lang.org/std/primitive.bool.html
+    /// [`Ipv4Addr`]: https://doc.rust-lang.org/std/net/struct.Ipv4Addr.html
     ///
     /// # Examples
     ///
@@ -701,9 +709,11 @@ pub struct Ipv6Network {
 }
 
 impl Ipv6Network {
-    /// Constructs new `Ipv6Network` based on `Ipv6Addr` and `netmask`.
+    /// Constructs new `Ipv6Network` based on [`Ipv6Addr`] and `netmask`.
     ///
     /// Returns error if netmask is bigger than 128 or if host bits are set in `network_address`.
+    ///
+    /// [`Ipv6Addr`]: https://doc.rust-lang.org/std/net/struct.Ipv6Addr.html
     ///
     /// # Examples
     ///
@@ -732,10 +742,12 @@ impl Ipv6Network {
         })
     }
 
-    /// Constructs new `Ipv6Network` based on `Ipv6Addr` and `netmask` with truncating host bits
+    /// Constructs new `Ipv6Network` based on [`Ipv6Addr`] and `netmask` with truncating host bits
     /// from given `network_address`.
     ///
     /// Returns error if netmask is bigger than 128.
+    ///
+    /// [`Ipv6Addr`]: https://doc.rust-lang.org/std/net/struct.Ipv6Addr.html
     ///
     /// # Examples
     ///
@@ -797,9 +809,10 @@ impl Ipv6Network {
         self.netmask
     }
 
-    /// Returns [`true`] if given IP address is inside this network.
+    /// Returns [`true`] if given [`IPv6Addr`] is inside this network.
     ///
     /// [`true`]: https://doc.rust-lang.org/std/primitive.bool.html
+    /// [`Ipv6Addr`]: https://doc.rust-lang.org/std/net/struct.Ipv6Addr.html
     ///
     /// # Examples
     ///
@@ -1063,6 +1076,10 @@ impl Ipv6Network {
     }
 
     /// Returns the network's multicast scope if the network is multicast.
+    ///
+    /// These scopes are defined in [IETF RFC 7346].
+    ///
+    /// [IETF RFC 7346]: https://tools.ietf.org/html/rfc7346
     ///
     /// # Examples
     ///
