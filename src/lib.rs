@@ -550,6 +550,38 @@ impl Ipv4Network {
         self.network_address.is_documentation() && self.netmask >= 24
     }
 
+    /// Returns [`true`] if the network appears to be globally routable.
+    /// See [iana-ipv4-special-registry][ipv4-sr].
+    ///
+    /// The following return false:
+    ///
+    /// - private address (10.0.0.0/8, 172.16.0.0/12 and 192.168.0.0/16)
+    /// - the loopback address (127.0.0.0/8)
+    /// - the link-local address (169.254.0.0/16)
+    /// - the broadcast address (255.255.255.255/32)
+    /// - test addresses used for documentation (192.0.2.0/24, 198.51.100.0/24 and 203.0.113.0/24)
+    /// - the unspecified address (0.0.0.0/32)
+    ///
+    /// [ipv4-sr]: https://www.iana.org/assignments/iana-ipv4-special-registry/iana-ipv4-special-registry.xhtml
+    /// [`true`]: ../../std/primitive.bool.html
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::net::Ipv4Addr;
+    /// use ip_network::Ipv4Network;
+    ///
+    /// assert!(!Ipv4Network::from(Ipv4Addr::new(10, 254, 0, 0), 16).unwrap().is_global());
+    /// assert!(!Ipv4Network::from(Ipv4Addr::new(192, 168, 10, 65), 32).unwrap().is_global());
+    /// assert!(!Ipv4Network::from(Ipv4Addr::new(172, 16, 10, 65), 32).unwrap().is_global());
+    /// assert!(!Ipv4Network::from(Ipv4Addr::new(0, 0, 0, 0), 32).unwrap().is_global());
+    /// assert!(Ipv4Network::from(Ipv4Addr::new(80, 9, 12, 3), 32).unwrap().is_global());
+    /// ```
+    pub fn is_global(&self) -> bool {
+        !self.is_private() && !self.is_loopback() && !self.is_link_local() &&
+            !self.is_broadcast() && !self.is_documentation() && !self.is_unspecified()
+    }
+
     // TODO: Documentation
     pub fn summarize_address_range(first: Ipv4Addr, last: Ipv4Addr) -> Vec<Self> {
         let mut first_int = u32::from(first);
@@ -1170,6 +1202,31 @@ mod tests {
         assert!(Ipv4Network::from(Ipv4Addr::new(192, 168, 0, 0), 16).unwrap().is_private());
         assert!(Ipv4Network::from(Ipv4Addr::new(192, 168, 0, 0), 32).unwrap().is_private());
         assert!(!Ipv4Network::from(Ipv4Addr::new(192, 168, 0, 0), 15).unwrap().is_private());
+    }
+
+    #[test]
+    fn test_ipv4_network_is_global() {
+        assert!(!Ipv4Network::from(Ipv4Addr::new(10, 0, 0, 0), 8).unwrap().is_global());
+        assert!(Ipv4Network::from(Ipv4Addr::new(10, 0, 0, 0), 7).unwrap().is_global());
+        assert!(!Ipv4Network::from(Ipv4Addr::new(10, 0, 0, 0), 32).unwrap().is_global());
+        assert!(Ipv4Network::from(Ipv4Addr::new(11, 0, 0, 0), 32).unwrap().is_global());
+
+        assert!(!Ipv4Network::from(Ipv4Addr::new(172, 16, 0, 0), 12).unwrap().is_global());
+        assert!(!Ipv4Network::from(Ipv4Addr::new(172, 16, 0, 0), 32).unwrap().is_global());
+        assert!(!Ipv4Network::from(Ipv4Addr::new(172, 31, 255, 255), 32).unwrap().is_global());
+        assert!(Ipv4Network::from(Ipv4Addr::new(172, 32, 0, 0), 32).unwrap().is_global());
+
+        assert!(!Ipv4Network::from(Ipv4Addr::new(192, 168, 0, 0), 16).unwrap().is_global());
+        assert!(!Ipv4Network::from(Ipv4Addr::new(192, 168, 0, 0), 32).unwrap().is_global());
+        assert!(Ipv4Network::from(Ipv4Addr::new(192, 168, 0, 0), 15).unwrap().is_global());
+
+        assert!(!Ipv4Network::from(Ipv4Addr::new(127, 0, 0, 0), 8).unwrap().is_global());
+        assert!(!Ipv4Network::from(Ipv4Addr::new(169, 254, 0, 0), 16).unwrap().is_global());
+        assert!(!Ipv4Network::from(Ipv4Addr::new(255, 255, 255, 255), 32).unwrap().is_global());
+        assert!(!Ipv4Network::from(Ipv4Addr::new(192, 0, 2, 0), 24).unwrap().is_global());
+        assert!(!Ipv4Network::from(Ipv4Addr::new(198, 51, 100, 0), 24).unwrap().is_global());
+        assert!(!Ipv4Network::from(Ipv4Addr::new(203, 0, 113, 0), 24).unwrap().is_global());
+
     }
 
     #[test]
