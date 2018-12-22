@@ -1,5 +1,6 @@
 use std::error::Error;
 use postgres::types::{FromSql, IsNull, ToSql, Type, CIDR};
+use postgres::{accepts, to_sql_checked};
 use crate::{IpNetwork, Ipv4Network, Ipv6Network};
 use crate::postgres_common;
 

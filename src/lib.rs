@@ -1,9 +1,3 @@
-#[cfg(feature = "serde")]
-#[macro_use]
-extern crate serde;
-#[cfg(feature = "postgres")]
-#[macro_use]
-extern crate postgres;
 #[cfg(feature = "diesel")]
 #[macro_use]
 extern crate diesel;
@@ -13,6 +7,8 @@ use std::error::Error;
 use std::fmt;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 use std::str::FromStr;
+#[cfg(feature = "serde")]
+use serde::{Serialize, Deserialize};
 
 #[cfg(feature = "diesel")]
 /// Support for Diesel PostgreSQL CIDR type
