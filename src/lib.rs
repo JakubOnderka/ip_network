@@ -24,6 +24,17 @@ mod postgres_support;
 const IPV4_LENGTH: u8 = 32;
 const IPV6_LENGTH: u8 = 128;
 
+#[derive(Copy, PartialEq, Eq, Clone, Hash, Debug)]
+pub enum Ipv6MulticastScope {
+    InterfaceLocal,
+    LinkLocal,
+    RealmLocal,
+    AdminLocal,
+    SiteLocal,
+    OrganizationLocal,
+    Global
+}
+
 /// Holds IPv4 or IPv6 network
 #[derive(Clone, Eq, PartialEq, Debug, Hash, PartialOrd, Ord)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
@@ -852,6 +863,231 @@ impl Ipv6Network {
     /// ```
     pub fn subnets_with_prefix(&self, prefix: u8) -> iterator::Ipv6NetworkIterator {
         iterator::Ipv6NetworkIterator::new(self.clone(), prefix)
+    }
+
+    /// Returns [`true`] for the special 'unspecified' network (::/128).
+    ///
+    /// This property is defined in [IETF RFC 4291].
+    ///
+    /// [IETF RFC 4291]: https://tools.ietf.org/html/rfc4291
+    /// [`true`]: ../../std/primitive.bool.html
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::net::Ipv6Addr;
+    /// use ip_network::Ipv6Network;
+    ///
+    /// assert!(!Ipv6Network::from(Ipv6Addr::new(0, 0, 0, 0, 0, 0xffff, 0xc00a, 0x2ff), 128).unwrap().is_unspecified());
+    /// assert!(Ipv6Network::from(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 0), 128).unwrap().is_unspecified());
+    /// ```
+    pub fn is_unspecified(&self) -> bool {
+        self.network_address.is_unspecified() && self.netmask == IPV6_LENGTH
+    }
+
+    /// Returns [`true`] if this is a loopback network (::1/128).
+    ///
+    /// This property is defined in [IETF RFC 4291].
+    ///
+    /// [IETF RFC 4291]: https://tools.ietf.org/html/rfc4291
+    /// [`true`]: ../../std/primitive.bool.html
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::net::Ipv6Addr;
+    /// use ip_network::Ipv6Network;
+    ///
+    /// assert!(Ipv6Network::from(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 0x1), 128).unwrap().is_loopback());
+    /// assert!(!Ipv6Network::from(Ipv6Addr::new(0, 0, 0, 0, 0, 0xffff, 0xc00a, 0x2ff), 128).unwrap().is_loopback());
+    /// ```
+    pub fn is_loopback(&self) -> bool {
+        self.network_address.is_loopback()
+    }
+
+    /// Returns [`true`] if the address appears to be globally routable.
+    ///
+    /// The following return [`false`]:
+    ///
+    /// - the loopback network
+    /// - link-local, site-local, and unique local unicast networks
+    /// - interface-, link-, realm-, admin- and site-local multicast networks
+    ///
+    /// [`true`]: ../../std/primitive.bool.html
+    /// [`false`]: ../../std/primitive.bool.html
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::net::Ipv6Addr;
+    /// use ip_network::Ipv6Network;
+    ///
+    /// assert!(Ipv6Network::from(Ipv6Addr::new(0, 0, 0, 0, 0, 0xffff, 0xc00a, 0x2ff), 128).unwrap().is_global());
+    /// assert!(!Ipv6Network::from(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 0x1), 128).unwrap().is_global());
+    /// assert!(Ipv6Network::from(Ipv6Addr::new(0, 0, 0x1c9, 0, 0, 0xafc8, 0, 0x1), 128).unwrap().is_global());
+    /// ```
+    pub fn is_global(&self) -> bool {
+        match self.multicast_scope() {
+            Some(Ipv6MulticastScope::Global) => true,
+            None => self.is_unicast_global(),
+            _ => false
+        }
+    }
+
+    /// Returns [`true`] if this is a part of unique local network (fc00::/7).
+    ///
+    /// This property is defined in [IETF RFC 4193].
+    ///
+    /// [IETF RFC 4193]: https://tools.ietf.org/html/rfc4193
+    /// [`true`]: ../../std/primitive.bool.html
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::net::Ipv6Addr;
+    /// use ip_network::Ipv6Network;
+    ///
+    /// assert!(Ipv6Network::from(Ipv6Addr::new(0xfc02, 0, 0, 0, 0, 0, 0, 0), 16).unwrap().is_unique_local());
+    /// assert!(!Ipv6Network::from(Ipv6Addr::new(0, 0, 0, 0, 0, 0xffff, 0xc00a, 0x2ff), 128).unwrap().is_unique_local());
+    /// ```
+    pub fn is_unique_local(&self) -> bool {
+        (self.network_address.segments()[0] & 0xfe00) == 0xfc00 && self.netmask >= 7
+    }
+
+    /// Returns [`true`] if the network is part of unicast and link-local (fe80::/10).
+    ///
+    /// This property is defined in [IETF RFC 4291].
+    ///
+    /// [IETF RFC 4291]: https://tools.ietf.org/html/rfc4291
+    /// [`true`]: ../../std/primitive.bool.html
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::net::Ipv6Addr;
+    /// use ip_network::Ipv6Network;
+    ///
+    /// assert!(Ipv6Network::from(Ipv6Addr::new(0xfe8a, 0, 0, 0, 0, 0, 0, 0), 16).unwrap().is_unicast_link_local());
+    /// assert!(!Ipv6Network::from(Ipv6Addr::new(0, 0, 0, 0, 0, 0xffff, 0xc00a, 0x2ff), 128).unwrap().is_unicast_link_local());
+    /// ```
+    pub fn is_unicast_link_local(&self) -> bool {
+        (self.network_address.segments()[0] & 0xffc0) == 0xfe80 && self.netmask >= 10
+    }
+
+    /// Returns [`true`] if this is a deprecated unicast site-local network (fec0::/10).
+    ///
+    /// [`true`]: ../../std/primitive.bool.html
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::net::Ipv6Addr;
+    /// use ip_network::Ipv6Network;
+    ///
+    /// assert!(Ipv6Network::from(Ipv6Addr::new(0xfec2, 0, 0, 0, 0, 0, 0, 0), 16).unwrap().is_unicast_site_local());
+    /// assert!(!Ipv6Network::from(Ipv6Addr::new(0, 0, 0, 0, 0, 0xffff, 0xc00a, 0x2ff), 128).unwrap().is_unicast_site_local());
+    /// ```
+    pub fn is_unicast_site_local(&self) -> bool {
+        (self.network_address.segments()[0] & 0xffc0) == 0xfec0 && self.netmask >= 10
+    }
+
+    /// Returns [`true`] if this is a part of network reserved for documentation (2001:db8::/32).
+    ///
+    /// This property is defined in [IETF RFC 3849].
+    ///
+    /// [IETF RFC 3849]: https://tools.ietf.org/html/rfc3849
+    /// [`true`]: ../../std/primitive.bool.html
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::net::Ipv6Addr;
+    /// use ip_network::Ipv6Network;
+    ///
+    /// assert!(Ipv6Network::from(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0), 32).unwrap().is_documentation());
+    /// assert!(!Ipv6Network::from(Ipv6Addr::new(0, 0, 0, 0, 0, 0xffff, 0xc00a, 0x2ff), 128).unwrap().is_documentation());
+    /// ```
+    pub fn is_documentation(&self) -> bool {
+        let segments = self.network_address.segments();
+        segments[0] == 0x2001 && segments[1] == 0xdb8 && self.netmask >= 32
+    }
+
+    /// Returns [`true`] if the network is a globally routable unicast network.
+    ///
+    /// The following return false:
+    ///
+    /// - the loopback network
+    /// - the link-local network
+    /// - the (deprecated) site-local network
+    /// - unique local network
+    /// - the unspecified network
+    /// - the network range reserved for documentation
+    ///
+    /// [`true`]: ../../std/primitive.bool.html
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::net::Ipv6Addr;
+    /// use ip_network::Ipv6Network;
+    ///
+    /// assert!(!Ipv6Network::from(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0), 32).unwrap().is_unicast_global());
+    /// assert!(Ipv6Network::from(Ipv6Addr::new(0, 0, 0, 0, 0, 0xffff, 0xc00a, 0x2ff), 128).unwrap().is_unicast_global());
+    /// ```
+    pub fn is_unicast_global(&self) -> bool {
+        !self.is_multicast()
+            && !self.is_loopback() && !self.is_unicast_link_local()
+            && !self.is_unicast_site_local() && !self.is_unique_local()
+            && !self.is_unspecified() && !self.is_documentation()
+    }
+
+    /// Returns [`true`] if this is a part of multicast network (ff00::/8).
+    ///
+    /// This property is defined by [IETF RFC 4291].
+    ///
+    /// [IETF RFC 4291]: https://tools.ietf.org/html/rfc4291
+    /// [`true`]: ../../std/primitive.bool.html
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::net::Ipv6Addr;
+    /// use ip_network::Ipv6Network;
+    ///
+    /// assert!(Ipv6Network::from(Ipv6Addr::new(0xff00, 0, 0, 0, 0, 0, 0, 0), 8).unwrap().is_multicast());
+    /// assert!(!Ipv6Network::from(Ipv6Addr::new(0, 0, 0, 0, 0, 0xffff, 0xc00a, 0x2ff), 128).unwrap().is_multicast());
+    /// ```
+    pub fn is_multicast(&self) -> bool {
+        (self.network_address.segments()[0] & 0xff00) == 0xff00 && self.netmask >= 8
+    }
+
+    /// Returns the network's multicast scope if the network is multicast.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::net::Ipv6Addr;
+    /// use ip_network::{Ipv6Network, Ipv6MulticastScope};
+    ///
+    /// assert_eq!(Ipv6Network::from(Ipv6Addr::new(0xff0e, 0, 0, 0, 0, 0, 0, 0), 32).unwrap().multicast_scope(),
+    ///                              Some(Ipv6MulticastScope::Global));
+    /// assert_eq!(Ipv6Network::from(Ipv6Addr::new(0, 0, 0, 0, 0, 0xffff, 0xc00a, 0x2ff), 128).unwrap().multicast_scope(), None);
+    /// ```
+    pub fn multicast_scope(&self) -> Option<Ipv6MulticastScope> {
+        if self.is_multicast() {
+            match self.network_address.segments()[0] & 0x000f {
+                1 => Some(Ipv6MulticastScope::InterfaceLocal),
+                2 => Some(Ipv6MulticastScope::LinkLocal),
+                3 => Some(Ipv6MulticastScope::RealmLocal),
+                4 => Some(Ipv6MulticastScope::AdminLocal),
+                5 => Some(Ipv6MulticastScope::SiteLocal),
+                8 => Some(Ipv6MulticastScope::OrganizationLocal),
+                14 => Some(Ipv6MulticastScope::Global),
+                _ => None
+            }
+        } else {
+            None
+        }
     }
 }
 
