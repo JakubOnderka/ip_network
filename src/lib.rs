@@ -206,14 +206,38 @@ impl fmt::Display for IpNetwork {
     }
 }
 
+impl From<Ipv4Addr> for IpNetwork {
+    /// Converts `Ipv4Addr` to `IpNetwork` with netmask 32.
+    fn from(ip: Ipv4Addr) -> Self {
+        IpNetwork::V4(Ipv4Network::from(ip))
+    }
+}
+
+impl From<Ipv6Addr> for IpNetwork {
+    /// Converts `Ipv46ddr` to `IpNetwork` with netmask 128.
+    fn from(ip: Ipv6Addr) -> Self {
+        IpNetwork::V6(Ipv6Network::from(ip))
+    }
+}
+
+impl From<IpAddr> for IpNetwork {
+    /// Converts `IpAddr` to `IpNetwork` with netmask 32 for IPv4 address and 128 for IPv6 address.
+    fn from(ip: IpAddr) -> Self {
+        match ip {
+            IpAddr::V4(ip) => IpNetwork::from(ip),
+            IpAddr::V6(ip) => IpNetwork::from(ip),
+        }
+    }
+}
+
 impl From<Ipv4Network> for IpNetwork {
-    fn from(network: Ipv4Network) -> IpNetwork {
+    fn from(network: Ipv4Network) -> Self {
         IpNetwork::V4(network)
     }
 }
 
 impl From<Ipv6Network> for IpNetwork {
-    fn from(network: Ipv6Network) -> IpNetwork {
+    fn from(network: Ipv6Network) -> Self {
         IpNetwork::V6(network)
     }
 }
@@ -709,6 +733,16 @@ impl FromStr for Ipv4Network {
     }
 }
 
+impl From<Ipv4Addr> for Ipv4Network {
+    /// Converts `Ipv4Addr` to `Ipv4Network` with netmask 32.
+    fn from(ip: Ipv4Addr) -> Self {
+        Self {
+            network_address: ip,
+            netmask: IPV4_LENGTH
+        }
+    }
+}
+
 impl IntoIterator for Ipv4Network {
     type Item = Ipv4Addr;
     type IntoIter = iterator::Ipv4RangeIterator;
@@ -1173,6 +1207,16 @@ impl FromStr for Ipv6Network {
         let netmask = u8::from_str(netmask).map_err(|_| IpNetworkParseError::InvalidNetmaskFormat)?;
 
         Self::new(network_address, netmask).map_err(IpNetworkParseError::IpNetworkError)
+    }
+}
+
+impl From<Ipv6Addr> for Ipv6Network {
+    /// Converts `Ipv6Addr` to `Ipv6Network` with netmask 128.
+    fn from(ip: Ipv6Addr) -> Self {
+        Self {
+            network_address: ip,
+            netmask: IPV6_LENGTH
+        }
     }
 }
 
