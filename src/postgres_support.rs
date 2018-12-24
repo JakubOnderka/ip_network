@@ -75,11 +75,11 @@ mod tests {
     use crate::{IpNetwork, Ipv4Network, Ipv6Network};
 
     fn return_test_ipv4_network() -> Ipv4Network {
-        Ipv4Network::from(Ipv4Addr::new(192, 168, 0, 0), 16).unwrap()
+        Ipv4Network::new(Ipv4Addr::new(192, 168, 0, 0), 16).unwrap()
     }
 
     fn return_test_ipv6_network() -> Ipv6Network {
-        Ipv6Network::from(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0), 32).unwrap()
+        Ipv6Network::new(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0), 32).unwrap()
     }
 
     #[test]

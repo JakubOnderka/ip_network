@@ -24,7 +24,7 @@ pub fn from_sql_ipv4_network(raw: &[u8]) -> Result<Ipv4Network, Box<Error + Sync
 
     let network_address = Ipv4Addr::new(raw[4], raw[5], raw[6], raw[7]);
     let netmask = raw[1];
-    Ok(Ipv4Network::from(network_address, netmask)?)
+    Ok(Ipv4Network::new(network_address, netmask)?)
 }
 
 #[inline]
@@ -48,7 +48,7 @@ pub fn from_sql_ipv6_network(raw: &[u8]) -> Result<Ipv6Network, Box<Error + Sync
     let network_address = Ipv6Addr::from(octets);
 
     let netmask = raw[1];
-    Ok(Ipv6Network::from(network_address, netmask)?)
+    Ok(Ipv6Network::new(network_address, netmask)?)
 }
 
 #[inline]

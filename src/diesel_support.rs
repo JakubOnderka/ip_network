@@ -170,7 +170,7 @@ mod tests {
 
     #[test]
     fn operators() {
-        let ip = IpNetwork::from(Ipv4Addr::new(127, 0, 0, 1), 32).unwrap();
+        let ip = IpNetwork::new(Ipv4Addr::new(127, 0, 0, 1), 32).unwrap();
         test::ip_network.is_contained_by(&ip);
         test::ip_network.is_contained_by_or_equals(&ip);
         test::ip_network.contains(&ip);
