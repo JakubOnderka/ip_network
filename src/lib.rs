@@ -33,7 +33,7 @@ pub enum Ipv6MulticastScope {
     AdminLocal,
     SiteLocal,
     OrganizationLocal,
-    Global
+    Global,
 }
 
 /// Holds IPv4 or IPv6 network
@@ -149,6 +149,26 @@ impl IpNetwork {
     }
 }
 
+impl fmt::Display for IpNetwork {
+    /// Converts `IpNetwork` to string in format X.X.X.X/Y for IPv4 and X:X::X/Y for IPv6 (CIDR notation).
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::net::Ipv4Addr;
+    /// use ip_network::{IpNetwork, Ipv4Network};
+    ///
+    /// let ip_network = IpNetwork::V4(Ipv4Network::new(Ipv4Addr::new(192, 168, 1, 0), 24).unwrap());
+    /// assert_eq!(format!("{}", ip_network), "192.168.1.0/24");
+    /// ```
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+            IpNetwork::V4(ref network) => network.fmt(f),
+            IpNetwork::V6(ref network) => network.fmt(f),
+        }
+    }
+}
+
 impl FromStr for IpNetwork {
     type Err = IpNetworkParseError;
 
@@ -170,7 +190,8 @@ impl FromStr for IpNetwork {
             None => return Err(IpNetworkParseError::InvalidFormatError),
         };
 
-        let netmask = u8::from_str(netmask).map_err(|_| IpNetworkParseError::InvalidNetmaskFormat)?;
+        let netmask =
+            u8::from_str(netmask).map_err(|_| IpNetworkParseError::InvalidNetmaskFormat)?;
 
         if let Ok(network_address) = Ipv4Addr::from_str(ip) {
             let network = Ipv4Network::new(network_address, netmask)
@@ -182,26 +203,6 @@ impl FromStr for IpNetwork {
             Ok(IpNetwork::V6(network))
         } else {
             Err(IpNetworkParseError::AddrParseError)
-        }
-    }
-}
-
-impl fmt::Display for IpNetwork {
-    /// Converts `IpNetwork` to string in format X.X.X.X/Y for IPv4 and X:X::X/Y for IPv6 (CIDR notation).
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use std::net::Ipv4Addr;
-    /// use ip_network::{IpNetwork, Ipv4Network};
-    ///
-    /// let ip_network = IpNetwork::V4(Ipv4Network::new(Ipv4Addr::new(192, 168, 1, 0), 24).unwrap());
-    /// assert_eq!(format!("{}", ip_network), "192.168.1.0/24");
-    /// ```
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match *self {
-            IpNetwork::V4(ref network) => network.fmt(f),
-            IpNetwork::V6(ref network) => network.fmt(f),
         }
     }
 }
@@ -427,7 +428,7 @@ impl Ipv4Network {
     /// assert_eq!(hosts.supernet(), Ipv4Network::new(Ipv4Addr::new(192, 168, 0, 0), 23).unwrap());
     /// ```
     pub fn supernet(&self) -> Self {
-        Self::new_truncate(self.network_address(), self.netmask().saturating_sub(1)).unwrap()
+        Self::new_truncate(self.network_address, self.netmask.saturating_sub(1)).unwrap()
     }
 
     /// Returns `Ipv4NetworkIterator` over networks with bigger netmask by one.
@@ -444,7 +445,7 @@ impl Ipv4Network {
     /// assert_eq!(iterator.last().unwrap(), Ipv4Network::new(Ipv4Addr::new(192, 168, 1, 128), 25).unwrap());
     /// ```
     pub fn subnets(&self) -> iterator::Ipv4NetworkIterator {
-        iterator::Ipv4NetworkIterator::new(self.clone(), self.netmask().saturating_add(1))
+        iterator::Ipv4NetworkIterator::new(self.clone(), self.netmask.saturating_add(1))
     }
 
     /// Returns `Ipv4NetworkIterator` over networks with defined netmask.
@@ -649,8 +650,12 @@ impl Ipv4Network {
     /// assert!(Ipv4Network::new(Ipv4Addr::new(80, 9, 12, 3), 32).unwrap().is_global());
     /// ```
     pub fn is_global(&self) -> bool {
-        !self.is_private() && !self.is_loopback() && !self.is_link_local() &&
-            !self.is_broadcast() && !self.is_documentation() && !self.is_unspecified()
+        !self.is_private()
+            && !self.is_loopback()
+            && !self.is_link_local()
+            && !self.is_broadcast()
+            && !self.is_documentation()
+            && !self.is_unspecified()
     }
 
     // TODO: Documentation
@@ -727,7 +732,8 @@ impl FromStr for Ipv4Network {
 
         let network_address =
             Ipv4Addr::from_str(ip).map_err(|_| IpNetworkParseError::AddrParseError)?;
-        let netmask = u8::from_str(netmask).map_err(|_| IpNetworkParseError::InvalidNetmaskFormat)?;
+        let netmask =
+            u8::from_str(netmask).map_err(|_| IpNetworkParseError::InvalidNetmaskFormat)?;
 
         Self::new(network_address, netmask).map_err(IpNetworkParseError::IpNetworkError)
     }
@@ -738,7 +744,7 @@ impl From<Ipv4Addr> for Ipv4Network {
     fn from(ip: Ipv4Addr) -> Self {
         Self {
             network_address: ip,
-            netmask: IPV4_LENGTH
+            netmask: IPV4_LENGTH,
         }
     }
 }
@@ -907,7 +913,7 @@ impl Ipv6Network {
     /// assert_eq!(network.supernet(), Ipv6Network::new(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0), 31).unwrap());
     /// ```
     pub fn supernet(&self) -> Self {
-        Self::new_truncate(self.network_address(), self.netmask().saturating_sub(1)).unwrap()
+        Self::new_truncate(self.network_address, self.netmask.saturating_sub(1)).unwrap()
     }
 
     /// Returns `Ipv6NetworkIterator` over networks with netmask bigger one.
@@ -924,7 +930,7 @@ impl Ipv6Network {
     /// assert_eq!(iterator.last().unwrap(), Ipv6Network::new(Ipv6Addr::new(0x2001, 0xdb8, 0x8000, 0, 0, 0, 0, 0), 33).unwrap());
     /// ```
     pub fn subnets(&self) -> iterator::Ipv6NetworkIterator {
-        iterator::Ipv6NetworkIterator::new(self.clone(), self.netmask().saturating_add(1))
+        iterator::Ipv6NetworkIterator::new(self.clone(), self.netmask.saturating_add(1))
     }
 
     /// Returns `Ipv6NetworkIterator` over networks with defined netmask.
@@ -1009,7 +1015,7 @@ impl Ipv6Network {
         match self.multicast_scope() {
             Some(Ipv6MulticastScope::Global) => true,
             None => self.is_unicast_global(),
-            _ => false
+            _ => false,
         }
     }
 
@@ -1116,9 +1122,12 @@ impl Ipv6Network {
     /// ```
     pub fn is_unicast_global(&self) -> bool {
         !self.is_multicast()
-            && !self.is_loopback() && !self.is_unicast_link_local()
-            && !self.is_unicast_site_local() && !self.is_unique_local()
-            && !self.is_unspecified() && !self.is_documentation()
+            && !self.is_loopback()
+            && !self.is_unicast_link_local()
+            && !self.is_unicast_site_local()
+            && !self.is_unique_local()
+            && !self.is_unspecified()
+            && !self.is_documentation()
     }
 
     /// Returns [`true`] if this is a part of multicast network (ff00::/8).
@@ -1167,7 +1176,7 @@ impl Ipv6Network {
                 5 => Some(Ipv6MulticastScope::SiteLocal),
                 8 => Some(Ipv6MulticastScope::OrganizationLocal),
                 14 => Some(Ipv6MulticastScope::Global),
-                _ => None
+                _ => None,
             }
         } else {
             None
@@ -1204,7 +1213,8 @@ impl FromStr for Ipv6Network {
 
         let network_address =
             Ipv6Addr::from_str(ip).map_err(|_| IpNetworkParseError::AddrParseError)?;
-        let netmask = u8::from_str(netmask).map_err(|_| IpNetworkParseError::InvalidNetmaskFormat)?;
+        let netmask =
+            u8::from_str(netmask).map_err(|_| IpNetworkParseError::InvalidNetmaskFormat)?;
 
         Self::new(network_address, netmask).map_err(IpNetworkParseError::IpNetworkError)
     }
@@ -1215,7 +1225,7 @@ impl From<Ipv6Addr> for Ipv6Network {
     fn from(ip: Ipv6Addr) -> Self {
         Self {
             network_address: ip,
-            netmask: IPV6_LENGTH
+            netmask: IPV6_LENGTH,
         }
     }
 }

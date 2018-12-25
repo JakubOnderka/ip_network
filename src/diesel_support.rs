@@ -138,11 +138,7 @@ pub trait PqCidrExtensionMethods: Expression<SqlType = Cidr> + Sized {
     }
 }
 
-impl<T> PqCidrExtensionMethods for T
-where
-    T: Expression<SqlType = Cidr>,
-{
-}
+impl<T> PqCidrExtensionMethods for T where T: Expression<SqlType = Cidr> {}
 
 #[cfg(test)]
 mod tests {
