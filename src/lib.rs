@@ -67,6 +67,31 @@ impl IpNetwork {
         })
     }
 
+    /// Constructs new `IpNetwork` based on [`IpAddr`] and `netmask` with truncating host bits
+    /// from given `network_address`.
+    ///
+    /// Returns error if netmask is bigger than 32 for IPv4 and 128 for IPv6.
+    ///
+    /// [`Ipv4Addr`]: https://doc.rust-lang.org/std/net/struct.IpAddr.html
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::net::{IpAddr, Ipv4Addr};
+    /// use ip_network::IpNetwork;
+    ///
+    /// let network_address = IpAddr::V4(Ipv4Addr::new(192, 168, 1, 128));
+    /// let ip_network = IpNetwork::new_truncate(network_address, 24).unwrap();
+    /// assert_eq!(ip_network.network_address(), IpAddr::V4(Ipv4Addr::new(192, 168, 1, 0)));
+    /// assert_eq!(ip_network.netmask(), 24);
+    /// ```
+    pub fn new_truncate<I: Into<IpAddr>>(network_address: I, netmask: u8) -> Result<Self, IpNetworkError> {
+        Ok(match network_address.into() {
+            IpAddr::V4(ip) => IpNetwork::V4(Ipv4Network::new_truncate(ip, netmask)?),
+            IpAddr::V6(ip) => IpNetwork::V6(Ipv6Network::new_truncate(ip, netmask)?),
+        })
+    }
+
     /// Returns network IP address.
     ///
     /// # Examples
