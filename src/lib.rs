@@ -298,8 +298,7 @@ impl Ipv4Network {
             return Err(IpNetworkError::NetmaskError(netmask));
         }
 
-        let network_address_u32 = u32::from(network_address);
-        if network_address_u32 & helpers::get_bite_mask(netmask) != network_address_u32 {
+        if u32::from(network_address).trailing_zeros() < (Self::LENGTH as u32 - netmask as u32) {
             return Err(IpNetworkError::HostBitsSet);
         }
 
@@ -831,8 +830,7 @@ impl Ipv6Network {
             return Err(IpNetworkError::NetmaskError(netmask));
         }
 
-        let network_address_u128 = u128::from(network_address);
-        if network_address_u128 & helpers::get_bite_mask_u128(netmask) != network_address_u128 {
+        if u128::from(network_address).trailing_zeros() < (Self::LENGTH as u32 - netmask as u32) {
             return Err(IpNetworkError::HostBitsSet);
         }
 
@@ -1424,6 +1422,27 @@ mod tests {
             IpNetworkError::HostBitsSet => true,
             _ => false,
         });
+    }
+
+    #[test]
+    fn test_ipv4_network_new_host_bits_set_no_31() {
+        let ip = Ipv4Addr::new(127, 0, 0, 2);
+        let ip_network = Ipv4Network::new(ip, 31);
+        assert!(ip_network.is_ok());
+    }
+
+    #[test]
+    fn test_ipv4_network_new_host_bits_set_no_32() {
+        let ip = Ipv4Addr::new(127, 0, 0, 1);
+        let ip_network = Ipv4Network::new(ip, 32);
+        assert!(ip_network.is_ok());
+    }
+
+    #[test]
+    fn test_ipv4_network_new_host_bits_set_no_zero() {
+        let ip = Ipv4Addr::new(0, 0, 0, 0);
+        let ip_network = Ipv4Network::new(ip, 0);
+        assert!(ip_network.is_ok());
     }
 
     #[test]
