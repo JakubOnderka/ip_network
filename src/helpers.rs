@@ -5,11 +5,19 @@ pub fn bit_length(number: u32) -> u8 {
 }
 
 pub fn get_bite_mask(mask: u8) -> u32 {
-    !std::u32::MAX.checked_shr(mask as u32).unwrap_or(0)
+    debug_assert!(mask <= 32);
+    match mask {
+        0 => 0,
+        n => (!0 << (32 - n)),
+    }
 }
 
 pub fn get_bite_mask_u128(mask: u8) -> u128 {
-    !std::u128::MAX.checked_shr(mask as u32).unwrap_or(0)
+    debug_assert!(mask <= 128);
+    match mask {
+        0 => 0,
+        n => (!0 << (128 - n)),
+    }
 }
 
 pub fn split_ip_netmask(input: &str) -> Option<(&str, &str)> {
@@ -29,7 +37,7 @@ pub fn split_ip_netmask(input: &str) -> Option<(&str, &str)> {
 
 #[cfg(test)]
 mod tests {
-    use super::{get_bite_mask, split_ip_netmask};
+    use super::{get_bite_mask, get_bite_mask_u128, split_ip_netmask};
     use std;
 
     #[test]
@@ -40,6 +48,16 @@ mod tests {
     #[test]
     fn get_bite_mask_0() {
         assert_eq!(0, get_bite_mask(0));
+    }
+
+    #[test]
+    fn get_bite_mask_u128_0() {
+        assert_eq!(0, get_bite_mask_u128(0));
+    }
+
+    #[test]
+    fn get_bite_mask_u128_128() {
+        assert_eq!(std::u128::MAX, get_bite_mask_u128(128));
     }
 
     #[test]
