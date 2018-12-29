@@ -207,10 +207,8 @@ impl FromStr for IpNetwork {
     /// assert_eq!(ip_network, IpNetwork::V4(Ipv4Network::new(Ipv4Addr::new(192, 168, 1, 0), 24).unwrap()));
     /// ```
     fn from_str(s: &str) -> Result<IpNetwork, IpNetworkParseError> {
-        let (ip, netmask) = match helpers::split_ip_netmask(s) {
-            Some(output) => output,
-            None => return Err(IpNetworkParseError::InvalidFormatError),
-        };
+        let (ip, netmask) =
+            helpers::split_ip_netmask(s).ok_or(IpNetworkParseError::InvalidFormatError)?;
 
         let netmask =
             u8::from_str(netmask).map_err(|_| IpNetworkParseError::InvalidNetmaskFormat)?;
@@ -749,10 +747,8 @@ impl FromStr for Ipv4Network {
     /// assert_eq!(ip_network.netmask(), 24);
     /// ```
     fn from_str(s: &str) -> Result<Ipv4Network, IpNetworkParseError> {
-        let (ip, netmask) = match helpers::split_ip_netmask(s) {
-            Some(a) => a,
-            None => return Err(IpNetworkParseError::InvalidFormatError),
-        };
+        let (ip, netmask) =
+            helpers::split_ip_netmask(s).ok_or(IpNetworkParseError::InvalidFormatError)?;
 
         let network_address =
             Ipv4Addr::from_str(ip).map_err(|_| IpNetworkParseError::AddrParseError)?;
@@ -1232,10 +1228,8 @@ impl FromStr for Ipv6Network {
 
     // TODO
     fn from_str(s: &str) -> Result<Ipv6Network, IpNetworkParseError> {
-        let (ip, netmask) = match helpers::split_ip_netmask(s) {
-            Some(a) => a,
-            None => return Err(IpNetworkParseError::InvalidFormatError),
-        };
+        let (ip, netmask) =
+            helpers::split_ip_netmask(s).ok_or(IpNetworkParseError::InvalidFormatError)?;
 
         let network_address =
             Ipv6Addr::from_str(ip).map_err(|_| IpNetworkParseError::AddrParseError)?;
@@ -1305,7 +1299,9 @@ impl fmt::Display for IpNetworkParseError {
             IpNetworkParseError::InvalidNetmaskFormat => write!(fmt, "invalid netmask format"),
             IpNetworkParseError::InvalidFormatError => write!(fmt, "invalid format"),
             IpNetworkParseError::AddrParseError => write!(fmt, "invalid IP address syntax"),
-            IpNetworkParseError::IpNetworkError(ref ip_network_error) => write!(fmt, "{}", ip_network_error),
+            IpNetworkParseError::IpNetworkError(ref ip_network_error) => {
+                write!(fmt, "{}", ip_network_error)
+            }
         }
     }
 }

@@ -1,5 +1,3 @@
-use std;
-
 pub fn bit_length(number: u32) -> u8 {
     32 - number.leading_zeros() as u8
 }
