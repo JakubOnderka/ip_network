@@ -1265,18 +1265,15 @@ pub enum IpNetworkError {
     HostBitsSet,
 }
 
-impl Error for IpNetworkError {
-    fn description(&self) -> &str {
-        match *self {
-            IpNetworkError::NetmaskError(_) => "invalid netmask",
-            IpNetworkError::HostBitsSet => "IP network address has host bits set",
-        }
-    }
-}
+impl Error for IpNetworkError {}
 
 impl fmt::Display for IpNetworkError {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        write!(fmt, "{}", self.description())
+        let description = match *self {
+            IpNetworkError::NetmaskError(_) => "invalid netmask",
+            IpNetworkError::HostBitsSet => "IP network address has host bits set",
+        };
+        write!(fmt, "{}", description)
     }
 }
 
@@ -1294,21 +1291,22 @@ pub enum IpNetworkParseError {
 }
 
 impl Error for IpNetworkParseError {
-    fn description(&self) -> &str {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
         match *self {
-            IpNetworkParseError::InvalidNetmaskFormat => "invalid netmask format",
-            IpNetworkParseError::InvalidFormatError => "invalid format",
-            IpNetworkParseError::AddrParseError => "invalid IP address syntax",
-            IpNetworkParseError::IpNetworkError(ref ip_network_error) => {
-                ip_network_error.description()
-            }
+            IpNetworkParseError::IpNetworkError(ref ip_network_error) => Some(ip_network_error),
+            _ => None,
         }
     }
 }
 
 impl fmt::Display for IpNetworkParseError {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        write!(fmt, "{}", self.description())
+        match *self {
+            IpNetworkParseError::InvalidNetmaskFormat => write!(fmt, "invalid netmask format"),
+            IpNetworkParseError::InvalidFormatError => write!(fmt, "invalid format"),
+            IpNetworkParseError::AddrParseError => write!(fmt, "invalid IP address syntax"),
+            IpNetworkParseError::IpNetworkError(ref ip_network_error) => write!(fmt, "{}", ip_network_error),
+        }
     }
 }
 
