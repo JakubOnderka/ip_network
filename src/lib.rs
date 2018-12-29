@@ -21,9 +21,6 @@ mod postgres_common;
 #[cfg(feature = "postgres")]
 mod postgres_support;
 
-const IPV4_LENGTH: u8 = 32;
-const IPV6_LENGTH: u8 = 128;
-
 /// IPv6 Multicast Address Scopes
 #[derive(Copy, PartialEq, Eq, Clone, Hash, Debug)]
 pub enum Ipv6MulticastScope {
@@ -277,6 +274,9 @@ pub struct Ipv4Network {
 }
 
 impl Ipv4Network {
+    /// IPv4 address length in bits.
+    const LENGTH: u8 = 32;
+
     /// Constructs new `Ipv4Network` based on [`Ipv4Addr`] and `netmask`.
     ///
     /// Returns error if netmask is bigger than 32 or if host bits are set in `network_address`.
@@ -294,7 +294,7 @@ impl Ipv4Network {
     /// assert_eq!(ip_network.netmask(), 24);
     /// ```
     pub fn new(network_address: Ipv4Addr, netmask: u8) -> Result<Self, IpNetworkError> {
-        if netmask > IPV4_LENGTH {
+        if netmask > Self::LENGTH {
             return Err(IpNetworkError::NetmaskError(netmask));
         }
 
@@ -327,7 +327,7 @@ impl Ipv4Network {
     /// assert_eq!(ip_network.netmask(), 24);
     /// ```
     pub fn new_truncate(network_address: Ipv4Addr, netmask: u8) -> Result<Self, IpNetworkError> {
-        if netmask > IPV4_LENGTH {
+        if netmask > Self::LENGTH {
             return Err(IpNetworkError::NetmaskError(netmask));
         }
 
@@ -693,16 +693,16 @@ impl Ipv4Network {
         while first_int <= last_int {
             let bit_length_diff;
             if last_int - first_int == std::u32::MAX {
-                bit_length_diff = IPV4_LENGTH;
+                bit_length_diff = Self::LENGTH;
             } else {
                 bit_length_diff = helpers::bit_length(last_int - first_int + 1) - 1
             }
 
             let nbits = cmp::min(first_int.trailing_zeros() as u8, bit_length_diff);
 
-            vector.push(Self::new(Ipv4Addr::from(first_int), IPV4_LENGTH - nbits).unwrap());
+            vector.push(Self::new(Ipv4Addr::from(first_int), Self::LENGTH - nbits).unwrap());
 
-            if nbits == IPV4_LENGTH {
+            if nbits == Self::LENGTH {
                 break;
             }
 
@@ -769,7 +769,7 @@ impl From<Ipv4Addr> for Ipv4Network {
     fn from(ip: Ipv4Addr) -> Self {
         Self {
             network_address: ip,
-            netmask: IPV4_LENGTH,
+            netmask: Self::LENGTH,
         }
     }
 }
@@ -806,6 +806,9 @@ pub struct Ipv6Network {
 }
 
 impl Ipv6Network {
+    /// IPv4 address length in bits.
+    const LENGTH: u8 = 128;
+
     /// Constructs new `Ipv6Network` based on [`Ipv6Addr`] and `netmask`.
     ///
     /// Returns error if netmask is bigger than 128 or if host bits are set in `network_address`.
@@ -824,7 +827,7 @@ impl Ipv6Network {
     /// assert_eq!(ip_network.netmask(), 32);
     /// ```
     pub fn new(network_address: Ipv6Addr, netmask: u8) -> Result<Self, IpNetworkError> {
-        if netmask > IPV6_LENGTH {
+        if netmask > Self::LENGTH {
             return Err(IpNetworkError::NetmaskError(netmask));
         }
 
@@ -858,7 +861,7 @@ impl Ipv6Network {
     /// assert_eq!(ip_network.netmask(), 32);
     /// ```
     pub fn new_truncate(network_address: Ipv6Addr, netmask: u8) -> Result<Self, IpNetworkError> {
-        if netmask > IPV6_LENGTH {
+        if netmask > Self::LENGTH {
             return Err(IpNetworkError::NetmaskError(netmask));
         }
 
@@ -992,7 +995,7 @@ impl Ipv6Network {
     /// assert!(Ipv6Network::new(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 0), 128).unwrap().is_unspecified());
     /// ```
     pub fn is_unspecified(&self) -> bool {
-        self.network_address.is_unspecified() && self.netmask == IPV6_LENGTH
+        self.network_address.is_unspecified() && self.netmask == Self::LENGTH
     }
 
     /// Returns [`true`] if this is a loopback network (::1/128).
@@ -1250,7 +1253,7 @@ impl From<Ipv6Addr> for Ipv6Network {
     fn from(ip: Ipv6Addr) -> Self {
         Self {
             network_address: ip,
-            netmask: IPV6_LENGTH,
+            netmask: Self::LENGTH,
         }
     }
 }

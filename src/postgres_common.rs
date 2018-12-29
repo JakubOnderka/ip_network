@@ -1,6 +1,6 @@
 use std::error::Error;
 use std::net::{Ipv4Addr, Ipv6Addr};
-use crate::{IPV4_LENGTH, IPV6_LENGTH, Ipv4Network, Ipv6Network};
+use crate::{Ipv4Network, Ipv6Network};
 
 // TODO: These constants are true for Linux, but we have to check it for Windows and other systems
 pub const IPV4_TYPE: u8 = 2;
@@ -18,7 +18,7 @@ pub fn from_sql_ipv4_network(raw: &[u8]) -> Result<Ipv4Network, Box<Error + Sync
         return Err("This field is not CIDR type, probably INET type".into());
     }
 
-    if raw[3] != IPV4_LENGTH / 8 {
+    if raw[3] != Ipv4Network::LENGTH / 8 {
         return Err(format!("CIDR is IP version 4, but have bad length '{}'", raw[3]).into());
     }
 
@@ -39,7 +39,7 @@ pub fn from_sql_ipv6_network(raw: &[u8]) -> Result<Ipv6Network, Box<Error + Sync
         return Err("This field is not CIDR type, probably INET type".into());
     }
 
-    if raw[3] != IPV6_LENGTH / 8 {
+    if raw[3] != Ipv6Network::LENGTH / 8 {
         return Err(format!("CIDR is IP version 6, but have bad length '{}'", raw[3]).into());
     }
 
@@ -58,7 +58,7 @@ pub fn to_sql_ipv4_network(network: &Ipv4Network) -> [u8; 8] {
     bytes[0] = IPV4_TYPE;
     bytes[1] = network.netmask;
     bytes[2] = 1;
-    bytes[3] = IPV4_LENGTH / 8;
+    bytes[3] = Ipv4Network::LENGTH / 8;
     bytes[4..].copy_from_slice(&ip_octets);
     bytes
 }
@@ -70,7 +70,7 @@ pub fn to_sql_ipv6_network(network: &Ipv6Network) -> [u8; 20] {
     bytes[0] = IPV6_TYPE;
     bytes[1] = network.netmask;
     bytes[2] = 1;
-    bytes[3] = IPV6_LENGTH / 8;
+    bytes[3] = Ipv6Network::LENGTH / 8;
     bytes[4..].copy_from_slice(&ip_octets);
     bytes
 }
