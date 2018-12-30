@@ -138,6 +138,27 @@ impl IpNetwork {
         !self.is_ipv4()
     }
 
+    /// Returns `true` if `IpNetwork` contains `IpAddr`. For different network type
+    /// (for example IpNetwork is IPv6 and IpAddr is IPv4) always returns `false`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
+    /// use ip_network::IpNetwork;
+    ///
+    /// let ip_network = IpNetwork::new(Ipv4Addr::new(192, 168, 1, 0), 24).unwrap();
+    /// assert!(ip_network.contains(Ipv4Addr::new(192, 168, 1, 25)));
+    /// assert!(!ip_network.contains(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 1, 0, 0)));
+    /// ```
+    pub fn contains<I: Into<IpAddr>>(&self, ip: I) -> bool {
+        match (self, ip.into()) {
+            (IpNetwork::V4(network), IpAddr::V4(ip)) => network.contains(ip),
+            (IpNetwork::V6(network), IpAddr::V6(ip)) => network.contains(ip),
+            _ => false,
+        }
+    }
+
     /// Returns `true` if the network is part of multicast network range.
     pub fn is_multicast(&self) -> bool {
         match *self {
@@ -518,7 +539,7 @@ impl Ipv4Network {
     /// assert!(ip_network.is_unspecified());
     /// ```
     pub fn is_unspecified(&self) -> bool {
-        u32::from(self.network_address) == 0 && self.netmask == 32
+        u32::from(self.network_address) == 0 && self.netmask == Self::LENGTH
     }
 
     /// Returns [`true`] if this network is inside loopback address range (127.0.0.0/8).
