@@ -437,7 +437,7 @@ impl Ipv4Network {
         iterator::Ipv4RangeIterator::new(from, to)
     }
 
-    /// Returns network with smaller netmask by one.
+    /// Returns network with smaller netmask by one. If netmask is already zero, `None` will be returned.
     ///
     /// # Examples
     ///
@@ -447,10 +447,14 @@ impl Ipv4Network {
     ///
     /// let ip = Ipv4Addr::new(192, 168, 1, 0);
     /// let mut hosts = Ipv4Network::new(ip, 24).unwrap();
-    /// assert_eq!(hosts.supernet(), Ipv4Network::new(Ipv4Addr::new(192, 168, 0, 0), 23).unwrap());
+    /// assert_eq!(hosts.supernet(), Some(Ipv4Network::new(Ipv4Addr::new(192, 168, 0, 0), 23).unwrap()));
     /// ```
-    pub fn supernet(&self) -> Self {
-        Self::new_truncate(self.network_address, self.netmask.saturating_sub(1)).unwrap()
+    pub fn supernet(&self) -> Option<Self> {
+        if self.netmask == 0 {
+            None
+        } else {
+            Some(Self::new_truncate(self.network_address, self.netmask - 1).unwrap())
+        }
     }
 
     /// Returns `Ipv4NetworkIterator` over networks with bigger netmask by one.
@@ -923,7 +927,7 @@ impl Ipv6Network {
         truncated_ip == u128::from(self.network_address)
     }
 
-    /// Returns network with smaller netmask by one.
+    /// Returns network with smaller netmask by one. If netmask is already zero, `None` will be returned.
     ///
     /// # Examples
     ///
@@ -932,10 +936,14 @@ impl Ipv6Network {
     /// use ip_network::Ipv6Network;
     ///
     /// let network = Ipv6Network::new(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0), 32).unwrap();
-    /// assert_eq!(network.supernet(), Ipv6Network::new(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0), 31).unwrap());
+    /// assert_eq!(network.supernet(), Some(Ipv6Network::new(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0), 31).unwrap()));
     /// ```
-    pub fn supernet(&self) -> Self {
-        Self::new_truncate(self.network_address, self.netmask.saturating_sub(1)).unwrap()
+    pub fn supernet(&self) -> Option<Self> {
+        if self.netmask == 0 {
+            None
+        } else {
+            Some(Self::new_truncate(self.network_address, self.netmask - 1).unwrap())
+        }
     }
 
     /// Returns `Ipv6NetworkIterator` over networks with netmask bigger one.
@@ -1469,7 +1477,7 @@ mod tests {
         assert_eq!(ip_network.full_netmask(), Ipv4Addr::new(255, 255, 0, 0));
         assert_eq!(
             ip_network.supernet(),
-            Ipv4Network::new(Ipv4Addr::new(192, 168, 0, 0), 15).unwrap()
+            Some(Ipv4Network::new(Ipv4Addr::new(192, 168, 0, 0), 15).unwrap())
         );
         assert_eq!(ip_network.hosts().len(), 256 * 256 - 2);
     }
@@ -1684,7 +1692,7 @@ mod tests {
         let ip_network = return_test_ipv6_network();
         assert_eq!(
             ip_network.supernet(),
-            Ipv6Network::new(Ipv6Addr::new(0x2001, 0x0db8, 0, 0, 0, 0, 0, 0), 31).unwrap()
+            Some(Ipv6Network::new(Ipv6Addr::new(0x2001, 0x0db8, 0, 0, 0, 0, 0, 0), 31).unwrap())
         );
     }
 
