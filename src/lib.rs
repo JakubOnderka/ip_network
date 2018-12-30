@@ -181,7 +181,7 @@ impl fmt::Display for IpNetwork {
     /// use ip_network::{IpNetwork, Ipv4Network};
     ///
     /// let ip_network = IpNetwork::V4(Ipv4Network::new(Ipv4Addr::new(192, 168, 1, 0), 24).unwrap());
-    /// assert_eq!(format!("{}", ip_network), "192.168.1.0/24");
+    /// assert_eq!(ip_network.to_string(), "192.168.1.0/24");
     /// ```
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
@@ -723,7 +723,7 @@ impl fmt::Display for Ipv4Network {
     /// use ip_network::Ipv4Network;
     ///
     /// let ip_network = Ipv4Network::new(Ipv4Addr::new(192, 168, 1, 0), 24).unwrap();
-    /// assert_eq!(format!("{}", ip_network), "192.168.1.0/24");
+    /// assert_eq!(ip_network.to_string(), "192.168.1.0/24");
     /// ```
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         write!(fmt, "{}/{}", self.network_address, self.netmask)
@@ -1216,7 +1216,7 @@ impl fmt::Display for Ipv6Network {
     /// use ip_network::Ipv6Network;
     ///
     /// let ip_network = Ipv6Network::new(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0), 32).unwrap();
-    /// assert_eq!(format!("{}", ip_network), "2001:db8::/32");
+    /// assert_eq!(ip_network.to_string(), "2001:db8::/32");
     /// ```
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}/{}", self.network_address, self.netmask)
@@ -1398,13 +1398,13 @@ mod tests {
     #[test]
     fn test_ip_network_format_ipv4() {
         let ip_network = IpNetwork::V4(return_test_ipv4_network());
-        assert_eq!(format!("{}", ip_network), "192.168.0.0/16");
+        assert_eq!(ip_network.to_string(), "192.168.0.0/16");
     }
 
     #[test]
     fn test_ip_network_format_ipv6() {
         let ip_network = IpNetwork::V6(return_test_ipv6_network());
-        assert_eq!(format!("{}", ip_network), "2001:db8::/32");
+        assert_eq!(ip_network.to_string(), "2001:db8::/32");
     }
 
     #[test]
@@ -1547,7 +1547,7 @@ mod tests {
     #[test]
     fn test_ipv4_network_format() {
         let ip_network = return_test_ipv4_network();
-        assert_eq!(format!("{}", ip_network), "192.168.0.0/16");
+        assert_eq!(ip_network.to_string(), "192.168.0.0/16");
     }
 
     #[test]
@@ -1736,6 +1736,6 @@ mod tests {
     #[test]
     fn test_ipv6_network_format() {
         let ip_network = return_test_ipv6_network();
-        assert_eq!(format!("{}", ip_network), "2001:db8::/32");
+        assert_eq!(ip_network.to_string(), "2001:db8::/32");
     }
 }
