@@ -481,6 +481,10 @@ impl Ipv4Network {
 
     /// Returns `Ipv4NetworkIterator` over networks with defined netmask.
     ///
+    /// # Panics
+    ///
+    /// This method panics when prefix is bigger than 32 or when prefix is lower or equal than netmask.
+    ///
     /// # Examples
     ///
     /// ```
@@ -974,6 +978,10 @@ impl Ipv6Network {
     }
 
     /// Returns `Ipv6NetworkIterator` over networks with defined netmask.
+    ///
+    /// # Panics
+    ///
+    /// This method panics when prefix is bigger than 128 or when prefix is lower or equal than netmask.
     ///
     /// # Examples
     ///
