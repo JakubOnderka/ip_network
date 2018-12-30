@@ -59,26 +59,26 @@ mod tests {
     }
 
     #[test]
-    fn test_split_ip_netmask() {
+    fn split_ip_netmask_normal() {
         let (ip, netmask) = split_ip_netmask("192.168.1.1/24").unwrap();
         assert_eq!("192.168.1.1", ip);
         assert_eq!("24", netmask);
     }
 
     #[test]
-    fn test_split_ip_netmask_invalid_1() {
+    fn split_ip_netmask_invalid_1() {
         let a = split_ip_netmask("ab");
         assert!(a.is_none());
     }
 
     #[test]
-    fn test_split_ip_netmask_invalid_2() {
+    fn split_ip_netmask_invalid_2() {
         let a = split_ip_netmask("/");
         assert!(a.is_none());
     }
 
     #[test]
-    fn test_split_ip_netmask_invalid_3() {
+    fn split_ip_netmask_invalid_3() {
         let a = split_ip_netmask("192.168.1.1/");
         assert!(a.is_none());
     }

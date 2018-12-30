@@ -83,7 +83,7 @@ mod tests {
     }
 
     #[test]
-    fn test_ivp4_to_sql() {
+    fn ivp4_to_sql() {
         let ip_network = return_test_ipv4_network();
         let mut output = vec![];
         assert!(ip_network.to_sql(&CIDR, &mut output).is_ok());
@@ -98,7 +98,7 @@ mod tests {
     }
 
     #[test]
-    fn test_ivp4_both_direction() {
+    fn ivp4_both_direction() {
         let ip_network = return_test_ipv4_network();
         let mut output = vec![];
 
@@ -112,7 +112,7 @@ mod tests {
     }
 
     #[test]
-    fn test_ivp6_to_sql() {
+    fn ivp6_to_sql() {
         let ip_network = return_test_ipv6_network();
         let mut output = vec![];
         assert!(ip_network.to_sql(&CIDR, &mut output).is_ok());
@@ -124,7 +124,7 @@ mod tests {
     }
 
     #[test]
-    fn test_ivp6_both_direction() {
+    fn ivp6_both_direction() {
         let ip_network = return_test_ipv6_network();
         let mut output = vec![];
 
@@ -138,14 +138,14 @@ mod tests {
     }
 
     #[test]
-    fn test_ipnetwork_to_sql_v4() {
+    fn ipnetwork_to_sql_v4() {
         let ip_network = IpNetwork::V4(return_test_ipv4_network());
         let mut output = vec![];
         assert!(ip_network.to_sql(&CIDR, &mut output).is_ok());
     }
 
     #[test]
-    fn test_ipnetwork_to_sql_v6() {
+    fn ipnetwork_to_sql_v6() {
         let ip_network = IpNetwork::V6(return_test_ipv6_network());
         let mut output = vec![];
         assert!(ip_network.to_sql(&CIDR, &mut output).is_ok());

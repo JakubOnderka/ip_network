@@ -218,7 +218,7 @@ mod tests {
     use super::{Ipv4NetworkIterator, Ipv4RangeIterator, Ipv6NetworkIterator};
 
     #[test]
-    fn test_ipv4_range_iterator() {
+    fn ipv4_range_iterator() {
         let mut iterator = Ipv4RangeIterator::new(
             Ipv4Addr::new(192, 168, 2, 0),
             Ipv4Addr::new(192, 168, 2, 255),
@@ -229,7 +229,7 @@ mod tests {
     }
 
     #[test]
-    fn test_ipv4_range_iterator_length() {
+    fn ipv4_range_iterator_length() {
         let mut iterator = Ipv4RangeIterator::new(
             Ipv4Addr::new(192, 168, 2, 0),
             Ipv4Addr::new(192, 168, 2, 255),
@@ -241,7 +241,7 @@ mod tests {
     }
 
     #[test]
-    fn test_ipv4_range_iterator_same_values() {
+    fn ipv4_range_iterator_same_values() {
         let mut iterator = Ipv4RangeIterator::new(
             Ipv4Addr::new(255, 255, 255, 255),
             Ipv4Addr::new(255, 255, 255, 255),
@@ -253,7 +253,7 @@ mod tests {
     }
 
     #[test]
-    fn test_ipv4_network_iterator() {
+    fn ipv4_network_iterator() {
         let network = Ipv4Network::new(Ipv4Addr::new(127, 0, 0, 0), 8).unwrap();
         let mut iterator = Ipv4NetworkIterator::new(network, 16);
 
@@ -277,14 +277,14 @@ mod tests {
     }
 
     #[test]
-    fn test_ipv4_network_iterator_len() {
+    fn ipv4_network_iterator_len() {
         let network = Ipv4Network::new(Ipv4Addr::new(127, 0, 0, 0), 8).unwrap();
         let iterator = Ipv4NetworkIterator::new(network, 16);
         assert_eq!(256, iterator.len());
     }
 
     #[test]
-    fn test_ipv6_network_iterator() {
+    fn ipv6_network_iterator() {
         let ip = Ipv6Addr::new(0x2001, 0, 0, 0, 0, 0, 0, 0);
         let network = Ipv6Network::new(ip, 16).unwrap();
         let mut iterator = Ipv6NetworkIterator::new(network, 17);
@@ -300,7 +300,7 @@ mod tests {
 
     #[test]
     #[should_panic] // because range is bigger than `usize` on 64bit machine
-    fn test_ipv6_network_iterator_whole_range_len() {
+    fn ipv6_network_iterator_whole_range_len() {
         let ip = Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 0);
         let network = Ipv6Network::new(ip, 0).unwrap();
         let iterator = Ipv6NetworkIterator::new(network, 128);
@@ -309,7 +309,7 @@ mod tests {
     }
 
     #[test]
-    fn test_ipv6_network_iterator_whole_range_real_len() {
+    fn ipv6_network_iterator_whole_range_real_len() {
         let ip = Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 0);
         let network = Ipv6Network::new(ip, 0).unwrap();
         let iterator = Ipv6NetworkIterator::new(network, 128);
@@ -318,7 +318,7 @@ mod tests {
     }
 
     #[test]
-    fn test_ipv6_network_iterator_whole_range() {
+    fn ipv6_network_iterator_whole_range() {
         let ip = Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 0);
         let network = Ipv6Network::new(ip, 0).unwrap();
         let mut iterator = Ipv6NetworkIterator::new(network, 128);

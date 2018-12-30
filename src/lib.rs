@@ -1328,33 +1328,33 @@ mod tests {
     }
 
     #[test]
-    fn test_ip_network_is_ipv4() {
+    fn ip_network_is_ipv4() {
         let ip_network = IpNetwork::V4(return_test_ipv4_network());
         assert!(ip_network.is_ipv4());
         assert!(!ip_network.is_ipv6());
     }
 
     #[test]
-    fn test_ip_network_is_ipv6() {
+    fn ip_network_is_ipv6() {
         let ip_network = IpNetwork::V6(return_test_ipv6_network());
         assert!(ip_network.is_ipv6());
         assert!(!ip_network.is_ipv4());
     }
 
     #[test]
-    fn test_ip_network_parse_ipv4() {
+    fn ip_network_parse_ipv4() {
         let ip_network: IpNetwork = "192.168.0.0/16".parse().unwrap();
         assert_eq!(ip_network, IpNetwork::V4(return_test_ipv4_network()));
     }
 
     #[test]
-    fn test_ip_network_parse_ipv6() {
+    fn ip_network_parse_ipv6() {
         let ip_network: IpNetwork = "2001:db8::/32".parse().unwrap();
         assert_eq!(ip_network, IpNetwork::V6(return_test_ipv6_network()));
     }
 
     #[test]
-    fn test_ip_network_parse_empty() {
+    fn ip_network_parse_empty() {
         let ip_network = "".parse::<IpNetwork>();
         assert!(ip_network.is_err());
         assert!(match ip_network.err().unwrap() {
@@ -1364,7 +1364,7 @@ mod tests {
     }
 
     #[test]
-    fn test_ip_network_parse_invalid_netmask() {
+    fn ip_network_parse_invalid_netmask() {
         let ip_network = "192.168.0.0/a".parse::<IpNetwork>();
         assert!(ip_network.is_err());
         assert!(match ip_network.err().unwrap() {
@@ -1374,7 +1374,7 @@ mod tests {
     }
 
     #[test]
-    fn test_ip_network_parse_invalid_ip() {
+    fn ip_network_parse_invalid_ip() {
         let ip_network = "192.168.0.0a/16".parse::<IpNetwork>();
         assert!(ip_network.is_err());
         assert!(match ip_network.err().unwrap() {
@@ -1384,7 +1384,7 @@ mod tests {
     }
 
     #[test]
-    fn test_ip_network_parse_ipv4_host_bits_set() {
+    fn ip_network_parse_ipv4_host_bits_set() {
         let ip_network = "192.168.0.1/16".parse::<IpNetwork>();
         assert!(ip_network.is_err());
         assert!(match ip_network.err().unwrap() {
@@ -1394,7 +1394,7 @@ mod tests {
     }
 
     #[test]
-    fn test_ip_network_parse_ipv6_host_bits_set() {
+    fn ip_network_parse_ipv6_host_bits_set() {
         let ip_network = "2001:db8::1/32".parse::<IpNetwork>();
         assert!(ip_network.is_err());
         assert!(match ip_network.err().unwrap() {
@@ -1404,19 +1404,19 @@ mod tests {
     }
 
     #[test]
-    fn test_ip_network_format_ipv4() {
+    fn ip_network_format_ipv4() {
         let ip_network = IpNetwork::V4(return_test_ipv4_network());
         assert_eq!(ip_network.to_string(), "192.168.0.0/16");
     }
 
     #[test]
-    fn test_ip_network_format_ipv6() {
+    fn ip_network_format_ipv6() {
         let ip_network = IpNetwork::V6(return_test_ipv6_network());
         assert_eq!(ip_network.to_string(), "2001:db8::/32");
     }
 
     #[test]
-    fn test_ipv4_network_new_host_bits_set() {
+    fn ipv4_network_new_host_bits_set() {
         let ip = Ipv4Addr::new(127, 0, 0, 1);
         let ip_network = Ipv4Network::new(ip, 8);
         assert!(ip_network.is_err());
@@ -1427,28 +1427,28 @@ mod tests {
     }
 
     #[test]
-    fn test_ipv4_network_new_host_bits_set_no_31() {
+    fn ipv4_network_new_host_bits_set_no_31() {
         let ip = Ipv4Addr::new(127, 0, 0, 2);
         let ip_network = Ipv4Network::new(ip, 31);
         assert!(ip_network.is_ok());
     }
 
     #[test]
-    fn test_ipv4_network_new_host_bits_set_no_32() {
+    fn ipv4_network_new_host_bits_set_no_32() {
         let ip = Ipv4Addr::new(127, 0, 0, 1);
         let ip_network = Ipv4Network::new(ip, 32);
         assert!(ip_network.is_ok());
     }
 
     #[test]
-    fn test_ipv4_network_new_host_bits_set_no_zero() {
+    fn ipv4_network_new_host_bits_set_no_zero() {
         let ip = Ipv4Addr::new(0, 0, 0, 0);
         let ip_network = Ipv4Network::new(ip, 0);
         assert!(ip_network.is_ok());
     }
 
     #[test]
-    fn test_ipv4_network_new_big_invalid_netmask() {
+    fn ipv4_network_new_big_invalid_netmask() {
         let ip = Ipv4Addr::new(127, 0, 0, 1);
         let ip_network = Ipv4Network::new(ip, 35);
         assert!(ip_network.is_err());
@@ -1459,14 +1459,14 @@ mod tests {
     }
 
     #[test]
-    fn test_ipv4_network_new_truncate_host_bits_set() {
+    fn ipv4_network_new_truncate_host_bits_set() {
         let ip = Ipv4Addr::new(127, 0, 0, 1);
         let ip_network = Ipv4Network::new_truncate(ip, 8).unwrap();
         assert_eq!(ip_network.network_address(), Ipv4Addr::new(127, 0, 0, 0));
     }
 
     #[test]
-    fn test_ipv4_network_basic_getters() {
+    fn ipv4_network_basic_getters() {
         let ip_network = return_test_ipv4_network();
         assert_eq!(ip_network.network_address(), Ipv4Addr::new(192, 168, 0, 0));
         assert_eq!(ip_network.netmask(), 16);
@@ -1483,13 +1483,13 @@ mod tests {
     }
 
     #[test]
-    fn test_ipv4_network_iterator() {
+    fn ipv4_network_iterator() {
         let ip_network = return_test_ipv4_network();
         assert_eq!(ip_network.into_iter().len(), 256 * 256);
     }
 
     #[test]
-    fn test_ipv4_network_iterator_for() {
+    fn ipv4_network_iterator_for() {
         let mut i = 0;
         for _ in return_test_ipv4_network() {
             i += 1;
@@ -1498,7 +1498,7 @@ mod tests {
     }
 
     #[test]
-    fn test_ipv4_network_contains() {
+    fn ipv4_network_contains() {
         let ip_network = return_test_ipv4_network();
         assert!(!ip_network.contains(Ipv4Addr::new(192, 167, 255, 255)));
         assert!(ip_network.contains(Ipv4Addr::new(192, 168, 0, 0)));
@@ -1507,7 +1507,7 @@ mod tests {
     }
 
     #[test]
-    fn test_ipv4_network_subnets() {
+    fn ipv4_network_subnets() {
         let ip_network = return_test_ipv4_network();
         let mut subnets = ip_network.subnets();
         assert_eq!(subnets.len(), 2);
@@ -1523,7 +1523,7 @@ mod tests {
     }
 
     #[test]
-    fn test_ipv4_network_subnets_with_prefix() {
+    fn ipv4_network_subnets_with_prefix() {
         let ip_network = return_test_ipv4_network();
         let mut subnets = ip_network.subnets_with_prefix(18);
         assert_eq!(subnets.len(), 4);
@@ -1547,33 +1547,33 @@ mod tests {
     }
 
     #[test]
-    fn test_ipv4_network_parse() {
+    fn ipv4_network_parse() {
         let ip_network: Ipv4Network = "192.168.0.0/16".parse().unwrap();
         assert_eq!(ip_network, return_test_ipv4_network());
     }
 
     #[test]
-    fn test_ipv4_network_format() {
+    fn ipv4_network_format() {
         let ip_network = return_test_ipv4_network();
         assert_eq!(ip_network.to_string(), "192.168.0.0/16");
     }
 
     #[test]
-    fn test_ipv4_network_cmd_different_ip() {
+    fn ipv4_network_cmd_different_ip() {
         let a = Ipv4Network::new(Ipv4Addr::new(127, 0, 0, 0), 8).unwrap();
         let b = Ipv4Network::new(Ipv4Addr::new(128, 0, 0, 0), 8).unwrap();
         assert!(b > a);
     }
 
     #[test]
-    fn test_ipv4_network_cmd_different_netmask() {
+    fn ipv4_network_cmd_different_netmask() {
         let a = Ipv4Network::new(Ipv4Addr::new(127, 0, 0, 0), 8).unwrap();
         let b = Ipv4Network::new(Ipv4Addr::new(127, 0, 0, 0), 16).unwrap();
         assert!(b > a);
     }
 
     #[test]
-    fn test_ipv4_network_is_private() {
+    fn ipv4_network_is_private() {
         let is_private = |ip, netmask| Ipv4Network::new(ip, netmask).unwrap().is_private();
 
         assert!(is_private(Ipv4Addr::new(10, 0, 0, 0), 8));
@@ -1592,7 +1592,7 @@ mod tests {
     }
 
     #[test]
-    fn test_ipv4_network_is_global() {
+    fn ipv4_network_is_global() {
         let is_global = |ip, netmask| Ipv4Network::new(ip, netmask).unwrap().is_global();
 
         assert!(!is_global(Ipv4Addr::new(10, 0, 0, 0), 8));
@@ -1618,7 +1618,7 @@ mod tests {
     }
 
     #[test]
-    fn test_ipv4_network_hashmap() {
+    fn ipv4_network_hashmap() {
         use std::collections::HashMap;
 
         let ip = Ipv4Addr::new(127, 0, 0, 0);
@@ -1637,7 +1637,7 @@ mod tests {
     }
 
     #[test]
-    fn test_ipv4_network_summarize_address_range() {
+    fn ipv4_network_summarize_address_range() {
         let networks = Ipv4Network::summarize_address_range(
             Ipv4Addr::new(194, 249, 198, 0),
             Ipv4Addr::new(194, 249, 198, 159),
@@ -1654,7 +1654,7 @@ mod tests {
     }
 
     #[test]
-    fn test_ipv4_network_summarize_address_range_whole_range() {
+    fn ipv4_network_summarize_address_range_whole_range() {
         let networks = Ipv4Network::summarize_address_range(
             Ipv4Addr::new(0, 0, 0, 0),
             Ipv4Addr::new(255, 255, 255, 255),
@@ -1667,7 +1667,7 @@ mod tests {
     }
 
     #[test]
-    fn test_ipv6_network_new() {
+    fn ipv6_network_new() {
         let ip = Ipv6Addr::new(0xfc00, 0, 0, 0, 0, 0, 0, 0);
         let network = Ipv6Network::new(ip, 7).unwrap();
         assert_eq!(
@@ -1678,7 +1678,7 @@ mod tests {
     }
 
     #[test]
-    fn test_ipv6_network_contains() {
+    fn ipv6_network_contains() {
         let ip_network = return_test_ipv6_network();
         assert!(!ip_network.contains(Ipv6Addr::new(
             0x2001, 0x0db7, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff
@@ -1691,7 +1691,7 @@ mod tests {
     }
 
     #[test]
-    fn test_ipv6_network_supernet() {
+    fn ipv6_network_supernet() {
         let ip_network = return_test_ipv6_network();
         assert_eq!(
             ip_network.supernet(),
@@ -1700,7 +1700,7 @@ mod tests {
     }
 
     #[test]
-    fn test_ipv6_network_subnets() {
+    fn ipv6_network_subnets() {
         let mut subnets = return_test_ipv6_network().subnets();
         assert_eq!(subnets.len(), 2);
         assert_eq!(
@@ -1715,7 +1715,7 @@ mod tests {
     }
 
     #[test]
-    fn test_ipv6_network_subnets_with_prefix() {
+    fn ipv6_network_subnets_with_prefix() {
         let ip_network = return_test_ipv6_network();
         let mut subnets = ip_network.subnets_with_prefix(34);
         assert_eq!(subnets.len(), 4);
@@ -1739,13 +1739,13 @@ mod tests {
     }
 
     #[test]
-    fn test_ipv6_network_parse() {
+    fn ipv6_network_parse() {
         let ip_network: Ipv6Network = "2001:db8::/32".parse().unwrap();
         assert_eq!(ip_network, return_test_ipv6_network());
     }
 
     #[test]
-    fn test_ipv6_network_format() {
+    fn ipv6_network_format() {
         let ip_network = return_test_ipv6_network();
         assert_eq!(ip_network.to_string(), "2001:db8::/32");
     }
