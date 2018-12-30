@@ -458,6 +458,7 @@ impl Ipv4Network {
     }
 
     /// Returns `Ipv4NetworkIterator` over networks with bigger netmask by one.
+    /// If netmask is already 32, `None` will be returned.
     ///
     /// # Examples
     ///
@@ -465,13 +466,17 @@ impl Ipv4Network {
     /// use std::net::Ipv4Addr;
     /// use ip_network::Ipv4Network;
     ///
-    /// let ip = Ipv4Addr::new(192, 168, 1, 0);
-    /// let mut iterator = Ipv4Network::new(ip, 24).unwrap().subnets();
+    /// let ip_network = Ipv4Network::new(Ipv4Addr::new(192, 168, 1, 0), 24).unwrap();
+    /// let mut iterator = ip_network.subnets().unwrap();
     /// assert_eq!(iterator.next().unwrap(), Ipv4Network::new(Ipv4Addr::new(192, 168, 1, 0), 25).unwrap());
     /// assert_eq!(iterator.last().unwrap(), Ipv4Network::new(Ipv4Addr::new(192, 168, 1, 128), 25).unwrap());
     /// ```
-    pub fn subnets(&self) -> iterator::Ipv4NetworkIterator {
-        iterator::Ipv4NetworkIterator::new(self.clone(), self.netmask.saturating_add(1))
+    pub fn subnets(&self) -> Option<iterator::Ipv4NetworkIterator> {
+        if self.netmask == Self::LENGTH {
+            None
+        } else {
+            Some(iterator::Ipv4NetworkIterator::new(self.clone(), self.netmask + 1))
+        }
     }
 
     /// Returns `Ipv4NetworkIterator` over networks with defined netmask.
@@ -947,6 +952,7 @@ impl Ipv6Network {
     }
 
     /// Returns `Ipv6NetworkIterator` over networks with netmask bigger one.
+    /// If netmask is already 128, `None` will be returned.
     ///
     /// # Examples
     ///
@@ -954,13 +960,17 @@ impl Ipv6Network {
     /// use std::net::Ipv6Addr;
     /// use ip_network::Ipv6Network;
     ///
-    /// let network = Ipv6Network::new(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0), 32).unwrap();
-    /// let mut iterator = network.subnets();
+    /// let ip_network = Ipv6Network::new(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0), 32).unwrap();
+    /// let mut iterator = ip_network.subnets().unwrap();
     /// assert_eq!(iterator.next().unwrap(), Ipv6Network::new(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0), 33).unwrap());
     /// assert_eq!(iterator.last().unwrap(), Ipv6Network::new(Ipv6Addr::new(0x2001, 0xdb8, 0x8000, 0, 0, 0, 0, 0), 33).unwrap());
     /// ```
-    pub fn subnets(&self) -> iterator::Ipv6NetworkIterator {
-        iterator::Ipv6NetworkIterator::new(self.clone(), self.netmask.saturating_add(1))
+    pub fn subnets(&self) -> Option<iterator::Ipv6NetworkIterator> {
+        if self.netmask == Self::LENGTH {
+            None
+        } else {
+            Some(iterator::Ipv6NetworkIterator::new(self.clone(), self.netmask + 1))
+        }
     }
 
     /// Returns `Ipv6NetworkIterator` over networks with defined netmask.
@@ -1521,7 +1531,7 @@ mod tests {
     #[test]
     fn ipv4_network_subnets() {
         let ip_network = return_test_ipv4_network();
-        let mut subnets = ip_network.subnets();
+        let mut subnets = ip_network.subnets().unwrap();
         assert_eq!(subnets.len(), 2);
         assert_eq!(
             subnets.next().unwrap(),
@@ -1713,7 +1723,7 @@ mod tests {
 
     #[test]
     fn ipv6_network_subnets() {
-        let mut subnets = return_test_ipv6_network().subnets();
+        let mut subnets = return_test_ipv6_network().subnets().unwrap();
         assert_eq!(subnets.len(), 2);
         assert_eq!(
             subnets.next().unwrap(),
