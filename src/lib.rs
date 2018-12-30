@@ -1574,44 +1574,47 @@ mod tests {
 
     #[test]
     fn test_ipv4_network_is_private() {
-        assert!(Ipv4Network::new(Ipv4Addr::new(10, 0, 0, 0), 8).unwrap().is_private());
-        assert!(!Ipv4Network::new(Ipv4Addr::new(10, 0, 0, 0), 7).unwrap().is_private());
-        assert!(Ipv4Network::new(Ipv4Addr::new(10, 0, 0, 0), 32).unwrap().is_private());
-        assert!(!Ipv4Network::new(Ipv4Addr::new(11, 0, 0, 0), 32).unwrap().is_private());
+        let is_private = |ip, netmask| Ipv4Network::new(ip, netmask).unwrap().is_private();
 
-        assert!(Ipv4Network::new(Ipv4Addr::new(172, 16, 0, 0), 12).unwrap().is_private());
-        assert!(Ipv4Network::new(Ipv4Addr::new(172, 16, 0, 0), 32).unwrap().is_private());
-        assert!(Ipv4Network::new(Ipv4Addr::new(172, 31, 255, 255), 32).unwrap().is_private());
-        assert!(!Ipv4Network::new(Ipv4Addr::new(172, 32, 0, 0), 32).unwrap().is_private());
+        assert!(is_private(Ipv4Addr::new(10, 0, 0, 0), 8));
+        assert!(!is_private(Ipv4Addr::new(10, 0, 0, 0), 7));
+        assert!(is_private(Ipv4Addr::new(10, 0, 0, 0), 32));
+        assert!(!is_private(Ipv4Addr::new(11, 0, 0, 0), 32));
 
-        assert!(Ipv4Network::new(Ipv4Addr::new(192, 168, 0, 0), 16).unwrap().is_private());
-        assert!(Ipv4Network::new(Ipv4Addr::new(192, 168, 0, 0), 32).unwrap().is_private());
-        assert!(!Ipv4Network::new(Ipv4Addr::new(192, 168, 0, 0), 15).unwrap().is_private());
+        assert!(is_private(Ipv4Addr::new(172, 16, 0, 0), 12));
+        assert!(is_private(Ipv4Addr::new(172, 16, 0, 0), 32));
+        assert!(is_private(Ipv4Addr::new(172, 31, 255, 255), 32));
+        assert!(!is_private(Ipv4Addr::new(172, 32, 0, 0), 32));
+
+        assert!(is_private(Ipv4Addr::new(192, 168, 0, 0), 16));
+        assert!(is_private(Ipv4Addr::new(192, 168, 0, 0), 32));
+        assert!(!is_private(Ipv4Addr::new(192, 168, 0, 0), 15));
     }
 
     #[test]
     fn test_ipv4_network_is_global() {
-        assert!(!Ipv4Network::new(Ipv4Addr::new(10, 0, 0, 0), 8).unwrap().is_global());
-        assert!(Ipv4Network::new(Ipv4Addr::new(10, 0, 0, 0), 7).unwrap().is_global());
-        assert!(!Ipv4Network::new(Ipv4Addr::new(10, 0, 0, 0), 32).unwrap().is_global());
-        assert!(Ipv4Network::new(Ipv4Addr::new(11, 0, 0, 0), 32).unwrap().is_global());
+        let is_global = |ip, netmask| Ipv4Network::new(ip, netmask).unwrap().is_global();
 
-        assert!(!Ipv4Network::new(Ipv4Addr::new(172, 16, 0, 0), 12).unwrap().is_global());
-        assert!(!Ipv4Network::new(Ipv4Addr::new(172, 16, 0, 0), 32).unwrap().is_global());
-        assert!(!Ipv4Network::new(Ipv4Addr::new(172, 31, 255, 255), 32).unwrap().is_global());
-        assert!(Ipv4Network::new(Ipv4Addr::new(172, 32, 0, 0), 32).unwrap().is_global());
+        assert!(!is_global(Ipv4Addr::new(10, 0, 0, 0), 8));
+        assert!(is_global(Ipv4Addr::new(10, 0, 0, 0), 7));
+        assert!(!is_global(Ipv4Addr::new(10, 0, 0, 0), 32));
+        assert!(is_global(Ipv4Addr::new(11, 0, 0, 0), 32));
 
-        assert!(!Ipv4Network::new(Ipv4Addr::new(192, 168, 0, 0), 16).unwrap().is_global());
-        assert!(!Ipv4Network::new(Ipv4Addr::new(192, 168, 0, 0), 32).unwrap().is_global());
-        assert!(Ipv4Network::new(Ipv4Addr::new(192, 168, 0, 0), 15).unwrap().is_global());
+        assert!(!is_global(Ipv4Addr::new(172, 16, 0, 0), 12));
+        assert!(!is_global(Ipv4Addr::new(172, 16, 0, 0), 32));
+        assert!(!is_global(Ipv4Addr::new(172, 31, 255, 255), 32));
+        assert!(is_global(Ipv4Addr::new(172, 32, 0, 0), 32));
 
-        assert!(!Ipv4Network::new(Ipv4Addr::new(127, 0, 0, 0), 8).unwrap().is_global());
-        assert!(!Ipv4Network::new(Ipv4Addr::new(169, 254, 0, 0), 16).unwrap().is_global());
-        assert!(!Ipv4Network::new(Ipv4Addr::new(255, 255, 255, 255), 32).unwrap().is_global());
-        assert!(!Ipv4Network::new(Ipv4Addr::new(192, 0, 2, 0), 24).unwrap().is_global());
-        assert!(!Ipv4Network::new(Ipv4Addr::new(198, 51, 100, 0), 24).unwrap().is_global());
-        assert!(!Ipv4Network::new(Ipv4Addr::new(203, 0, 113, 0), 24).unwrap().is_global());
+        assert!(!is_global(Ipv4Addr::new(192, 168, 0, 0), 16));
+        assert!(!is_global(Ipv4Addr::new(192, 168, 0, 0), 32));
+        assert!(is_global(Ipv4Addr::new(192, 168, 0, 0), 15));
 
+        assert!(!is_global(Ipv4Addr::new(127, 0, 0, 0), 8));
+        assert!(!is_global(Ipv4Addr::new(169, 254, 0, 0), 16));
+        assert!(!is_global(Ipv4Addr::new(255, 255, 255, 255), 32));
+        assert!(!is_global(Ipv4Addr::new(192, 0, 2, 0), 24));
+        assert!(!is_global(Ipv4Addr::new(198, 51, 100, 0), 24));
+        assert!(!is_global(Ipv4Addr::new(203, 0, 113, 0), 24));
     }
 
     #[test]
