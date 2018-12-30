@@ -1234,7 +1234,19 @@ impl fmt::Display for Ipv6Network {
 impl FromStr for Ipv6Network {
     type Err = IpNetworkParseError;
 
-    // TODO
+    /// Converts string in format X:X::X/Y (CIDR notation) to `Ipv6Network`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::net::Ipv6Addr;
+    /// use ip_network::Ipv6Network;
+    /// use std::str::FromStr;
+    ///
+    /// let ip_network = Ipv6Network::from_str("2001:db8::/32").unwrap();
+    /// assert_eq!(ip_network.network_address(), Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0));
+    /// assert_eq!(ip_network.netmask(), 32);
+    /// ```
     fn from_str(s: &str) -> Result<Ipv6Network, IpNetworkParseError> {
         let (ip, netmask) =
             helpers::split_ip_netmask(s).ok_or(IpNetworkParseError::InvalidFormatError)?;
