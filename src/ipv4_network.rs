@@ -33,6 +33,7 @@ impl Ipv4Network {
     /// assert_eq!(ip_network.network_address(), Ipv4Addr::new(192, 168, 1, 0));
     /// assert_eq!(ip_network.netmask(), 24);
     /// ```
+    #[allow(clippy::new_ret_no_self)]
     pub fn new(network_address: Ipv4Addr, netmask: u8) -> Result<Self, IpNetworkError> {
         if netmask > Self::LENGTH {
             return Err(IpNetworkError::NetmaskError(netmask));

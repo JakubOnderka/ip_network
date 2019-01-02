@@ -28,6 +28,7 @@ impl IpNetwork {
     /// let ip_network = IpNetwork::new(network_address, 24).unwrap();
     /// assert_eq!(ip_network, IpNetwork::V4(Ipv4Network::new(Ipv4Addr::new(192, 168, 1, 0), 24).unwrap()));
     /// ```
+    #[allow(clippy::new_ret_no_self)]
     pub fn new<I: Into<IpAddr>>(network_address: I, netmask: u8) -> Result<Self, IpNetworkError> {
         Ok(match network_address.into() {
             IpAddr::V4(ip) => IpNetwork::V4(Ipv4Network::new(ip, netmask)?),
