@@ -1,15 +1,12 @@
 use std::fmt;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 use std::str::FromStr;
-#[cfg(feature = "serde")]
-use serde::{Serialize, Deserialize};
 use crate::{IpNetworkError, IpNetworkParseError};
 use crate::helpers;
 use crate::{Ipv4Network, Ipv6Network};
 
 /// Holds IPv4 or IPv6 network
 #[derive(Clone, Eq, PartialEq, Debug, Hash, PartialOrd, Ord)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum IpNetwork {
     V4(Ipv4Network),
     V6(Ipv6Network),

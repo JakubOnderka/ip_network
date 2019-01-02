@@ -2,15 +2,12 @@ use std::cmp;
 use std::fmt;
 use std::net::Ipv4Addr;
 use std::str::FromStr;
-#[cfg(feature = "serde")]
-use serde::{Serialize, Deserialize};
 use crate::{IpNetworkError, IpNetworkParseError};
 use crate::helpers;
 use crate::iterator;
 
 /// IPv4 Network
 #[derive(Clone, Debug, Eq, PartialEq, Hash, PartialOrd, Ord)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Ipv4Network {
     network_address: Ipv4Addr,
     netmask: u8,
@@ -558,7 +555,7 @@ mod tests {
     fn return_test_ipv4_network() -> Ipv4Network {
         Ipv4Network::new(Ipv4Addr::new(192, 168, 0, 0), 16).unwrap()
     }
-    
+
     #[test]
     fn new_host_bits_set() {
         let ip = Ipv4Addr::new(127, 0, 0, 1);

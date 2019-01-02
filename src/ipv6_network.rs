@@ -1,8 +1,6 @@
 use std::fmt;
 use std::net::Ipv6Addr;
 use std::str::FromStr;
-#[cfg(feature = "serde")]
-use serde::{Serialize, Deserialize};
 use crate::{IpNetworkError, IpNetworkParseError};
 use crate::helpers;
 use crate::iterator;
@@ -21,7 +19,6 @@ pub enum Ipv6MulticastScope {
 
 /// IPv6 Network
 #[derive(Clone, Debug, Eq, PartialEq, Hash, PartialOrd, Ord)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Ipv6Network {
     network_address: Ipv6Addr,
     netmask: u8,
@@ -506,7 +503,7 @@ impl From<Ipv6Addr> for Ipv6Network {
 mod tests {
     use std::net::Ipv6Addr;
     use crate::Ipv6Network;
-    
+
     fn return_test_ipv6_network() -> Ipv6Network {
         Ipv6Network::new(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0), 32).unwrap()
     }
