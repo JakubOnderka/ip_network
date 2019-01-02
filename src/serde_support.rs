@@ -1,6 +1,5 @@
 use std::fmt;
-use std::str;
-use std::str::FromStr;
+use std::str::{self, FromStr};
 use serde::de::{Deserializer, EnumAccess, Error, Unexpected, VariantAccess, Visitor};
 use serde::ser::Serializer;
 use crate::{IpNetwork, Ipv4Network, Ipv6Network};

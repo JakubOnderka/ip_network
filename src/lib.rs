@@ -21,7 +21,7 @@ use std::fmt;
 
 pub use self::ip_network::IpNetwork;
 pub use self::ipv4_network::Ipv4Network;
-pub use self::ipv6_network::{Ipv6Network, Ipv6MulticastScope};
+pub use self::ipv6_network::{Ipv6MulticastScope, Ipv6Network};
 
 /// Errors when creating new IPv4 or IPv6 networks
 #[derive(Debug)]
