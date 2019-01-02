@@ -6,7 +6,7 @@ use crate::postgres_common;
 
 impl ToSql for Ipv4Network {
     fn to_sql(&self, _: &Type, w: &mut Vec<u8>) -> Result<IsNull, Box<Error + Sync + Send>> {
-        let bytes = postgres_common::to_sql_ipv4_network(self);
+        let bytes = postgres_common::to_sql_ipv4_network(*self);
         w.extend_from_slice(&bytes);
 
         Ok(IsNull::No)
@@ -18,7 +18,7 @@ impl ToSql for Ipv4Network {
 
 impl ToSql for Ipv6Network {
     fn to_sql(&self, _: &Type, w: &mut Vec<u8>) -> Result<IsNull, Box<Error + Sync + Send>> {
-        let bytes = postgres_common::to_sql_ipv6_network(self);
+        let bytes = postgres_common::to_sql_ipv6_network(*self);
         w.extend_from_slice(&bytes);
 
         Ok(IsNull::No)

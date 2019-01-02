@@ -37,14 +37,14 @@ impl FromSql<Cidr, Pg> for IpNetwork {
 
 impl ToSql<Cidr, Pg> for Ipv4Network {
     fn to_sql<W: Write>(&self, out: &mut Output<W, Pg>) -> serialize::Result {
-        let data = postgres_common::to_sql_ipv4_network(self);
+        let data = postgres_common::to_sql_ipv4_network(*self);
         out.write_all(&data).map(|_| IsNull::No).map_err(Into::into)
     }
 }
 
 impl ToSql<Cidr, Pg> for Ipv6Network {
     fn to_sql<W: Write>(&self, out: &mut Output<W, Pg>) -> serialize::Result {
-        let data = postgres_common::to_sql_ipv6_network(self);
+        let data = postgres_common::to_sql_ipv6_network(*self);
         out.write_all(&data).map(|_| IsNull::No).map_err(Into::into)
     }
 }
@@ -53,11 +53,11 @@ impl ToSql<Cidr, Pg> for IpNetwork {
     fn to_sql<W: Write>(&self, out: &mut Output<W, Pg>) -> serialize::Result {
         match *self {
             IpNetwork::V4(ref network) => {
-                let data = postgres_common::to_sql_ipv4_network(network);
+                let data = postgres_common::to_sql_ipv4_network(*network);
                 out.write_all(&data).map(|_| IsNull::No).map_err(Into::into)
             }
             IpNetwork::V6(ref network) => {
-                let data = postgres_common::to_sql_ipv6_network(network);
+                let data = postgres_common::to_sql_ipv6_network(*network);
                 out.write_all(&data).map(|_| IsNull::No).map_err(Into::into)
             }
         }

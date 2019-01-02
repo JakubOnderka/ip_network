@@ -7,7 +7,7 @@ use crate::helpers;
 use crate::iterator;
 
 /// IPv4 Network
-#[derive(Clone, Debug, Eq, PartialEq, Hash, PartialOrd, Ord)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Hash, PartialOrd, Ord)]
 pub struct Ipv4Network {
     network_address: Ipv4Addr,
     netmask: u8,
@@ -217,7 +217,7 @@ impl Ipv4Network {
         if self.netmask == Self::LENGTH {
             None
         } else {
-            Some(iterator::Ipv4NetworkIterator::new(self.clone(), self.netmask + 1))
+            Some(iterator::Ipv4NetworkIterator::new(*self, self.netmask + 1))
         }
     }
 
@@ -239,7 +239,7 @@ impl Ipv4Network {
     /// assert_eq!(iterator.last().unwrap(), Ipv4Network::new(Ipv4Addr::new(192, 168, 1, 128), 25).unwrap());
     /// ```
     pub fn subnets_with_prefix(&self, prefix: u8) -> iterator::Ipv4NetworkIterator {
-        iterator::Ipv4NetworkIterator::new(self.clone(), prefix)
+        iterator::Ipv4NetworkIterator::new(*self, prefix)
     }
 
     /// Returns [`true`] for the special 'unspecified' network (0.0.0.0/32).

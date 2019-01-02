@@ -18,7 +18,7 @@ pub enum Ipv6MulticastScope {
 }
 
 /// IPv6 Network
-#[derive(Clone, Debug, Eq, PartialEq, Hash, PartialOrd, Ord)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Hash, PartialOrd, Ord)]
 pub struct Ipv6Network {
     network_address: Ipv6Addr,
     netmask: u8,
@@ -184,7 +184,7 @@ impl Ipv6Network {
         if self.netmask == Self::LENGTH {
             None
         } else {
-            Some(iterator::Ipv6NetworkIterator::new(self.clone(), self.netmask + 1))
+            Some(iterator::Ipv6NetworkIterator::new(*self, self.netmask + 1))
         }
     }
 
@@ -206,7 +206,7 @@ impl Ipv6Network {
     /// assert_eq!(iterator.last().unwrap(), Ipv6Network::new(Ipv6Addr::new(0x2001, 0xdb8, 0x8000, 0, 0, 0, 0, 0), 33).unwrap());
     /// ```
     pub fn subnets_with_prefix(&self, prefix: u8) -> iterator::Ipv6NetworkIterator {
-        iterator::Ipv6NetworkIterator::new(self.clone(), prefix)
+        iterator::Ipv6NetworkIterator::new(*self, prefix)
     }
 
     /// Returns [`true`] for the special 'unspecified' network (::/128).

@@ -52,7 +52,7 @@ pub fn from_sql_ipv6_network(raw: &[u8]) -> Result<Ipv6Network, Box<Error + Sync
 }
 
 #[inline]
-pub fn to_sql_ipv4_network(network: &Ipv4Network) -> [u8; 8] {
+pub fn to_sql_ipv4_network(network: Ipv4Network) -> [u8; 8] {
     let ip_octets = network.network_address().octets();
     let mut bytes = [0; 8];
     bytes[0] = IPV4_TYPE;
@@ -64,7 +64,7 @@ pub fn to_sql_ipv4_network(network: &Ipv4Network) -> [u8; 8] {
 }
 
 #[inline]
-pub fn to_sql_ipv6_network(network: &Ipv6Network) -> [u8; 20] {
+pub fn to_sql_ipv6_network(network: Ipv6Network) -> [u8; 20] {
     let ip_octets = network.network_address().octets();
     let mut bytes = [0; 20];
     bytes[0] = IPV6_TYPE;
