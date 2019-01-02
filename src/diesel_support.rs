@@ -12,21 +12,24 @@ type BoxedError = Box<Error + Sync + Send>;
 
 impl FromSql<Cidr, Pg> for Ipv4Network {
     fn from_sql(bytes: Option<&[u8]>) -> deserialize::Result<Self> {
-        let raw = bytes.ok_or::<BoxedError>("Input for Ipv4Network::from_sql is empty".into())?;
-        postgres_common::from_sql_ipv4_network(raw)
+        bytes
+            .ok_or_else(|| "Input for Ipv4Network::from_sql is empty".into())
+            .and_then(postgres_common::from_sql_ipv4_network)
     }
 }
 
 impl FromSql<Cidr, Pg> for Ipv6Network {
     fn from_sql(bytes: Option<&[u8]>) -> deserialize::Result<Self> {
-        let raw = bytes.ok_or::<BoxedError>("Input for Ipv6Network::from_sql is empty".into())?;
-        postgres_common::from_sql_ipv6_network(raw)
+        bytes
+            .ok_or_else(|| "Input for Ipv6Network::from_sql is empty".into())
+            .and_then(postgres_common::from_sql_ipv6_network)
     }
 }
 
 impl FromSql<Cidr, Pg> for IpNetwork {
     fn from_sql(bytes: Option<&[u8]>) -> deserialize::Result<Self> {
-        let raw = bytes.ok_or::<BoxedError>("Input for IpNetwork::from_sql is empty".into())?;
+        let raw = bytes
+            .ok_or_else::<BoxedError, _>(|| "Input for IpNetwork::from_sql is empty".into())?;
         match raw[0] {
             postgres_common::IPV4_TYPE => Ok(IpNetwork::V4(Ipv4Network::from_sql(bytes)?)),
             postgres_common::IPV6_TYPE => Ok(IpNetwork::V6(Ipv6Network::from_sql(bytes)?)),
