@@ -54,15 +54,9 @@ impl ToSql<Cidr, Pg> for Ipv6Network {
 
 impl ToSql<Cidr, Pg> for IpNetwork {
     fn to_sql<W: Write>(&self, out: &mut Output<W, Pg>) -> serialize::Result {
-        match *self {
-            IpNetwork::V4(ref network) => {
-                let data = postgres_common::to_sql_ipv4_network(*network);
-                out.write_all(&data).map(|_| IsNull::No).map_err(Into::into)
-            }
-            IpNetwork::V6(ref network) => {
-                let data = postgres_common::to_sql_ipv6_network(*network);
-                out.write_all(&data).map(|_| IsNull::No).map_err(Into::into)
-            }
+        match self {
+            IpNetwork::V4(network) => ToSql::<Cidr, Pg>::to_sql(network, out),
+            IpNetwork::V6(network) => ToSql::<Cidr, Pg>::to_sql(network, out),
         }
     }
 }
@@ -145,9 +139,13 @@ impl<T> PqCidrExtensionMethods for T where T: Expression<SqlType = Cidr> {}
 
 #[cfg(test)]
 mod tests {
+    use std::net::{Ipv4Addr, Ipv6Addr};
+    use diesel::sql_types::Cidr;
+    use diesel::pg::Pg;
+    use diesel::serialize::{Output, ToSql};
+    use diesel::deserialize::FromSql;
     use super::PqCidrExtensionMethods;
     use super::{IpNetwork, Ipv4Network, Ipv6Network};
-    use std::net::Ipv4Addr;
 
     table! {
         test {
@@ -165,6 +163,38 @@ mod tests {
         pub ip_network: IpNetwork,
         pub ipv4_network: Ipv4Network,
         pub ipv6_network: Ipv6Network,
+    }
+
+    fn test_output() -> Output<'static, Vec<u8>, Pg> {
+        use std::mem;
+        Output::new(Vec::new(), unsafe { mem::uninitialized() })
+    }
+
+    #[test]
+    fn ipv4_network() {
+        let mut bytes = test_output();
+        let ipv4_network = Ipv4Network::new(Ipv4Addr::new(1, 2, 3, 4), 32).unwrap();
+        ToSql::<Cidr, Pg>::to_sql(&ipv4_network, &mut bytes).unwrap();
+        let converted: Ipv4Network = FromSql::<Cidr, Pg>::from_sql(Some(bytes.as_ref())).unwrap();
+        assert_eq!(ipv4_network, converted);
+    }
+
+    #[test]
+    fn ipv6_network() {
+        let mut bytes = test_output();
+        let ipv6_network = Ipv6Network::new(Ipv6Addr::new(1, 2, 3, 4, 5, 6, 7, 8), 128).unwrap();
+        ToSql::<Cidr, Pg>::to_sql(&ipv6_network, &mut bytes).unwrap();
+        let converted: Ipv6Network = FromSql::<Cidr, Pg>::from_sql(Some(bytes.as_ref())).unwrap();
+        assert_eq!(ipv6_network, converted);
+    }
+
+    #[test]
+    fn ip_network() {
+        let mut bytes = test_output();
+        let ip_network = IpNetwork::V6(Ipv6Network::new(Ipv6Addr::new(1, 2, 3, 4, 5, 6, 7, 8), 128).unwrap());
+        ToSql::<Cidr, Pg>::to_sql(&ip_network, &mut bytes).unwrap();
+        let converted: IpNetwork = FromSql::<Cidr, Pg>::from_sql(Some(bytes.as_ref())).unwrap();
+        assert_eq!(ip_network, converted);
     }
 
     #[test]
