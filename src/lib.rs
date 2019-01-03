@@ -6,11 +6,11 @@ extern crate diesel;
 /// Support for Diesel PostgreSQL CIDR type
 pub mod diesel_support;
 mod helpers;
-/// `Ipv4RangeIterator`, `Ipv4NetworkIterator` and `Ipv6NetworkIterator`
-pub mod iterator;
+mod ip_network;
 mod ipv4_network;
 mod ipv6_network;
-mod ip_network;
+/// `Ipv4RangeIterator`, `Ipv4NetworkIterator` and `Ipv6NetworkIterator`
+pub mod iterator;
 #[cfg(any(feature = "diesel", feature = "postgres"))]
 mod postgres_common;
 #[cfg(feature = "postgres")]

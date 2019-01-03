@@ -54,7 +54,10 @@ impl IpNetwork {
     /// assert_eq!(ip_network.network_address(), IpAddr::V4(Ipv4Addr::new(192, 168, 1, 0)));
     /// assert_eq!(ip_network.netmask(), 24);
     /// ```
-    pub fn new_truncate<I: Into<IpAddr>>(network_address: I, netmask: u8) -> Result<Self, IpNetworkError> {
+    pub fn new_truncate<I: Into<IpAddr>>(
+        network_address: I,
+        netmask: u8,
+    ) -> Result<Self, IpNetworkError> {
         Ok(match network_address.into() {
             IpAddr::V4(ip) => IpNetwork::V4(Ipv4Network::new_truncate(ip, netmask)?),
             IpAddr::V6(ip) => IpNetwork::V6(Ipv6Network::new_truncate(ip, netmask)?),
