@@ -259,6 +259,42 @@ impl From<Ipv6Network> for IpNetwork {
     }
 }
 
+impl PartialEq<Ipv4Network> for IpNetwork {
+    fn eq(&self, other: &Ipv4Network) -> bool {
+        match self {
+            IpNetwork::V4(v4) => v4 == other,
+            IpNetwork::V6(_) => false,
+        }
+    }
+}
+
+impl PartialEq<Ipv6Network> for IpNetwork {
+    fn eq(&self, other: &Ipv6Network) -> bool {
+        match self {
+            IpNetwork::V4(_) => false,
+            IpNetwork::V6(v6) => v6 == other,
+        }
+    }
+}
+
+impl PartialEq<IpNetwork> for Ipv4Network {
+    fn eq(&self, other: &IpNetwork) -> bool {
+        match other {
+            IpNetwork::V4(v4) => self == v4,
+            IpNetwork::V6(_) => false,
+        }
+    }
+}
+
+impl PartialEq<IpNetwork> for Ipv6Network {
+    fn eq(&self, other: &IpNetwork) -> bool {
+        match other {
+            IpNetwork::V4(_) => false,
+            IpNetwork::V6(v6) => self == v6,
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use std::net::{Ipv4Addr, Ipv6Addr};
@@ -358,5 +394,31 @@ mod tests {
     fn format_ipv6() {
         let ip_network = IpNetwork::V6(return_test_ipv6_network());
         assert_eq!(ip_network.to_string(), "2001:db8::/32");
+    }
+
+    #[test]
+    fn compare_ip_network_ipv4_network() {
+        let ip_network = IpNetwork::V4(return_test_ipv4_network());
+        let ipv4_network = return_test_ipv4_network();
+        let different = Ipv4Network::new(Ipv4Addr::new(1, 2, 3, 4), 32).unwrap();
+        assert_eq!(ip_network, ipv4_network);
+        assert_eq!(ipv4_network, ip_network);
+        assert_ne!(ip_network, different);
+        assert_ne!(different, ip_network);
+        assert_ne!(ip_network, return_test_ipv6_network());
+        assert_ne!(return_test_ipv6_network(), ip_network);
+    }
+
+    #[test]
+    fn compare_ip_network_ipv6_network() {
+        let ip_network = IpNetwork::V6(return_test_ipv6_network());
+        let ipv6_network = return_test_ipv6_network();
+        let different = Ipv6Network::new(Ipv6Addr::new(1, 2, 3, 4, 5, 6, 7, 8), 128).unwrap();
+        assert_eq!(ip_network, ipv6_network);
+        assert_eq!(ipv6_network, ip_network);
+        assert_ne!(ip_network, different);
+        assert_ne!(different, ip_network);
+        assert_ne!(ip_network, return_test_ipv4_network());
+        assert_ne!(return_test_ipv4_network(), ip_network);
     }
 }
