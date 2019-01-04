@@ -407,7 +407,7 @@ impl Ipv6Network {
     /// assert!(!Ipv6Network::new(Ipv6Addr::new(0, 0, 0, 0, 0, 0xffff, 0xc00a, 0x2ff), 128).unwrap().is_multicast());
     /// ```
     pub fn is_multicast(&self) -> bool {
-        (self.network_address.segments()[0] & 0xff00) == 0xff00 && self.netmask >= 8
+        self.network_address.is_multicast()
     }
 
     /// Returns the network's multicast scope if the network is multicast.
@@ -427,7 +427,7 @@ impl Ipv6Network {
     /// assert_eq!(Ipv6Network::new(Ipv6Addr::new(0, 0, 0, 0, 0, 0xffff, 0xc00a, 0x2ff), 128).unwrap().multicast_scope(), None);
     /// ```
     pub fn multicast_scope(&self) -> Option<Ipv6MulticastScope> {
-        if self.is_multicast() {
+        if self.is_multicast() && self.netmask >= 16 {
             match self.network_address.segments()[0] & 0x000f {
                 1 => Some(Ipv6MulticastScope::InterfaceLocal),
                 2 => Some(Ipv6MulticastScope::LinkLocal),
@@ -503,7 +503,7 @@ impl From<Ipv6Addr> for Ipv6Network {
 #[cfg(test)]
 mod tests {
     use std::net::Ipv6Addr;
-    use crate::{Ipv6Network, IpNetworkError};
+    use crate::{Ipv6Network, IpNetworkError, Ipv6MulticastScope};
 
     fn return_test_ipv6_network() -> Ipv6Network {
         Ipv6Network::new(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0), 32).unwrap()
@@ -595,6 +595,26 @@ mod tests {
             Ipv6Network::new(Ipv6Addr::new(0x2001, 0x0db8, 0xc000, 0, 0, 0, 0, 0), 34).unwrap()
         );
         assert!(subnets.next().is_none());
+    }
+
+    #[test]
+    fn multicast_scope() {
+        assert_eq!(None, "ff02::/15".parse::<Ipv6Network>().unwrap().multicast_scope());
+        assert_eq!(None, "fff2::/15".parse::<Ipv6Network>().unwrap().multicast_scope());
+        assert_eq!(Some(Ipv6MulticastScope::InterfaceLocal), "ff01::/16".parse::<Ipv6Network>().unwrap().multicast_scope());
+        assert_eq!(Some(Ipv6MulticastScope::InterfaceLocal), "fff1::/16".parse::<Ipv6Network>().unwrap().multicast_scope());
+        assert_eq!(Some(Ipv6MulticastScope::LinkLocal), "ff02::/16".parse::<Ipv6Network>().unwrap().multicast_scope());
+        assert_eq!(Some(Ipv6MulticastScope::LinkLocal), "fff2::/16".parse::<Ipv6Network>().unwrap().multicast_scope());
+        assert_eq!(Some(Ipv6MulticastScope::RealmLocal), "ff03::/16".parse::<Ipv6Network>().unwrap().multicast_scope());
+        assert_eq!(Some(Ipv6MulticastScope::RealmLocal), "fff3::/16".parse::<Ipv6Network>().unwrap().multicast_scope());
+        assert_eq!(Some(Ipv6MulticastScope::AdminLocal), "ff04::/16".parse::<Ipv6Network>().unwrap().multicast_scope());
+        assert_eq!(Some(Ipv6MulticastScope::AdminLocal), "fff4::/16".parse::<Ipv6Network>().unwrap().multicast_scope());
+        assert_eq!(Some(Ipv6MulticastScope::SiteLocal), "ff05::/16".parse::<Ipv6Network>().unwrap().multicast_scope());
+        assert_eq!(Some(Ipv6MulticastScope::SiteLocal), "fff5::/16".parse::<Ipv6Network>().unwrap().multicast_scope());
+        assert_eq!(Some(Ipv6MulticastScope::OrganizationLocal), "ff08::/16".parse::<Ipv6Network>().unwrap().multicast_scope());
+        assert_eq!(Some(Ipv6MulticastScope::OrganizationLocal), "fff8::/16".parse::<Ipv6Network>().unwrap().multicast_scope());
+        assert_eq!(Some(Ipv6MulticastScope::Global), "ff0e::/16".parse::<Ipv6Network>().unwrap().multicast_scope());
+        assert_eq!(Some(Ipv6MulticastScope::Global), "fffe::/16".parse::<Ipv6Network>().unwrap().multicast_scope());
     }
 
     #[test]
