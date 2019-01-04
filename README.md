@@ -15,10 +15,10 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-ip_network = "0.2"
+ip_network = "0.3"
 ```
 
-this to your crate root:
+this to your crate root (necessary just when your project is Rust 2015 edition):
 
 ```rust
 extern crate ip_network;
@@ -30,12 +30,14 @@ and then you can use it like this:
 use std::net::Ipv4Addr;
 use ip_network::Ipv4Network;
 
-let ip_network = Ipv4Network::from(Ipv4Addr::new(192, 168, 0, 0), 16).unwrap();
-assert_eq!(format!("{}", ip_network), "192.168.0.0/16");
+let ip_network = Ipv4Network::new(Ipv4Addr::new(192, 168, 0, 0), 16).unwrap();
+assert_eq!("192.168.0.0/16", ip_network.to_string());
 ```
 
-Minimal required version of Rust compiler is 1.26 (because of support `u128` data type), for
-older compiler you can use `0.1.X` versions.   
+Minimal required version of Rust compiler is:
+- 1.31 for version 0.3 and newer (because of 2018 edition),
+- 1.26 for version 0.2 (because of support `u128` data type),
+- for older compiler you can use 0.1 version.   
 
 ## Serde support
 
@@ -43,7 +45,7 @@ To enable serialization, just add `serde` feature to package in `Cargo.toml`:
 
 ```toml
 [dependencies]
-ip_network = { version = "0.2", features = ["serde"] }
+ip_network = { version = "0.3", features = ["serde"] }
 ``` 
 
 ## Postgres support
@@ -52,7 +54,7 @@ To enable support for [postgres](https://github.com/sfackler/rust-postgres) crat
 
 ```toml
 [dependencies]
-ip_network = { version = "0.2", features = ["postgres"] }
+ip_network = { version = "0.3", features = ["postgres"] }
 ``` 
 
 ## Diesel support
@@ -61,7 +63,7 @@ To enable support for [diesel](https://diesel.rs) CIDR type for PostgreSQL, just
 
 ```toml
 [dependencies]
-ip_network = { version = "0.2", features = ["diesel"] }
+ip_network = { version = "0.3", features = ["diesel"] }
 ``` 
 
 You can then use `ip_network::diesel_support::PqCidrExtensionMethods` trait for CIDR operators support.
