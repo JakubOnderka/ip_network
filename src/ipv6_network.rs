@@ -18,7 +18,7 @@ pub enum Ipv6MulticastScope {
 }
 
 /// IPv6 Network
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Hash, PartialOrd, Ord)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialOrd, Ord)]
 pub struct Ipv6Network {
     network_address: Ipv6Addr,
     netmask: u8,
@@ -497,6 +497,12 @@ impl From<Ipv6Addr> for Ipv6Network {
             network_address: ip,
             netmask: Self::LENGTH,
         }
+    }
+}
+
+impl PartialEq for Ipv6Network {
+    fn eq(&self, other: &Ipv6Network) -> bool {
+        self.netmask == other.netmask && self.network_address == other.network_address
     }
 }
 

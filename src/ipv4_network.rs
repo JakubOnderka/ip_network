@@ -7,7 +7,7 @@ use crate::helpers;
 use crate::iterator;
 
 /// IPv4 Network
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Hash, PartialOrd, Ord)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialOrd, Ord)]
 pub struct Ipv4Network {
     network_address: Ipv4Addr,
     netmask: u8,
@@ -522,6 +522,12 @@ impl From<Ipv4Addr> for Ipv4Network {
             network_address: ip,
             netmask: Self::LENGTH,
         }
+    }
+}
+
+impl PartialEq for Ipv4Network {
+    fn eq(&self, other: &Ipv4Network) -> bool {
+        self.netmask == other.netmask && self.network_address == other.network_address
     }
 }
 
