@@ -562,7 +562,7 @@ mod tests {
         let ip = Ipv4Addr::new(127, 0, 0, 1);
         let ip_network = Ipv4Network::new(ip, 8);
         assert!(ip_network.is_err());
-        assert_eq!(ip_network.err().unwrap(), IpNetworkError::HostBitsSet);
+        assert_eq!(IpNetworkError::HostBitsSet, ip_network.unwrap_err());
     }
 
     #[test]
@@ -591,7 +591,7 @@ mod tests {
         let ip = Ipv4Addr::new(127, 0, 0, 1);
         let ip_network = Ipv4Network::new(ip, 33);
         assert!(ip_network.is_err());
-        assert_eq!(ip_network.err().unwrap(), IpNetworkError::NetmaskError(33));
+        assert_eq!(IpNetworkError::NetmaskError(33), ip_network.unwrap_err());
     }
 
     #[test]
@@ -606,7 +606,7 @@ mod tests {
         let ip = Ipv4Addr::new(127, 0, 0, 1);
         let ip_network = Ipv4Network::new_truncate(ip, 33);
         assert!(ip_network.is_err());
-        assert_eq!(ip_network.err().unwrap(), IpNetworkError::NetmaskError(33));
+        assert_eq!(IpNetworkError::NetmaskError(33), ip_network.unwrap_err());
     }
 
     #[test]

@@ -559,6 +559,12 @@ mod tests {
     }
 
     #[test]
+    fn supernet_none() {
+        let ipv6_network = Ipv6Network::new(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 0), 0).unwrap();
+        assert_eq!(None, ipv6_network.supernet());
+    }
+
+    #[test]
     fn subnets() {
         let mut subnets = return_test_ipv6_network().subnets().unwrap();
         assert_eq!(subnets.len(), 2);
