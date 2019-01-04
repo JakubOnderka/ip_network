@@ -503,7 +503,7 @@ impl From<Ipv6Addr> for Ipv6Network {
 #[cfg(test)]
 mod tests {
     use std::net::Ipv6Addr;
-    use crate::Ipv6Network;
+    use crate::{Ipv6Network, IpNetworkError};
 
     fn return_test_ipv6_network() -> Ipv6Network {
         Ipv6Network::new(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0), 32).unwrap()
@@ -518,6 +518,22 @@ mod tests {
             Ipv6Addr::new(0xfc00, 0, 0, 0, 0, 0, 0, 0)
         );
         assert_eq!(network.netmask(), 7);
+    }
+
+    #[test]
+    fn new_invalid_netmask() {
+        let ip = Ipv6Addr::new(0xfc00, 0, 0, 0, 0, 0, 0, 0);
+        let network = Ipv6Network::new(ip, 129);
+        assert!(network.is_err());
+        assert_eq!(IpNetworkError::NetmaskError(129), network.unwrap_err());
+    }
+
+    #[test]
+    fn new_truncate_invalid_netmask() {
+        let ip = Ipv6Addr::new(0xfc00, 0, 0, 0, 0, 0, 0, 0);
+        let network = Ipv6Network::new_truncate(ip, 129);
+        assert!(network.is_err());
+        assert_eq!(IpNetworkError::NetmaskError(129), network.unwrap_err());
     }
 
     #[test]
@@ -591,5 +607,13 @@ mod tests {
     fn format() {
         let ip_network = return_test_ipv6_network();
         assert_eq!(ip_network.to_string(), "2001:db8::/32");
+    }
+
+    #[test]
+    fn from_ipv6addr() {
+        let ip = Ipv6Addr::new(0x2001, 0x0db8, 0xc000, 0, 0, 0, 0, 0);
+        let ipv6_network = Ipv6Network::from(ip);
+        assert_eq!(ip, ipv6_network.network_address());
+        assert_eq!(128, ipv6_network.netmask());
     }
 }

@@ -24,7 +24,7 @@ pub use self::ipv4_network::Ipv4Network;
 pub use self::ipv6_network::{Ipv6MulticastScope, Ipv6Network};
 
 /// Errors when creating new IPv4 or IPv6 networks
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum IpNetworkError {
     /// Network mask is bigger than possible for given IP version (32 for IPv4, 128 for IPv6)
     NetmaskError(u8),
@@ -45,7 +45,7 @@ impl fmt::Display for IpNetworkError {
 }
 
 /// Errors from IPv4 or IPv6 network parsing
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum IpNetworkParseError {
     /// Network mask is not valid integer between 0-255
     InvalidNetmaskFormat,

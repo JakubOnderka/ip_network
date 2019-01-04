@@ -562,10 +562,7 @@ mod tests {
         let ip = Ipv4Addr::new(127, 0, 0, 1);
         let ip_network = Ipv4Network::new(ip, 8);
         assert!(ip_network.is_err());
-        assert!(match ip_network.err().unwrap() {
-            IpNetworkError::HostBitsSet => true,
-            _ => false,
-        });
+        assert_eq!(ip_network.err().unwrap(), IpNetworkError::HostBitsSet);
     }
 
     #[test]
@@ -592,12 +589,9 @@ mod tests {
     #[test]
     fn new_big_invalid_netmask() {
         let ip = Ipv4Addr::new(127, 0, 0, 1);
-        let ip_network = Ipv4Network::new(ip, 35);
+        let ip_network = Ipv4Network::new(ip, 33);
         assert!(ip_network.is_err());
-        assert!(match ip_network.err().unwrap() {
-            IpNetworkError::NetmaskError(_) => true,
-            _ => false,
-        });
+        assert_eq!(ip_network.err().unwrap(), IpNetworkError::NetmaskError(33));
     }
 
     #[test]
@@ -605,6 +599,14 @@ mod tests {
         let ip = Ipv4Addr::new(127, 0, 0, 1);
         let ip_network = Ipv4Network::new_truncate(ip, 8).unwrap();
         assert_eq!(ip_network.network_address(), Ipv4Addr::new(127, 0, 0, 0));
+    }
+
+    #[test]
+    fn new_truncate_big_invalid_netmask() {
+        let ip = Ipv4Addr::new(127, 0, 0, 1);
+        let ip_network = Ipv4Network::new_truncate(ip, 33);
+        assert!(ip_network.is_err());
+        assert_eq!(ip_network.err().unwrap(), IpNetworkError::NetmaskError(33));
     }
 
     #[test]
@@ -622,6 +624,12 @@ mod tests {
             Some(Ipv4Network::new(Ipv4Addr::new(192, 168, 0, 0), 15).unwrap())
         );
         assert_eq!(ip_network.hosts().len(), 256 * 256 - 2);
+    }
+
+    #[test]
+    fn supernet_none() {
+        let ipv4_network = Ipv4Network::new(Ipv4Addr::new(0, 0, 0, 0), 0).unwrap();
+        assert_eq!(None, ipv4_network.supernet());
     }
 
     #[test]
@@ -662,6 +670,12 @@ mod tests {
             Ipv4Network::new(Ipv4Addr::new(192, 168, 128, 0), 17).unwrap()
         );
         assert!(subnets.next().is_none());
+    }
+
+    #[test]
+    fn subnets_none() {
+        let ipv4_network = Ipv4Network::new(Ipv4Addr::new(0, 0, 0, 0), 32).unwrap();
+        assert!(ipv4_network.subnets().is_none());
     }
 
     #[test]
@@ -806,5 +820,13 @@ mod tests {
             networks[0],
             Ipv4Network::new(Ipv4Addr::new(0, 0, 0, 0), 0).unwrap()
         );
+    }
+
+    #[test]
+    fn from_ipv4addr() {
+        let ip = Ipv4Addr::new(127, 0, 0, 1);
+        let ipv4_network = Ipv4Network::from(ip);
+        assert_eq!(ip, ipv4_network.network_address());
+        assert_eq!(32, ipv4_network.netmask());
     }
 }
