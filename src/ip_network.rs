@@ -394,6 +394,46 @@ mod tests {
     }
 
     #[test]
+    fn from_ipv4addr() {
+        let ipv4addr = Ipv4Addr::new(1, 2, 3, 4);
+        let ip_network = IpNetwork::from(ipv4addr);
+        assert_eq!(IpAddr::V4(ipv4addr), ip_network.network_address());
+        assert_eq!(32, ip_network.netmask());
+    }
+
+    #[test]
+    fn from_ipv6addr() {
+        let ipv6addr = Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0);
+        let ip_network = IpNetwork::from(ipv6addr);
+        assert_eq!(IpAddr::V6(ipv6addr), ip_network.network_address());
+        assert_eq!(128, ip_network.netmask());
+    }
+
+    #[test]
+    fn from_ipaddr() {
+        let ipaddr = IpAddr::V6(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0));
+        let ip_network = IpNetwork::from(ipaddr);
+        assert_eq!(ipaddr, ip_network.network_address());
+        assert_eq!(128, ip_network.netmask());
+    }
+
+    #[test]
+    fn from_ipv4_network() {
+        let ipv4_network = return_test_ipv4_network();
+        let ip_network = IpNetwork::from(ipv4_network);
+        assert_eq!(IpAddr::V4(ipv4_network.network_address()), ip_network.network_address());
+        assert_eq!(ipv4_network.netmask(), ip_network.netmask());
+    }
+
+    #[test]
+    fn from_ipv6_network() {
+        let ipv6_network = return_test_ipv6_network();
+        let ip_network = IpNetwork::from(ipv6_network);
+        assert_eq!(IpAddr::V6(ipv6_network.network_address()), ip_network.network_address());
+        assert_eq!(ipv6_network.netmask(), ip_network.netmask());
+    }
+
+    #[test]
     fn compare_ip_network_ipv4_network() {
         let ip_network = IpNetwork::V4(return_test_ipv4_network());
         let ipv4_network = return_test_ipv4_network();
