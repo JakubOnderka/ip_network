@@ -39,7 +39,8 @@ Minimal required version of Rust compiler is:
 - 1.26 for version 0.2 (because of support `u128` data type),
 - for older compiler you can use 0.1 version.   
 
-## Serde support
+## Features
+### Serde support
 
 To enable serialization, just add `serde` feature to package in `Cargo.toml`:
 
@@ -48,7 +49,7 @@ To enable serialization, just add `serde` feature to package in `Cargo.toml`:
 ip_network = { version = "0.3", features = ["serde"] }
 ``` 
 
-## Postgres support
+### Postgres support
 
 To enable support for [postgres](https://github.com/sfackler/rust-postgres) crate CIDR type, just add `postgres` feature to package in `Cargo.toml`:
 
@@ -57,7 +58,7 @@ To enable support for [postgres](https://github.com/sfackler/rust-postgres) crat
 ip_network = { version = "0.3", features = ["postgres"] }
 ``` 
 
-## Diesel support
+### Diesel support
 
 To enable support for [diesel](https://diesel.rs) CIDR type for PostgreSQL, just add `diesel` feature to package in `Cargo.toml`:
 
@@ -67,3 +68,23 @@ ip_network = { version = "0.3", features = ["diesel"] }
 ``` 
 
 You can then use `ip_network::diesel_support::PqCidrExtensionMethods` trait for CIDR operators support.
+
+## Comparsion with `ipnetwork` crate
+
+Similiar functionality also provide [`ipnetwork`](https://github.com/achanda/ipnetwork) crate. This table show differences between these two crates:
+
+
+| Feature              | ip_network | ipnetwork |
+|----------------------|------------|-----------|
+| IPv4                 |      ✓     |     ✓     |
+| IPv6                 |      ✓     |     ✓     |
+| IPv4 and IPv6 enum   |      ✓     |     ✓     |
+| IPv4 network types   |      ✓     |           |
+| IPv6 network types   |      ✓     |           |
+| Hosts iterator       |      ✓     |     ✓     | 
+| Subnetworks iterator |      ✓     |           |
+| Check host bits set  |      ✓     |           |
+| Serde                |      ✓     |     ✓     |
+| Serde binary         |      ✓     |           |
+| Diesel               |      ✓     |     ✓     |
+| Postgres             |      ✓     |     ✓     |
