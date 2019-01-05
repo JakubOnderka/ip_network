@@ -69,9 +69,9 @@ ip_network = { version = "0.3", features = ["diesel"] }
 
 You can then use `ip_network::diesel_support::PqCidrExtensionMethods` trait for CIDR operators support.
 
-## Comparsion with `ipnetwork` crate
+## Comparison with `ipnetwork` crate
 
-Similiar functionality also provide [`ipnetwork`](https://github.com/achanda/ipnetwork) crate. This table show differences between these two crates:
+Similar functionality also provide [`ipnetwork`](https://github.com/achanda/ipnetwork) crate. This table show differences between these two crates:
 
 
 | Feature              | ip_network | ipnetwork |
@@ -87,4 +87,6 @@ Similiar functionality also provide [`ipnetwork`](https://github.com/achanda/ipn
 | Serde                |      ✓     |     ✓     |
 | Serde binary         |      ✓     |           |
 | Diesel               |      ✓     |     ✓     |
-| Postgres             |      ✓     |     ✓     |
+| Postgres             |      ✓     |           |
+| IPv4 string parsing  | 65 ns      | 379 ns    |
+| IPv6 string parsing  | 126 ns     | 434 ns    |
