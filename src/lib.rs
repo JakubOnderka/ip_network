@@ -15,6 +15,8 @@ pub mod iterator;
 mod postgres_common;
 #[cfg(feature = "postgres")]
 mod postgres_support;
+#[cfg(feature = "serde")]
+mod serde_support;
 
 use std::error::Error;
 use std::fmt;

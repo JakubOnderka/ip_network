@@ -1,7 +1,7 @@
 use std::fmt;
 use std::str::{self, FromStr};
-use serde::de::{Deserializer, EnumAccess, Error, Unexpected, VariantAccess, Visitor};
-use serde::ser::Serializer;
+use serde::de::{Deserialize, Deserializer, EnumAccess, Error, Unexpected, VariantAccess, Visitor};
+use serde::ser::{Serialize, Serializer};
 use crate::{IpNetwork, Ipv4Network, Ipv6Network};
 
 impl Serialize for IpNetwork {
