@@ -33,3 +33,6 @@ features = ["postgres"]
 
 [dev-dependencies.serde_test]
 version = "1.0"
+
+[package.metadata.docs.rs]
+features = ["serde", "postgres", "diesel"]
