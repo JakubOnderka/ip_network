@@ -4,8 +4,38 @@ use postgres::{accepts, to_sql_checked};
 use crate::{IpNetwork, Ipv4Network, Ipv6Network};
 use crate::postgres_common;
 
+type PostgresResult<T> = Result<T, Box<Error + Sync + Send>>;
+
+impl FromSql for Ipv4Network {
+    fn from_sql(_: &Type, raw: &[u8]) -> PostgresResult<Ipv4Network> {
+        postgres_common::from_sql_ipv4_network(raw)
+    }
+
+    accepts!(CIDR);
+}
+
+impl FromSql for Ipv6Network {
+    fn from_sql(_: &Type, raw: &[u8]) -> PostgresResult<Ipv6Network> {
+        postgres_common::from_sql_ipv6_network(raw)
+    }
+
+    accepts!(CIDR);
+}
+
+impl FromSql for IpNetwork {
+    fn from_sql(t: &Type, raw: &[u8]) -> PostgresResult<IpNetwork> {
+        match raw[0] {
+            postgres_common::IPV4_TYPE => Ok(IpNetwork::V4(Ipv4Network::from_sql(t, raw)?)),
+            postgres_common::IPV6_TYPE => Ok(IpNetwork::V6(Ipv6Network::from_sql(t, raw)?)),
+            _ => Err("CIDR is not IP version 4 or 6".into()),
+        }
+    }
+
+    accepts!(CIDR);
+}
+
 impl ToSql for Ipv4Network {
-    fn to_sql(&self, _: &Type, w: &mut Vec<u8>) -> Result<IsNull, Box<Error + Sync + Send>> {
+    fn to_sql(&self, _: &Type, w: &mut Vec<u8>) -> PostgresResult<IsNull> {
         let bytes = postgres_common::to_sql_ipv4_network(*self);
         w.extend_from_slice(&bytes);
 
@@ -17,7 +47,7 @@ impl ToSql for Ipv4Network {
 }
 
 impl ToSql for Ipv6Network {
-    fn to_sql(&self, _: &Type, w: &mut Vec<u8>) -> Result<IsNull, Box<Error + Sync + Send>> {
+    fn to_sql(&self, _: &Type, w: &mut Vec<u8>) -> PostgresResult<IsNull> {
         let bytes = postgres_common::to_sql_ipv6_network(*self);
         w.extend_from_slice(&bytes);
 
@@ -28,36 +58,8 @@ impl ToSql for Ipv6Network {
     to_sql_checked!();
 }
 
-impl FromSql for Ipv4Network {
-    fn from_sql(_: &Type, raw: &[u8]) -> Result<Ipv4Network, Box<Error + Sync + Send>> {
-        postgres_common::from_sql_ipv4_network(raw)
-    }
-
-    accepts!(CIDR);
-}
-
-impl FromSql for Ipv6Network {
-    fn from_sql(_: &Type, raw: &[u8]) -> Result<Ipv6Network, Box<Error + Sync + Send>> {
-        postgres_common::from_sql_ipv6_network(raw)
-    }
-
-    accepts!(CIDR);
-}
-
-impl FromSql for IpNetwork {
-    fn from_sql(t: &Type, raw: &[u8]) -> Result<IpNetwork, Box<Error + Sync + Send>> {
-        match raw[0] {
-            postgres_common::IPV4_TYPE => Ok(IpNetwork::V4(Ipv4Network::from_sql(t, raw)?)),
-            postgres_common::IPV6_TYPE => Ok(IpNetwork::V6(Ipv6Network::from_sql(t, raw)?)),
-            _ => Err("CIDR is not IP version 4 or 6".into()),
-        }
-    }
-
-    accepts!(CIDR);
-}
-
 impl ToSql for IpNetwork {
-    fn to_sql(&self, t: &Type, w: &mut Vec<u8>) -> Result<IsNull, Box<Error + Sync + Send>> {
+    fn to_sql(&self, t: &Type, w: &mut Vec<u8>) -> PostgresResult<IsNull> {
         match *self {
             IpNetwork::V4(ref network) => network.to_sql(t, w),
             IpNetwork::V6(ref network) => network.to_sql(t, w),
