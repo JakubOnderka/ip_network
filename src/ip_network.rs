@@ -311,13 +311,19 @@ mod tests {
     #[test]
     fn network_address_ipv4() {
         let ip_network = IpNetwork::V4(return_test_ipv4_network());
-        assert_eq!(IpAddr::V4(Ipv4Addr::new(192, 168, 0, 0)), ip_network.network_address());
+        assert_eq!(
+            IpAddr::V4(Ipv4Addr::new(192, 168, 0, 0)),
+            ip_network.network_address()
+        );
     }
 
     #[test]
     fn network_address_ipv6() {
         let ip_network = IpNetwork::V6(return_test_ipv6_network());
-        assert_eq!(IpAddr::V6(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0)), ip_network.network_address());
+        assert_eq!(
+            IpAddr::V6(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0)),
+            ip_network.network_address()
+        );
     }
 
     #[test]
@@ -350,14 +356,20 @@ mod tests {
     fn parse_empty() {
         let ip_network = "".parse::<IpNetwork>();
         assert!(ip_network.is_err());
-        assert_eq!(IpNetworkParseError::InvalidFormatError, ip_network.unwrap_err());
+        assert_eq!(
+            IpNetworkParseError::InvalidFormatError,
+            ip_network.unwrap_err()
+        );
     }
 
     #[test]
     fn parse_invalid_netmask() {
         let ip_network = "192.168.0.0/a".parse::<IpNetwork>();
         assert!(ip_network.is_err());
-        assert_eq!(IpNetworkParseError::InvalidNetmaskFormat, ip_network.unwrap_err());
+        assert_eq!(
+            IpNetworkParseError::InvalidNetmaskFormat,
+            ip_network.unwrap_err()
+        );
     }
 
     #[test]
@@ -371,14 +383,20 @@ mod tests {
     fn parse_ipv4_host_bits_set() {
         let ip_network = "192.168.0.1/16".parse::<IpNetwork>();
         assert!(ip_network.is_err());
-        assert_eq!(IpNetworkParseError::IpNetworkError(IpNetworkError::HostBitsSet), ip_network.unwrap_err());
+        assert_eq!(
+            IpNetworkParseError::IpNetworkError(IpNetworkError::HostBitsSet),
+            ip_network.unwrap_err()
+        );
     }
 
     #[test]
     fn parse_ipv6_host_bits_set() {
         let ip_network = "2001:db8::1/32".parse::<IpNetwork>();
         assert!(ip_network.is_err());
-        assert_eq!(IpNetworkParseError::IpNetworkError(IpNetworkError::HostBitsSet), ip_network.unwrap_err());
+        assert_eq!(
+            IpNetworkParseError::IpNetworkError(IpNetworkError::HostBitsSet),
+            ip_network.unwrap_err()
+        );
     }
 
     #[test]
@@ -421,7 +439,10 @@ mod tests {
     fn from_ipv4_network() {
         let ipv4_network = return_test_ipv4_network();
         let ip_network = IpNetwork::from(ipv4_network);
-        assert_eq!(IpAddr::V4(ipv4_network.network_address()), ip_network.network_address());
+        assert_eq!(
+            IpAddr::V4(ipv4_network.network_address()),
+            ip_network.network_address()
+        );
         assert_eq!(ipv4_network.netmask(), ip_network.netmask());
     }
 
@@ -429,7 +450,10 @@ mod tests {
     fn from_ipv6_network() {
         let ipv6_network = return_test_ipv6_network();
         let ip_network = IpNetwork::from(ipv6_network);
-        assert_eq!(IpAddr::V6(ipv6_network.network_address()), ip_network.network_address());
+        assert_eq!(
+            IpAddr::V6(ipv6_network.network_address()),
+            ip_network.network_address()
+        );
         assert_eq!(ipv6_network.netmask(), ip_network.netmask());
     }
 

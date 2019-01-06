@@ -26,8 +26,12 @@ impl FromSql<Cidr, Pg> for IpNetwork {
     fn from_sql(bytes: Option<&[u8]>) -> deserialize::Result<Self> {
         let bytes = not_none!(bytes);
         match bytes[0] {
-            postgres_common::IPV4_TYPE => Ok(IpNetwork::V4(postgres_common::from_sql_ipv4_network(bytes)?)),
-            postgres_common::IPV6_TYPE => Ok(IpNetwork::V6(postgres_common::from_sql_ipv6_network(bytes)?)),
+            postgres_common::IPV4_TYPE => Ok(IpNetwork::V4(
+                postgres_common::from_sql_ipv4_network(bytes)?,
+            )),
+            postgres_common::IPV6_TYPE => Ok(IpNetwork::V6(
+                postgres_common::from_sql_ipv6_network(bytes)?,
+            )),
             _ => Err("CIDR is not IP version 4 or 6".into()),
         }
     }
@@ -186,7 +190,8 @@ mod tests {
     #[test]
     fn ip_network() {
         let mut bytes = test_output();
-        let ip_network = IpNetwork::V6(Ipv6Network::new(Ipv6Addr::new(1, 2, 3, 4, 5, 6, 7, 8), 128).unwrap());
+        let ip_network =
+            IpNetwork::V6(Ipv6Network::new(Ipv6Addr::new(1, 2, 3, 4, 5, 6, 7, 8), 128).unwrap());
         ToSql::<Cidr, Pg>::to_sql(&ip_network, &mut bytes).unwrap();
         let converted: IpNetwork = FromSql::<Cidr, Pg>::from_sql(Some(bytes.as_ref())).unwrap();
         assert_eq!(ip_network, converted);
