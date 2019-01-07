@@ -49,10 +49,7 @@ impl<'de> Deserialize<'de> for IpNetwork {
                         fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
                             formatter.write_str("`V4` or `V6`")
                         }
-                        fn visit_u32<E>(self, value: u32) -> Result<Self::Value, E>
-                        where
-                            E: Error,
-                        {
+                        fn visit_u32<E: Error>(self, value: u32) -> Result<Self::Value, E> {
                             match value {
                                 0 => Ok(IpNetworkKind::V4),
                                 1 => Ok(IpNetworkKind::V6),
@@ -62,20 +59,14 @@ impl<'de> Deserialize<'de> for IpNetwork {
                                 )),
                             }
                         }
-                        fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
-                        where
-                            E: Error,
-                        {
+                        fn visit_str<E: Error>(self, value: &str) -> Result<Self::Value, E> {
                             match value {
                                 "V4" => Ok(IpNetworkKind::V4),
                                 "V6" => Ok(IpNetworkKind::V6),
                                 _ => Err(Error::unknown_variant(value, VARIANTS)),
                             }
                         }
-                        fn visit_bytes<E>(self, value: &[u8]) -> Result<Self::Value, E>
-                        where
-                            E: Error,
-                        {
+                        fn visit_bytes<E: Error>(self, value: &[u8]) -> Result<Self::Value, E> {
                             match value {
                                 b"V4" => Ok(IpNetworkKind::V4),
                                 b"V6" => Ok(IpNetworkKind::V6),

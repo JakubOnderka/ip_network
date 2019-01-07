@@ -611,35 +611,88 @@ mod tests {
 
     #[test]
     fn is_loopback() {
-        assert!(Ipv6Network::new(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 0x1), 128).unwrap().is_loopback())
+        assert!(
+            Ipv6Network::new(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 0x1), 128)
+                .unwrap()
+                .is_loopback()
+        )
     }
 
     #[test]
     fn is_global() {
-        assert!("2c0f:fb50:4000::/36".parse::<Ipv6Network>().unwrap().is_global());
-        assert!("2001:4860:4000::/36".parse::<Ipv6Network>().unwrap().is_global());
+        assert!("2c0f:fb50:4000::/36"
+            .parse::<Ipv6Network>()
+            .unwrap()
+            .is_global());
+        assert!("2001:4860:4000::/36"
+            .parse::<Ipv6Network>()
+            .unwrap()
+            .is_global());
     }
 
     #[test]
     fn multicast_scope() {
-        let multicast_scope = |network: &str| network.parse::<Ipv6Network>().unwrap().multicast_scope();
+        let multicast_scope =
+            |network: &str| network.parse::<Ipv6Network>().unwrap().multicast_scope();
 
         assert_eq!(None, multicast_scope("ff02::/15"));
         assert_eq!(None, multicast_scope("fff2::/15"));
-        assert_eq!(Some(Ipv6MulticastScope::InterfaceLocal), multicast_scope("ff01::/16"));
-        assert_eq!(Some(Ipv6MulticastScope::InterfaceLocal), multicast_scope("fff1::/16"));
-        assert_eq!(Some(Ipv6MulticastScope::LinkLocal), multicast_scope("ff02::/16"));
-        assert_eq!(Some(Ipv6MulticastScope::LinkLocal), multicast_scope("fff2::/16"));
-        assert_eq!(Some(Ipv6MulticastScope::RealmLocal), multicast_scope("ff03::/16"));
-        assert_eq!(Some(Ipv6MulticastScope::RealmLocal), multicast_scope("fff3::/16"));
-        assert_eq!(Some(Ipv6MulticastScope::AdminLocal), multicast_scope("ff04::/16"));
-        assert_eq!(Some(Ipv6MulticastScope::AdminLocal), multicast_scope("fff4::/16"));
-        assert_eq!(Some(Ipv6MulticastScope::SiteLocal), multicast_scope("ff05::/16"));
-        assert_eq!(Some(Ipv6MulticastScope::SiteLocal), multicast_scope("fff5::/16"));
-        assert_eq!(Some(Ipv6MulticastScope::OrganizationLocal), multicast_scope("ff08::/16"));
-        assert_eq!(Some(Ipv6MulticastScope::OrganizationLocal), multicast_scope("fff8::/16"));
-        assert_eq!(Some(Ipv6MulticastScope::Global), multicast_scope("ff0e::/16"));
-        assert_eq!(Some(Ipv6MulticastScope::Global), multicast_scope("fffe::/16"));
+        assert_eq!(
+            Some(Ipv6MulticastScope::InterfaceLocal),
+            multicast_scope("ff01::/16")
+        );
+        assert_eq!(
+            Some(Ipv6MulticastScope::InterfaceLocal),
+            multicast_scope("fff1::/16")
+        );
+        assert_eq!(
+            Some(Ipv6MulticastScope::LinkLocal),
+            multicast_scope("ff02::/16")
+        );
+        assert_eq!(
+            Some(Ipv6MulticastScope::LinkLocal),
+            multicast_scope("fff2::/16")
+        );
+        assert_eq!(
+            Some(Ipv6MulticastScope::RealmLocal),
+            multicast_scope("ff03::/16")
+        );
+        assert_eq!(
+            Some(Ipv6MulticastScope::RealmLocal),
+            multicast_scope("fff3::/16")
+        );
+        assert_eq!(
+            Some(Ipv6MulticastScope::AdminLocal),
+            multicast_scope("ff04::/16")
+        );
+        assert_eq!(
+            Some(Ipv6MulticastScope::AdminLocal),
+            multicast_scope("fff4::/16")
+        );
+        assert_eq!(
+            Some(Ipv6MulticastScope::SiteLocal),
+            multicast_scope("ff05::/16")
+        );
+        assert_eq!(
+            Some(Ipv6MulticastScope::SiteLocal),
+            multicast_scope("fff5::/16")
+        );
+        assert_eq!(
+            Some(Ipv6MulticastScope::OrganizationLocal),
+            multicast_scope("ff08::/16")
+        );
+        assert_eq!(
+            Some(Ipv6MulticastScope::OrganizationLocal),
+            multicast_scope("fff8::/16")
+        );
+        assert_eq!(
+            Some(Ipv6MulticastScope::Global),
+            multicast_scope("ff0e::/16")
+        );
+        assert_eq!(
+            Some(Ipv6MulticastScope::Global),
+            multicast_scope("fffe::/16")
+        );
     }
 
     #[test]
