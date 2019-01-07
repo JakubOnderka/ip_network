@@ -36,11 +36,10 @@ pub fn split_ip_netmask(input: &str) -> Option<(&str, &str)> {
 #[cfg(test)]
 mod tests {
     use super::{get_bite_mask, get_bite_mask_u128, split_ip_netmask};
-    use std;
 
     #[test]
     fn get_bite_mask_32() {
-        assert_eq!(std::u32::MAX, get_bite_mask(32));
+        assert_eq!(u32::max_value(), get_bite_mask(32));
     }
 
     #[test]
@@ -55,7 +54,7 @@ mod tests {
 
     #[test]
     fn get_bite_mask_u128_128() {
-        assert_eq!(std::u128::MAX, get_bite_mask_u128(128));
+        assert_eq!(u128::max_value(), get_bite_mask_u128(128));
     }
 
     #[test]
