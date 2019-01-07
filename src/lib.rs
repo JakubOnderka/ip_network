@@ -1,3 +1,28 @@
+//! IPv4 and IPv6 network structs.
+//!
+//! ## Optional features
+//!
+//! When using this crate, you can choose to compile with these features:
+//!
+//! * `serde` – for serialization and deserialization by [Serde framework](https://serde.rs).
+//! * `diesel` – support for [PostgreSQL CIDR type] with [Diesel ORM](https://diesel.rs).
+//! * `postgres` – support for [PostgreSQL CIDR type] with [postgres crate](https://github.com/sfackler/rust-postgres).
+//!
+//! ## Examples
+//!
+//! ```rust
+//! use std::net::Ipv4Addr;
+//! use ip_network::Ipv4Network;
+//!
+//! let ip_network = Ipv4Network::new(Ipv4Addr::new(192, 168, 1, 0), 24).unwrap();
+//! assert_eq!(Ipv4Addr::new(192, 168, 1, 0), ip_network.network_address());
+//! assert_eq!(24, ip_network.netmask());
+//! assert_eq!(254, ip_network.hosts().len());
+//! assert_eq!("192.168.1.0/24", ip_network.to_string());
+//! ```
+//!
+//! [PostgreSQL CIDR type]: https://www.postgresql.org/docs/current/datatype-net-types.html#DATATYPE-CIDR
+
 #[cfg(feature = "diesel")]
 #[macro_use]
 extern crate diesel;
