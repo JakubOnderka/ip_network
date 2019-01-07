@@ -3,11 +3,10 @@ ip_network
 
 IPv4 and IPv6 network structs.
 
+[![Documentation](https://docs.rs/ip_network/badge.svg)](https://docs.rs/ip_network)
 [![Build Status](https://travis-ci.org/JakubOnderka/ip_network.svg?branch=master)](https://travis-ci.org/JakubOnderka/ip_network)
 [![Coverage Status](https://coveralls.io/repos/github/JakubOnderka/ip_network/badge.svg?branch=master)](https://coveralls.io/github/JakubOnderka/ip_network?branch=master)
 [![Crates.io](https://img.shields.io/crates/v/ip_network.svg)](https://crates.io/crates/ip_network)
-
-- [Documentation](https://docs.rs/ip_network)
 
 ## Usage
 
@@ -36,7 +35,7 @@ assert_eq!("192.168.0.0/16", ip_network.to_string());
 
 Minimal required version of Rust compiler is:
 - 1.31 for version 0.3 and newer (because of 2018 edition),
-- 1.26 for version 0.2 (because of support `u128` data type),
+- 1.26 for version 0.2 (because of support u128 data type),
 - for older compiler you can use 0.1 version.   
 
 ## Features
@@ -71,7 +70,7 @@ You can then use `ip_network::diesel_support::PqCidrExtensionMethods` trait for 
 
 ## Comparison with `ipnetwork` crate
 
-Similar functionality also provide [`ipnetwork`](https://github.com/achanda/ipnetwork) crate. This table show differences between these two crates:
+Similar functionality also provide [ipnetwork](https://github.com/achanda/ipnetwork) crate. This table show differences between these two crates:
 
 
 | Feature              | ip_network | ipnetwork |
@@ -86,7 +85,11 @@ Similar functionality also provide [`ipnetwork`](https://github.com/achanda/ipne
 | Check host bits set  |      ✓     |           |
 | Serde                |      ✓     |     ✓     |
 | Serde binary         |      ✓     |           |
-| Diesel               |      ✓     |     ✓     |
-| Postgres             |      ✓     |           |
+| Diesel CIDR          |      ✓     |     ✓     |
+| Diesel operators     |      ✓     |           |
+| Postgres CIDR        |      ✓     |           |
 | IPv4 string parsing  | 65 ns      | 379 ns    |
 | IPv6 string parsing  | 126 ns     | 434 ns    |
+| IPv4 contains method | 7 ns       | 15 ns     |
+| IPv6 contains method | 28 ns      | 49 ns     |
+
