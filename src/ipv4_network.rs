@@ -161,7 +161,11 @@ impl Ipv4Network {
         u32::from(ip) & helpers::get_bite_mask(self.netmask) == u32::from(self.network_address)
     }
 
-    /// Returns iterator over host IP addresses in range (without network and broadcast address).
+    /// Returns iterator over host IP addresses in range (without network and broadcast address). You
+    /// can also use this method to check how much hosts address are in range by calling [`len()`] method
+    /// on iterator (see Examples).
+    ///
+    /// [`len()`]: https://doc.rust-lang.org/std/iter/trait.ExactSizeIterator.html#method.len
     ///
     /// # Examples
     ///
@@ -171,13 +175,12 @@ impl Ipv4Network {
     ///
     /// let ip = Ipv4Addr::new(192, 168, 1, 0);
     /// let mut hosts = Ipv4Network::new(ip, 24).unwrap().hosts();
+    /// assert_eq!(254, hosts.len());
     /// assert_eq!(hosts.next().unwrap(), Ipv4Addr::new(192, 168, 1, 1));
     /// assert_eq!(hosts.last().unwrap(), Ipv4Addr::new(192, 168, 1, 254));
     /// ```
-    pub fn hosts(&self) -> iterator::Ipv4RangeIterator {
-        let from = Ipv4Addr::from(u32::from(self.network_address).saturating_add(1));
-        let to = Ipv4Addr::from(u32::from(self.broadcast_address()).saturating_sub(1));
-        iterator::Ipv4RangeIterator::new(from, to)
+    pub fn hosts(&self) -> impl ExactSizeIterator<Item = Ipv4Addr> {
+        iterator::Ipv4RangeIterator::hosts(*self)
     }
 
     /// Returns network with smaller netmask by one. If netmask is already zero, `None` will be returned.
@@ -200,8 +203,8 @@ impl Ipv4Network {
         }
     }
 
-    /// Returns `Ipv4NetworkIterator` over networks with bigger netmask by one.
-    /// If netmask is already 32, `None` will be returned.
+    /// Returns iterator over networks with bigger netmask by one. If netmask is already 32,
+    /// iterator is empty.
     ///
     /// # Examples
     ///
@@ -210,16 +213,13 @@ impl Ipv4Network {
     /// use ip_network::Ipv4Network;
     ///
     /// let ip_network = Ipv4Network::new(Ipv4Addr::new(192, 168, 1, 0), 24).unwrap();
-    /// let mut iterator = ip_network.subnets().unwrap();
+    /// let mut iterator = ip_network.subnets();
     /// assert_eq!(iterator.next().unwrap(), Ipv4Network::new(Ipv4Addr::new(192, 168, 1, 0), 25).unwrap());
     /// assert_eq!(iterator.last().unwrap(), Ipv4Network::new(Ipv4Addr::new(192, 168, 1, 128), 25).unwrap());
     /// ```
-    pub fn subnets(&self) -> Option<iterator::Ipv4NetworkIterator> {
-        if self.netmask == Self::LENGTH {
-            None
-        } else {
-            Some(iterator::Ipv4NetworkIterator::new(*self, self.netmask + 1))
-        }
+    pub fn subnets(&self) -> impl ExactSizeIterator<Item = Ipv4Network> {
+        let new_netmask = ::std::cmp::min(self.netmask + 1, Self::LENGTH);
+        iterator::Ipv4NetworkIterator::new(*self, new_netmask)
     }
 
     /// Returns `Ipv4NetworkIterator` over networks with defined netmask.
@@ -239,7 +239,7 @@ impl Ipv4Network {
     /// assert_eq!(iterator.next().unwrap(), Ipv4Network::new(Ipv4Addr::new(192, 168, 1, 0), 25).unwrap());
     /// assert_eq!(iterator.last().unwrap(), Ipv4Network::new(Ipv4Addr::new(192, 168, 1, 128), 25).unwrap());
     /// ```
-    pub fn subnets_with_prefix(&self, prefix: u8) -> iterator::Ipv4NetworkIterator {
+    pub fn subnets_with_prefix(&self, prefix: u8) -> impl ExactSizeIterator<Item = Ipv4Network> {
         iterator::Ipv4NetworkIterator::new(*self, prefix)
     }
 
@@ -633,6 +633,13 @@ mod tests {
     }
 
     #[test]
+    fn host_network_without_hosts() {
+        let ip = Ipv4Addr::new(127, 0, 0, 1);
+        let ip_network = Ipv4Network::new(ip, 32).unwrap();
+        assert_eq!(0, ip_network.hosts().len());
+    }
+
+    #[test]
     fn supernet_none() {
         let ipv4_network = Ipv4Network::new(Ipv4Addr::new(0, 0, 0, 0), 0).unwrap();
         assert_eq!(None, ipv4_network.supernet());
@@ -665,7 +672,7 @@ mod tests {
     #[test]
     fn subnets() {
         let ip_network = return_test_ipv4_network();
-        let mut subnets = ip_network.subnets().unwrap();
+        let mut subnets = ip_network.subnets();
         assert_eq!(subnets.len(), 2);
         assert_eq!(
             subnets.next().unwrap(),
@@ -681,7 +688,7 @@ mod tests {
     #[test]
     fn subnets_none() {
         let ipv4_network = Ipv4Network::new(Ipv4Addr::new(0, 0, 0, 0), 32).unwrap();
-        assert!(ipv4_network.subnets().is_none());
+        assert_eq!(0, ipv4_network.subnets().len());
     }
 
     #[test]

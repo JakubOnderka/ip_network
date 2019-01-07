@@ -177,19 +177,20 @@ impl Ipv6Network {
     /// use ip_network::Ipv6Network;
     ///
     /// let ip_network = Ipv6Network::new(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0), 32).unwrap();
-    /// let mut iterator = ip_network.subnets().unwrap();
+    /// let mut iterator = ip_network.subnets();
     /// assert_eq!(iterator.next().unwrap(), Ipv6Network::new(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0), 33).unwrap());
     /// assert_eq!(iterator.last().unwrap(), Ipv6Network::new(Ipv6Addr::new(0x2001, 0xdb8, 0x8000, 0, 0, 0, 0, 0), 33).unwrap());
     /// ```
-    pub fn subnets(&self) -> Option<iterator::Ipv6NetworkIterator> {
-        if self.netmask == Self::LENGTH {
-            None
-        } else {
-            Some(iterator::Ipv6NetworkIterator::new(*self, self.netmask + 1))
-        }
+    pub fn subnets(&self) -> iterator::Ipv6NetworkIterator {
+        let new_netmask = ::std::cmp::min(self.netmask + 1, Self::LENGTH);
+        iterator::Ipv6NetworkIterator::new(*self, new_netmask)
     }
 
-    /// Returns `Ipv6NetworkIterator` over networks with defined netmask.
+    /// Returns `Ipv6NetworkIterator` over networks with defined netmask. Becasue [`len()`] method
+    /// returns `usize` and number of networks can be bigger than `usize`, you can use `real_len()` method
+    /// to get exact number of networks.
+    ///
+    /// [`len()`]: https://doc.rust-lang.org/std/iter/trait.ExactSizeIterator.html#method.len
     ///
     /// # Panics
     ///
@@ -203,6 +204,7 @@ impl Ipv6Network {
     ///
     /// let network = Ipv6Network::new(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0), 32).unwrap();
     /// let mut iterator = network.subnets_with_prefix(33);
+    /// assert_eq!(2, iterator.real_len());
     /// assert_eq!(iterator.next().unwrap(), Ipv6Network::new(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0), 33).unwrap());
     /// assert_eq!(iterator.last().unwrap(), Ipv6Network::new(Ipv6Addr::new(0x2001, 0xdb8, 0x8000, 0, 0, 0, 0, 0), 33).unwrap());
     /// ```
@@ -572,7 +574,7 @@ mod tests {
 
     #[test]
     fn subnets() {
-        let mut subnets = return_test_ipv6_network().subnets().unwrap();
+        let mut subnets = return_test_ipv6_network().subnets();
         assert_eq!(subnets.len(), 2);
         assert_eq!(
             subnets.next().unwrap(),

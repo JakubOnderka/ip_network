@@ -19,7 +19,11 @@ pub struct Ipv4RangeIterator {
 }
 
 impl Ipv4RangeIterator {
-    /// Constructs new `Ipv4RangeIterator`, both `from` and `to` address are inclusive.
+    /// Constructs new `Ipv4RangeIterator` for given range, both `from` and `to` address are inclusive.
+    ///
+    /// # Panics
+    ///
+    /// When `to` address is bigger or same than `from` address.
     ///
     /// # Examples
     ///
@@ -43,6 +47,23 @@ impl Ipv4RangeIterator {
             current,
             to,
             is_done: false,
+        }
+    }
+
+    /// Constructs new `Ipv4RangeIterator` that iterates host (without network and broadcast address)
+    /// IPs in Ipv4Network.
+    pub fn hosts(network: Ipv4Network) -> Self {
+        if network.netmask() >= 31 {
+            // Network doesn't contains any host IPs, create empty iterator.
+            Self {
+                current: 0,
+                to: 0,
+                is_done: true,
+            }
+        } else {
+            let from = Ipv4Addr::from(u32::from(network.network_address()) + 1);
+            let to = Ipv4Addr::from(u32::from(network.broadcast_address()) - 1);
+            Self::new(from, to)
         }
     }
 }
@@ -86,10 +107,26 @@ pub struct Ipv4NetworkIterator {
 }
 
 impl Ipv4NetworkIterator {
-    // TODO: Change assert to error?
+    /// Constructs new `Ipv4NetworkIterator`, that iterates over networks based on `network` and
+    /// `new_netmask`. If network has already netmask 32 or when is the same as `new_netmask`, empty
+    /// iterator is returned.
+    ///
+    /// # Panics
+    ///
+    /// When `new_netmask` is smaller than `network` netmask or when `net_netmask` is bigger than 32.
     pub fn new(network: Ipv4Network, new_netmask: u8) -> Self {
+        assert!(new_netmask <= Ipv4Network::LENGTH);
+
+        if network.netmask() == Ipv4Network::LENGTH || network.netmask() == new_netmask {
+            return Self {
+                current: 0,
+                to: 0,
+                new_netmask: 0,
+                is_done: true
+            }
+        }
+
         assert!(network.netmask() < new_netmask);
-        assert!(new_netmask <= 32);
 
         let current = u32::from(network.network_address());
         let mask =
@@ -148,10 +185,26 @@ pub struct Ipv6NetworkIterator {
 }
 
 impl Ipv6NetworkIterator {
-    // TODO: Change assert to error?
+    /// Constructs new `Ipv6NetworkIterator`, that iterates over networks based on `network` and
+    /// `new_netmask`. If network has already netmask 128 or when is the same as `new_netmask`, empty
+    /// iterator is returned.
+    ///
+    /// # Panics
+    ///
+    /// When `new_netmask` is smaller than `network` netmask or when `net_netmask` is bigger than 128.
     pub fn new(network: Ipv6Network, new_netmask: u8) -> Self {
+        assert!(new_netmask <= Ipv6Network::LENGTH);
+
+        if network.netmask() == Ipv6Network::LENGTH || network.netmask() == new_netmask {
+            return Self {
+                current: 0,
+                to: 0,
+                new_netmask: 0,
+                is_done: true
+            }
+        }
+
         assert!(network.netmask() < new_netmask);
-        assert!(new_netmask <= 128);
 
         let current = u128::from(network.network_address());
         let mask = !helpers::get_bite_mask_u128(128 - (new_netmask - network.netmask()))
@@ -277,10 +330,10 @@ mod tests {
     }
 
     #[test]
-    fn ipv4_network_iterator_len() {
-        let network = Ipv4Network::new(Ipv4Addr::new(127, 0, 0, 0), 8).unwrap();
-        let iterator = Ipv4NetworkIterator::new(network, 16);
-        assert_eq!(256, iterator.len());
+    fn ipv4_network_iterator_empty() {
+        let network = Ipv4Network::new(Ipv4Addr::new(127, 0, 0, 0), 32).unwrap();
+        let iterator = Ipv4NetworkIterator::new(network, 32);
+        assert_eq!(0, iterator.len());
     }
 
     #[test]
