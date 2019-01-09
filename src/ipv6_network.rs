@@ -229,7 +229,7 @@ impl Ipv6Network {
     /// assert!(Ipv6Network::new(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 0), 128).unwrap().is_unspecified());
     /// ```
     pub fn is_unspecified(&self) -> bool {
-        self.network_address.is_unspecified() && self.netmask == Self::LENGTH
+        self.netmask == Self::LENGTH && self.network_address.is_unspecified()
     }
 
     /// Returns [`true`] if this is a loopback network (::1/128).

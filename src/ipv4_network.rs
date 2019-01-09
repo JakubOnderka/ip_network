@@ -261,7 +261,7 @@ impl Ipv4Network {
     /// assert!(ip_network.is_unspecified());
     /// ```
     pub fn is_unspecified(&self) -> bool {
-        u32::from(self.network_address) == 0 && self.netmask == Self::LENGTH
+        self.netmask == Self::LENGTH && self.network_address.is_unspecified()
     }
 
     /// Returns [`true`] if this network is inside loopback address range (127.0.0.0/8).
