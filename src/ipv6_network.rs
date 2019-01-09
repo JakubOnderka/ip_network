@@ -51,7 +51,7 @@ impl Ipv6Network {
             return Err(IpNetworkError::NetmaskError(netmask));
         }
 
-        if u128::from(network_address).trailing_zeros() < (Self::LENGTH as u32 - netmask as u32) {
+        if u128::from(network_address).trailing_zeros() < u32::from(Self::LENGTH - netmask) {
             return Err(IpNetworkError::HostBitsSet);
         }
 
