@@ -134,6 +134,14 @@ impl IpNetwork {
         }
     }
 
+    /// Returns `true` if the network is default route, that contains all IP addresses.
+    pub fn is_default_route(&self) -> bool {
+        match *self {
+            IpNetwork::V4(ref ip_network) => ip_network.is_default_route(),
+            IpNetwork::V6(ref ip_network) => ip_network.is_default_route(),
+        }
+    }
+
     /// Returns `true` if the network is part of multicast network range.
     pub fn is_multicast(&self) -> bool {
         match *self {

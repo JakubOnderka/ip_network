@@ -212,6 +212,22 @@ impl Ipv6Network {
         iterator::Ipv6NetworkIterator::new(*self, prefix)
     }
 
+    /// Returns [`true`] for the default route network (::/0), that conains all IPv6 addresses.
+    ///
+    /// [`true`]: https://doc.rust-lang.org/std/primitive.bool.html
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::net::Ipv6Addr;
+    /// use ip_network::Ipv6Network;
+    ///
+    /// assert!(Ipv6Network::new(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 0), 0).unwrap().is_default_route());
+    /// ```
+    pub fn is_default_route(&self) -> bool {
+        self.netmask == 0
+    }
+
     /// Returns [`true`] for the special 'unspecified' network (::/128).
     ///
     /// This property is defined in [IETF RFC 4291].

@@ -243,6 +243,22 @@ impl Ipv4Network {
         iterator::Ipv4NetworkIterator::new(*self, prefix)
     }
 
+    /// Returns [`true`] for the default route network (0.0.0.0/0), that conains all IPv4 addresses.
+    ///
+    /// [`true`]: https://doc.rust-lang.org/std/primitive.bool.html
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::net::Ipv4Addr;
+    /// use ip_network::Ipv4Network;
+    ///
+    /// assert!(Ipv4Network::new(Ipv4Addr::new(0, 0, 0, 0), 0).unwrap().is_default_route());
+    /// ```
+    pub fn is_default_route(&self) -> bool {
+        self.netmask == 0
+    }
+
     /// Returns [`true`] for the special 'unspecified' network (0.0.0.0/32).
     ///
     /// This property is defined in _UNIX Network Programming, Second Edition_,
