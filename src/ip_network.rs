@@ -4,6 +4,7 @@ use std::str::FromStr;
 use crate::{IpNetworkError, IpNetworkParseError};
 use crate::helpers;
 use crate::{Ipv4Network, Ipv6Network};
+use std::cmp::Ordering;
 
 /// Holds IPv4 or IPv6 network
 #[derive(Clone, Copy, Eq, PartialEq, Debug, Hash, PartialOrd, Ord)]
@@ -303,6 +304,43 @@ impl PartialEq<IpNetwork> for Ipv6Network {
     }
 }
 
+impl PartialOrd<Ipv4Network> for IpNetwork {
+    fn partial_cmp(&self, other: &Ipv4Network) -> Option<Ordering> {
+        match self {
+            IpNetwork::V4(v4) => v4.partial_cmp(other),
+            IpNetwork::V6(_) => Some(Ordering::Greater),
+        }
+    }
+}
+
+
+impl PartialOrd<IpNetwork> for Ipv4Network {
+    fn partial_cmp(&self, other: &IpNetwork) -> Option<Ordering> {
+        match other {
+            IpNetwork::V4(v4) => self.partial_cmp(v4),
+            IpNetwork::V6(_) => Some(Ordering::Less),
+        }
+    }
+}
+
+impl PartialOrd<Ipv6Network> for IpNetwork {
+    fn partial_cmp(&self, other: &Ipv6Network) -> Option<Ordering> {
+        match self {
+            IpNetwork::V4(_) => Some(Ordering::Less),
+            IpNetwork::V6(v6) => v6.partial_cmp(other),
+        }
+    }
+}
+
+impl PartialOrd<IpNetwork> for Ipv6Network {
+    fn partial_cmp(&self, other: &IpNetwork) -> Option<Ordering> {
+        match other {
+            IpNetwork::V4(_) => Some(Ordering::Greater),
+            IpNetwork::V6(v6) => self.partial_cmp(v6),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
@@ -466,7 +504,7 @@ mod tests {
     }
 
     #[test]
-    fn compare_ip_network_ipv4_network() {
+    fn equal_ip_network_ipv4_network() {
         let ip_network = IpNetwork::V4(return_test_ipv4_network());
         let ipv4_network = return_test_ipv4_network();
         let different = Ipv4Network::new(Ipv4Addr::new(1, 2, 3, 4), 32).unwrap();
@@ -479,7 +517,7 @@ mod tests {
     }
 
     #[test]
-    fn compare_ip_network_ipv6_network() {
+    fn equal_ip_network_ipv6_network() {
         let ip_network = IpNetwork::V6(return_test_ipv6_network());
         let ipv6_network = return_test_ipv6_network();
         let different = Ipv6Network::new(Ipv6Addr::new(1, 2, 3, 4, 5, 6, 7, 8), 128).unwrap();
@@ -489,5 +527,33 @@ mod tests {
         assert_ne!(different, ip_network);
         assert_ne!(ip_network, return_test_ipv4_network());
         assert_ne!(return_test_ipv4_network(), ip_network);
+    }
+
+    #[test]
+    fn compare_ip_network_ipv4_network_same() {
+        let ip_network = IpNetwork::V4(return_test_ipv4_network());
+        let ipv4_network = return_test_ipv4_network();
+        assert!(ip_network <= ipv4_network);
+        assert!(ip_network >= ipv4_network);
+        assert!(ipv4_network <= ip_network);
+        assert!(ipv4_network >= ip_network);
+    }
+
+    #[test]
+    fn compare_ip_network_ipv6_network_same() {
+        let ip_network = IpNetwork::V6(return_test_ipv6_network());
+        let ipv6_network = return_test_ipv6_network();
+        assert!(ip_network <= ipv6_network);
+        assert!(ip_network >= ipv6_network);
+        assert!(ipv6_network <= ip_network);
+        assert!(ipv6_network >= ip_network);
+    }
+
+    #[test]
+    fn compare_ip_network_v4_ip_network_v6() {
+        let ip_network_v4 = IpNetwork::V4(return_test_ipv4_network());
+        let ip_network_v6 = IpNetwork::V6(return_test_ipv6_network());
+        assert!(ip_network_v4 < ip_network_v6);
+        assert!(ip_network_v6 > ip_network_v4);
     }
 }
