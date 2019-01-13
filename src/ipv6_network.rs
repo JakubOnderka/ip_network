@@ -520,6 +520,7 @@ impl From<Ipv6Addr> for Ipv6Network {
 }
 
 impl PartialEq for Ipv6Network {
+    #[inline]
     fn eq(&self, other: &Ipv6Network) -> bool {
         self.netmask == other.netmask && self.network_address == other.network_address
     }

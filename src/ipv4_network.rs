@@ -586,6 +586,7 @@ impl From<Ipv4Addr> for Ipv4Network {
 }
 
 impl PartialEq for Ipv4Network {
+    #[inline]
     fn eq(&self, other: &Ipv4Network) -> bool {
         self.netmask == other.netmask && self.network_address == other.network_address
     }
