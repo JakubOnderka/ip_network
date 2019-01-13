@@ -2,12 +2,13 @@ use std::cmp;
 use std::fmt;
 use std::net::Ipv4Addr;
 use std::str::FromStr;
+use std::hash::{Hash, Hasher};
 use crate::{IpNetworkError, IpNetworkParseError};
 use crate::helpers;
 use crate::iterator;
 
 /// IPv4 Network
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialOrd, Ord)]
+#[derive(Clone, Copy, Debug, Eq, PartialOrd, Ord)]
 pub struct Ipv4Network {
     network_address: Ipv4Addr,
     netmask: u8,
@@ -218,7 +219,7 @@ impl Ipv4Network {
     /// assert_eq!(iterator.last().unwrap(), Ipv4Network::new(Ipv4Addr::new(192, 168, 1, 128), 25).unwrap());
     /// ```
     pub fn subnets(&self) -> impl ExactSizeIterator<Item = Ipv4Network> {
-        let new_netmask = ::std::cmp::min(self.netmask + 1, Self::LENGTH);
+        let new_netmask = cmp::min(self.netmask + 1, Self::LENGTH);
         iterator::Ipv4NetworkIterator::new(*self, new_netmask)
     }
 
@@ -587,6 +588,13 @@ impl From<Ipv4Addr> for Ipv4Network {
 impl PartialEq for Ipv4Network {
     fn eq(&self, other: &Ipv4Network) -> bool {
         self.netmask == other.netmask && self.network_address == other.network_address
+    }
+}
+
+impl Hash for Ipv4Network {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.network_address.hash(state);
+        self.netmask.hash(state);
     }
 }
 
