@@ -259,6 +259,25 @@ impl Ipv4Network {
         self.netmask == 0
     }
 
+    /// Returns [`true`] for network in local identification range (0.0.0.0/8).
+    ///
+    /// [IETF RFC 919]: https://tools.ietf.org/html/rfc919
+    /// This property is defined by [IETF RFC 1122].
+    ///
+    /// [`true`]: https://doc.rust-lang.org/std/primitive.bool.html
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::net::Ipv4Addr;
+    /// use ip_network::Ipv4Network;
+    ///
+    /// assert!(Ipv4Network::new(Ipv4Addr::new(0, 0, 0, 0), 8).unwrap().is_local_identification());
+    /// ```
+    pub fn is_local_identification(&self) -> bool {
+        self.network_address.octets()[0] == 0 && self.netmask >= 8
+    }
+
     /// Returns [`true`] for the special 'unspecified' network (0.0.0.0/32).
     ///
     /// This property is defined in _UNIX Network Programming, Second Edition_,
@@ -426,7 +445,7 @@ impl Ipv4Network {
     /// - the link-local address (169.254.0.0/16)
     /// - the broadcast address (255.255.255.255/32)
     /// - test addresses used for documentation (192.0.2.0/24, 198.51.100.0/24 and 203.0.113.0/24)
-    /// - the unspecified address (0.0.0.0/32)
+    /// - local identification (0.0.0.0/8)
     ///
     /// [ipv4-sr]: https://www.iana.org/assignments/iana-ipv4-special-registry/iana-ipv4-special-registry.xhtml
     /// [`true`]: https://doc.rust-lang.org/std/primitive.bool.html
@@ -449,7 +468,7 @@ impl Ipv4Network {
             && !self.is_link_local()
             && !self.is_broadcast()
             && !self.is_documentation()
-            && !self.is_unspecified()
+            && !self.is_local_identification()
     }
 
     // TODO: Documentation
@@ -779,6 +798,10 @@ mod tests {
     #[test]
     fn is_global() {
         let is_global = |ip, netmask| Ipv4Network::new(ip, netmask).unwrap().is_global();
+
+        assert!(is_global(Ipv4Addr::new(0, 0, 0, 0), 4));
+        assert!(!is_global(Ipv4Addr::new(0, 0, 0, 0), 8));
+        assert!(!is_global(Ipv4Addr::new(0, 0, 0, 0), 16));
 
         assert!(!is_global(Ipv4Addr::new(10, 0, 0, 0), 8));
         assert!(is_global(Ipv4Addr::new(10, 0, 0, 0), 7));
