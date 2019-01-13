@@ -261,9 +261,9 @@ impl Ipv4Network {
 
     /// Returns [`true`] for network in local identification range (0.0.0.0/8).
     ///
-    /// [IETF RFC 919]: https://tools.ietf.org/html/rfc919
     /// This property is defined by [IETF RFC 1122].
     ///
+    /// [IETF RFC 1122]: https://tools.ietf.org/html/rfc1122
     /// [`true`]: https://doc.rust-lang.org/std/primitive.bool.html
     ///
     /// # Examples
@@ -408,7 +408,29 @@ impl Ipv4Network {
     /// assert!(ip_network.is_multicast());
     /// ```
     pub fn is_multicast(&self) -> bool {
-        self.network_address.is_multicast() && self.netmask >= 4
+        self.network_address.octets()[0] & 0xf0 == 224 && self.netmask >= 4
+    }
+
+    /// Returns [`true`] if this whole network is inside reserved address range (240.0.0.0/4).
+    ///
+    /// Reserved network addresses have a most significant octet between 240 and 255,
+    /// and is defined by [IETF RFC 1112].
+    ///
+    /// [IETF RFC 1112]: https://tools.ietf.org/html/rfc1112
+    /// [`true`]: https://doc.rust-lang.org/std/primitive.bool.html
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::net::Ipv4Addr;
+    /// use ip_network::Ipv4Network;
+    ///
+    /// let ip_network = Ipv4Network::new(Ipv4Addr::new(240, 168, 1, 0), 24).unwrap();
+    /// assert!(ip_network.is_reserved());
+    /// ```
+    pub fn is_reserved(&self) -> bool {
+        // Not necessary to check netmask
+        self.network_address.octets()[0] & 0xf0 == 240
     }
 
     /// Returns [`true`] if this network is in a range designated for documentation.
@@ -446,6 +468,7 @@ impl Ipv4Network {
     /// - the broadcast address (255.255.255.255/32)
     /// - test addresses used for documentation (192.0.2.0/24, 198.51.100.0/24 and 203.0.113.0/24)
     /// - local identification (0.0.0.0/8)
+    /// - reserved range (240.0.0.0/4)
     ///
     /// [ipv4-sr]: https://www.iana.org/assignments/iana-ipv4-special-registry/iana-ipv4-special-registry.xhtml
     /// [`true`]: https://doc.rust-lang.org/std/primitive.bool.html
@@ -469,6 +492,7 @@ impl Ipv4Network {
             && !self.is_broadcast()
             && !self.is_documentation()
             && !self.is_local_identification()
+            && !self.is_reserved()
     }
 
     // TODO: Documentation
@@ -823,6 +847,10 @@ mod tests {
         assert!(!is_global(Ipv4Addr::new(192, 0, 2, 0), 24));
         assert!(!is_global(Ipv4Addr::new(198, 51, 100, 0), 24));
         assert!(!is_global(Ipv4Addr::new(203, 0, 113, 0), 24));
+
+        assert!(!is_global(Ipv4Addr::new(240, 0, 0, 0), 4));
+        assert!(!is_global(Ipv4Addr::new(240, 0, 0, 0), 8));
+        assert!(!is_global(Ipv4Addr::new(255, 0, 0, 0), 8));
     }
 
     #[test]
