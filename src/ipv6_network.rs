@@ -169,7 +169,7 @@ impl Ipv6Network {
     }
 
     /// Returns `Ipv6NetworkIterator` over networks with netmask bigger one.
-    /// If netmask is already 128, `None` will be returned.
+    /// If netmask is already 128, empty iterator will be returned.
     ///
     /// # Examples
     ///
@@ -187,7 +187,7 @@ impl Ipv6Network {
         iterator::Ipv6NetworkIterator::new(*self, new_netmask)
     }
 
-    /// Returns `Ipv6NetworkIterator` over networks with defined netmask. Becasue [`len()`] method
+    /// Returns `Ipv6NetworkIterator` over networks with defined netmask. Because [`len()`] method
     /// returns `usize` and number of networks can be bigger than `usize`, you can use `real_len()` method
     /// to get exact number of networks.
     ///
@@ -213,7 +213,7 @@ impl Ipv6Network {
         iterator::Ipv6NetworkIterator::new(*self, prefix)
     }
 
-    /// Returns [`true`] for the default route network (::/0), that conains all IPv6 addresses.
+    /// Returns [`true`] for the default route network (::/0), that contains all IPv6 addresses.
     ///
     /// [`true`]: https://doc.rust-lang.org/std/primitive.bool.html
     ///

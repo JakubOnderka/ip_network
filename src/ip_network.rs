@@ -1,10 +1,10 @@
+use std::cmp::Ordering;
 use std::fmt;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 use std::str::FromStr;
 use crate::{IpNetworkError, IpNetworkParseError};
 use crate::helpers;
 use crate::{Ipv4Network, Ipv6Network};
-use std::cmp::Ordering;
 
 /// Holds IPv4 or IPv6 network
 #[derive(Clone, Copy, Eq, PartialEq, Debug, Hash, PartialOrd, Ord)]

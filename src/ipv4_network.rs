@@ -244,7 +244,7 @@ impl Ipv4Network {
         iterator::Ipv4NetworkIterator::new(*self, prefix)
     }
 
-    /// Returns [`true`] for the default route network (0.0.0.0/0), that conains all IPv4 addresses.
+    /// Returns [`true`] for the default route network (0.0.0.0/0), that contains all IPv4 addresses.
     ///
     /// [`true`]: https://doc.rust-lang.org/std/primitive.bool.html
     ///
