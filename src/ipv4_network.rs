@@ -370,6 +370,27 @@ impl Ipv4Network {
         }
     }
 
+    /// Returns [`true`] if this whole network is inside Shared Address Space (100.64.0.0/10).
+    ///
+    /// This property is defined by [IETF RFC 6598].
+    ///
+    /// [IETF RFC 6598]: https://tools.ietf.org/html/rfc6598
+    /// [`true`]: https://doc.rust-lang.org/std/primitive.bool.html
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::net::Ipv4Addr;
+    /// use ip_network::Ipv4Network;
+    ///
+    /// let ip_network = Ipv4Network::new(Ipv4Addr::new(100, 64, 0, 0), 10).unwrap();
+    /// assert!(ip_network.is_shared_address_space());
+    /// ```
+    pub fn is_shared_address_space(&self) -> bool {
+        let octets = self.network_address.octets();
+        octets[0] == 100 && octets[1] &  0xc0 == 64
+    }
+
     /// Returns [`true`] if the network is is inside link-local range (169.254.0.0/16).
     ///
     /// This property is defined by [IETF RFC 3927].
@@ -415,7 +436,7 @@ impl Ipv4Network {
     ///
     /// This property is defined by [IETF RFC 2544].
     ///
-    /// [IETF RFC 2544]: https://tools.ietf.org/html/rfc5771
+    /// [IETF RFC 2544]: https://tools.ietf.org/html/rfc2544
     /// [`true`]: https://doc.rust-lang.org/std/primitive.bool.html
     ///
     /// # Examples
@@ -486,6 +507,7 @@ impl Ipv4Network {
     ///
     /// - local identification (0.0.0.0/8)
     /// - private address (10.0.0.0/8, 172.16.0.0/12 and 192.168.0.0/16)
+    /// - Shared Address Space (100.64.0.0/10)
     /// - the loopback address (127.0.0.0/8)
     /// - the link-local address (169.254.0.0/16)
     /// - the broadcast address (255.255.255.255/32)
@@ -511,6 +533,7 @@ impl Ipv4Network {
     pub fn is_global(&self) -> bool {
         !self.is_local_identification()
             && !self.is_private()
+            && !self.is_shared_address_space()
             && !self.is_loopback()
             && !self.is_link_local()
             && !self.is_broadcast()
@@ -858,6 +881,9 @@ mod tests {
         assert!(is_global(Ipv4Addr::new(0, 0, 0, 0), 4));
         assert!(!is_global(Ipv4Addr::new(0, 0, 0, 0), 8));
         assert!(!is_global(Ipv4Addr::new(0, 0, 0, 0), 16));
+
+        assert!(!is_global(Ipv4Addr::new(100, 64, 0, 0), 10)); // Shared Address Space
+        assert!(!is_global(Ipv4Addr::new(100, 127, 0, 0), 16)); // Shared Address Space
 
         assert!(!is_global(Ipv4Addr::new(10, 0, 0, 0), 8));
         assert!(is_global(Ipv4Addr::new(10, 0, 0, 0), 7));
