@@ -387,8 +387,7 @@ impl Ipv4Network {
     /// assert!(ip_network.is_link_local());
     /// ```
     pub fn is_link_local(&self) -> bool {
-        let octets = self.network_address.octets();
-        octets[0] == 169 && octets[1] == 254 && self.netmask >= 16
+        self.network_address.is_link_local() && self.netmask >= 16
     }
 
     /// Returns [`true`] if this whole network is inside multicast address range (224.0.0.0/4).
@@ -410,6 +409,28 @@ impl Ipv4Network {
     /// ```
     pub fn is_multicast(&self) -> bool {
         self.network_address.octets()[0] & 0xf0 == 224 && self.netmask >= 4
+    }
+
+    /// Returns [`true`] if this whole network is inside benchmarking address range (198.18.0.0/15).
+    ///
+    /// This property is defined by [IETF RFC 2544].
+    ///
+    /// [IETF RFC 2544]: https://tools.ietf.org/html/rfc5771
+    /// [`true`]: https://doc.rust-lang.org/std/primitive.bool.html
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::net::Ipv4Addr;
+    /// use ip_network::Ipv4Network;
+    ///
+    /// let ip_network = Ipv4Network::new(Ipv4Addr::new(198, 19, 1, 0), 24).unwrap();
+    /// assert!(ip_network.is_benchmarking());
+    /// ```
+    pub fn is_benchmarking(&self) -> bool {
+        // Not necessary to check netmask
+        let octets = self.network_address.octets();
+        octets[0] == 198 && octets[1] & 0xfe == 18
     }
 
     /// Returns [`true`] if this whole network is inside reserved address range (240.0.0.0/4).
@@ -463,12 +484,13 @@ impl Ipv4Network {
     ///
     /// The following return false:
     ///
+    /// - local identification (0.0.0.0/8)
     /// - private address (10.0.0.0/8, 172.16.0.0/12 and 192.168.0.0/16)
     /// - the loopback address (127.0.0.0/8)
     /// - the link-local address (169.254.0.0/16)
     /// - the broadcast address (255.255.255.255/32)
     /// - test addresses used for documentation (192.0.2.0/24, 198.51.100.0/24 and 203.0.113.0/24)
-    /// - local identification (0.0.0.0/8)
+    /// - benchmarking (198.18.0.0/15)
     /// - reserved range (240.0.0.0/4)
     ///
     /// [ipv4-sr]: https://www.iana.org/assignments/iana-ipv4-special-registry/iana-ipv4-special-registry.xhtml
@@ -487,12 +509,13 @@ impl Ipv4Network {
     /// assert!(Ipv4Network::new(Ipv4Addr::new(80, 9, 12, 3), 32).unwrap().is_global());
     /// ```
     pub fn is_global(&self) -> bool {
-        !self.is_private()
+        !self.is_local_identification()
+            && !self.is_private()
             && !self.is_loopback()
             && !self.is_link_local()
             && !self.is_broadcast()
             && !self.is_documentation()
-            && !self.is_local_identification()
+            && !self.is_benchmarking()
             && !self.is_reserved()
     }
 
@@ -856,6 +879,9 @@ mod tests {
         assert!(!is_global(Ipv4Addr::new(192, 0, 2, 0), 24));
         assert!(!is_global(Ipv4Addr::new(198, 51, 100, 0), 24));
         assert!(!is_global(Ipv4Addr::new(203, 0, 113, 0), 24));
+
+        assert!(!is_global(Ipv4Addr::new(198, 18, 0, 0), 15)); // benchmarking
+        assert!(!is_global(Ipv4Addr::new(198, 19, 0, 0), 16)); // benchmarking
 
         assert!(!is_global(Ipv4Addr::new(240, 0, 0, 0), 4));
         assert!(!is_global(Ipv4Addr::new(240, 0, 0, 0), 8));
