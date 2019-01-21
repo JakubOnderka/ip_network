@@ -1,5 +1,4 @@
-use std::error::Error;
-use std::io::prelude::*;
+use std::io::Write;
 use diesel::expression::{AsExpression, Expression};
 use diesel::pg::Pg;
 use diesel::serialize::{self, IsNull, Output, ToSql};
