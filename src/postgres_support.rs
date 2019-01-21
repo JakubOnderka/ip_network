@@ -122,7 +122,13 @@ mod tests {
         assert_eq!(32, output[1]);
         assert_eq!(1, output[2]);
         assert_eq!(16, output[3]);
-        // TODO: IPv6 comparsion
+        assert_eq!(0x20, output[4]);
+        assert_eq!(0x01, output[5]);
+        assert_eq!(0x0d, output[6]);
+        assert_eq!(0xb8, output[7]);
+        for i in 8..20 {
+            assert_eq!(0, output[i]);
+        }
     }
 
     #[test]
