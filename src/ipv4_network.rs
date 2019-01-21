@@ -501,7 +501,7 @@ impl Ipv4Network {
     }
 
     /// Returns [`true`] if the network appears to be globally routable.
-    /// See [iana-ipv4-special-registry][ipv4-sr].
+    /// See [IANA IPv4 Special-Purpose Address Registry][ipv4-sr].
     ///
     /// The following return false:
     ///
@@ -542,7 +542,25 @@ impl Ipv4Network {
             && !self.is_reserved()
     }
 
-    // TODO: Documentation
+    /// Return a vector of the summarized network range given the first and last IPv4 addresses.
+    /// Implementation of this method was inspired by Python [`ipaddress.summarize_address_range`]
+    /// method. If first IP address is bigger than last, empty vector is returned.
+    ///
+    /// [`ipaddress.summarize_address_range`]: https://docs.python.org/3/library/ipaddress.html#ipaddress.summarize_address_range
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::net::Ipv4Addr;
+    /// use ip_network::Ipv4Network;
+    ///
+    /// let ranges = Ipv4Network::summarize_address_range(
+    ///     Ipv4Addr::new(10, 254, 0, 0),
+    ///     Ipv4Addr::new(10, 255, 255, 255),
+    /// );
+    ///
+    /// assert_eq!(Ipv4Network::new(Ipv4Addr::new(10, 254, 0, 0), 15).unwrap(), ranges[0]);
+    /// ```
     pub fn summarize_address_range(first: Ipv4Addr, last: Ipv4Addr) -> Vec<Self> {
         let mut first_int = u32::from(first);
         let last_int = u32::from(last);
@@ -961,6 +979,15 @@ mod tests {
             networks[0],
             Ipv4Network::new(Ipv4Addr::new(0, 0, 0, 0), 0).unwrap()
         );
+    }
+
+    #[test]
+    fn summarize_address_range_first_is_bigger() {
+        let networks = Ipv4Network::summarize_address_range(
+            Ipv4Addr::new(255, 255, 255, 255),
+            Ipv4Addr::new(0, 0, 0, 0),
+        );
+        assert_eq!(0, networks.len());
     }
 
     #[test]
