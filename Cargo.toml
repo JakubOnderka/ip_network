@@ -35,5 +35,12 @@ features = ["postgres"]
 [dev-dependencies.serde_test]
 version = "1.0"
 
+[dev-dependencies.criterion]
+version = "0.2.9"
+
 [package.metadata.docs.rs]
 features = ["serde", "postgres", "diesel"]
+
+[[bench]]
+name = "benchmark"
+harness = false
