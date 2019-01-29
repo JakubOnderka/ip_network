@@ -122,8 +122,8 @@ impl Ipv4NetworkIterator {
                 current: 0,
                 to: 0,
                 new_netmask: 0,
-                is_done: true
-            }
+                is_done: true,
+            };
         }
 
         assert!(network.netmask() < new_netmask);
@@ -200,8 +200,8 @@ impl Ipv6NetworkIterator {
                 current: 0,
                 to: 0,
                 new_netmask: 0,
-                is_done: true
-            }
+                is_done: true,
+            };
         }
 
         assert!(network.netmask() < new_netmask);

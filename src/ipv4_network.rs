@@ -388,7 +388,7 @@ impl Ipv4Network {
     /// ```
     pub fn is_shared_address_space(&self) -> bool {
         let octets = self.network_address.octets();
-        octets[0] == 100 && octets[1] &  0xc0 == 64
+        octets[0] == 100 && octets[1] & 0xc0 == 64
     }
 
     /// Returns [`true`] if the network is is inside link-local range (169.254.0.0/16).

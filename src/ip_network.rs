@@ -313,7 +313,6 @@ impl PartialOrd<Ipv4Network> for IpNetwork {
     }
 }
 
-
 impl PartialOrd<IpNetwork> for Ipv4Network {
     fn partial_cmp(&self, other: &IpNetwork) -> Option<Ordering> {
         match other {
