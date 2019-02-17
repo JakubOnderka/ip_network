@@ -511,6 +511,7 @@ impl FromStr for Ipv6Network {
 
 impl From<Ipv6Addr> for Ipv6Network {
     /// Converts `Ipv6Addr` to `Ipv6Network` with netmask 128.
+    #[inline]
     fn from(ip: Ipv6Addr) -> Self {
         Self {
             network_address: ip,

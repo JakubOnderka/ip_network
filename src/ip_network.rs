@@ -234,6 +234,7 @@ impl FromStr for IpNetwork {
 
 impl From<Ipv4Addr> for IpNetwork {
     /// Converts `Ipv4Addr` to `IpNetwork` with netmask 32.
+    #[inline]
     fn from(ip: Ipv4Addr) -> Self {
         IpNetwork::V4(Ipv4Network::from(ip))
     }
@@ -241,6 +242,7 @@ impl From<Ipv4Addr> for IpNetwork {
 
 impl From<Ipv6Addr> for IpNetwork {
     /// Converts `Ipv46ddr` to `IpNetwork` with netmask 128.
+    #[inline]
     fn from(ip: Ipv6Addr) -> Self {
         IpNetwork::V6(Ipv6Network::from(ip))
     }
@@ -257,12 +259,14 @@ impl From<IpAddr> for IpNetwork {
 }
 
 impl From<Ipv4Network> for IpNetwork {
+    #[inline]
     fn from(network: Ipv4Network) -> Self {
         IpNetwork::V4(network)
     }
 }
 
 impl From<Ipv6Network> for IpNetwork {
+    #[inline]
     fn from(network: Ipv6Network) -> Self {
         IpNetwork::V6(network)
     }

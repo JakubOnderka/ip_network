@@ -641,6 +641,7 @@ impl FromStr for Ipv4Network {
 
 impl From<Ipv4Addr> for Ipv4Network {
     /// Converts `Ipv4Addr` to `Ipv4Network` with netmask 32.
+    #[inline]
     fn from(ip: Ipv4Addr) -> Self {
         Self {
             network_address: ip,
