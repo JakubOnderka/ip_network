@@ -135,6 +135,30 @@ pub trait PqCidrExtensionMethods: Expression<SqlType = Cidr> + Sized {
 
 impl<T> PqCidrExtensionMethods for T where T: Expression<SqlType = Cidr> {}
 
+/// CIDR functions.
+pub mod functions {
+    use diesel::sql_types::Cidr;
+
+    sql_function! {
+        /// Extract family of address; 4 for IPv4, 6 for IPv6.
+        fn family(x: Cidr) -> Integer;
+    }
+    sql_function! {
+        /// Extract netmask length.
+        fn masklen(x: Cidr) -> Integer;
+    }
+}
+
+pub mod helper_types {
+    pub type Family<Expr> = super::functions::family::HelperType<Expr>;
+    pub type Masklen<Expr> = super::functions::masklen::HelperType<Expr>;
+}
+
+pub mod dsl {
+    pub use super::functions::*;
+    pub use super::helper_types::*;
+}
+
 #[cfg(test)]
 mod tests {
     use std::net::{Ipv4Addr, Ipv6Addr};
@@ -142,8 +166,11 @@ mod tests {
     use diesel::pg::Pg;
     use diesel::serialize::{Output, ToSql};
     use diesel::deserialize::FromSql;
+    use diesel::prelude::*;
+    use diesel::debug_query;
     use super::PqCidrExtensionMethods;
     use super::{IpNetwork, Ipv4Network, Ipv6Network};
+    use super::dsl::*;
 
     table! {
         test {
@@ -204,5 +231,21 @@ mod tests {
         test::ip_network.contains(&ip);
         test::ip_network.contains_or_equals(&ip);
         test::ip_network.contains_or_is_contained_by(&ip);
+    }
+
+    #[test]
+    fn function_family() {
+        let query = test::table
+            .select(family(test::ip_network));
+        let string_query = debug_query::<Pg, _>(&query).to_string();
+        assert_eq!("SELECT family(\"test\".\"ip_network\") FROM \"test\" -- binds: []" , string_query);
+    }
+
+    #[test]
+    fn function_masklen() {
+        let query = test::table
+            .select(masklen(test::ip_network));
+        let string_query = debug_query::<Pg, _>(&query).to_string();
+        assert_eq!("SELECT masklen(\"test\".\"ip_network\") FROM \"test\" -- binds: []" , string_query);
     }
 }
