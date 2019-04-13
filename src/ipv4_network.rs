@@ -30,9 +30,10 @@ impl Ipv4Network {
     /// use std::net::Ipv4Addr;
     /// use ip_network::Ipv4Network;
     ///
-    /// let ip_network = Ipv4Network::new(Ipv4Addr::new(192, 168, 1, 0), 24).unwrap();
+    /// let ip_network = Ipv4Network::new(Ipv4Addr::new(192, 168, 1, 0), 24)?;
     /// assert_eq!(ip_network.network_address(), Ipv4Addr::new(192, 168, 1, 0));
     /// assert_eq!(ip_network.netmask(), 24);
+    /// # Ok::<(), ip_network::IpNetworkError>(())
     /// ```
     #[allow(clippy::new_ret_no_self)]
     pub fn new(network_address: Ipv4Addr, netmask: u8) -> Result<Self, IpNetworkError> {
@@ -63,9 +64,10 @@ impl Ipv4Network {
     /// use std::net::Ipv4Addr;
     /// use ip_network::Ipv4Network;
     ///
-    /// let ip_network = Ipv4Network::new_truncate(Ipv4Addr::new(192, 168, 1, 100), 24).unwrap();
+    /// let ip_network = Ipv4Network::new_truncate(Ipv4Addr::new(192, 168, 1, 100), 24)?;
     /// assert_eq!(ip_network.network_address(), Ipv4Addr::new(192, 168, 1, 0));
     /// assert_eq!(ip_network.netmask(), 24);
+    /// # Ok::<(), ip_network::IpNetworkError>(())
     /// ```
     pub fn new_truncate(network_address: Ipv4Addr, netmask: u8) -> Result<Self, IpNetworkError> {
         if netmask > Self::LENGTH {
@@ -89,8 +91,9 @@ impl Ipv4Network {
     /// use std::net::Ipv4Addr;
     /// use ip_network::Ipv4Network;
     ///
-    /// let ip_network = Ipv4Network::new(Ipv4Addr::new(192, 168, 1, 0), 24).unwrap();
+    /// let ip_network = Ipv4Network::new(Ipv4Addr::new(192, 168, 1, 0), 24)?;
     /// assert_eq!(ip_network.network_address(), Ipv4Addr::new(192, 168, 1, 0));
+    /// # Ok::<(), ip_network::IpNetworkError>(())
     /// ```
     #[inline]
     pub fn network_address(&self) -> Ipv4Addr {
@@ -105,8 +108,9 @@ impl Ipv4Network {
     /// use std::net::Ipv4Addr;
     /// use ip_network::Ipv4Network;
     ///
-    /// let ip_network = Ipv4Network::new(Ipv4Addr::new(192, 168, 1, 0), 24).unwrap();
+    /// let ip_network = Ipv4Network::new(Ipv4Addr::new(192, 168, 1, 0), 24)?;
     /// assert_eq!(ip_network.broadcast_address(), Ipv4Addr::new(192, 168, 1, 255));
+    /// # Ok::<(), ip_network::IpNetworkError>(())
     /// ```
     pub fn broadcast_address(&self) -> Ipv4Addr {
         Ipv4Addr::from(u32::from(self.network_address) | !helpers::get_bite_mask(self.netmask))
@@ -120,8 +124,9 @@ impl Ipv4Network {
     /// use std::net::Ipv4Addr;
     /// use ip_network::Ipv4Network;
     ///
-    /// let ip_network = Ipv4Network::new(Ipv4Addr::new(192, 168, 1, 0), 24).unwrap();
+    /// let ip_network = Ipv4Network::new(Ipv4Addr::new(192, 168, 1, 0), 24)?;
     /// assert_eq!(ip_network.netmask(), 24);
+    /// # Ok::<(), ip_network::IpNetworkError>(())
     /// ```
     #[inline]
     pub fn netmask(&self) -> u8 {
@@ -136,8 +141,9 @@ impl Ipv4Network {
     /// use std::net::Ipv4Addr;
     /// use ip_network::Ipv4Network;
     ///
-    /// let ip_network = Ipv4Network::new(Ipv4Addr::new(192, 168, 1, 0), 24).unwrap();
+    /// let ip_network = Ipv4Network::new(Ipv4Addr::new(192, 168, 1, 0), 24)?;
     /// assert_eq!(ip_network.full_netmask(), Ipv4Addr::new(255, 255, 255, 0));
+    /// # Ok::<(), ip_network::IpNetworkError>(())
     /// ```
     pub fn full_netmask(&self) -> Ipv4Addr {
         Ipv4Addr::from(helpers::get_bite_mask(self.netmask))
@@ -154,9 +160,10 @@ impl Ipv4Network {
     /// use std::net::Ipv4Addr;
     /// use ip_network::Ipv4Network;
     ///
-    /// let ip_network = Ipv4Network::new(Ipv4Addr::new(192, 168, 1, 0), 24).unwrap();
+    /// let ip_network = Ipv4Network::new(Ipv4Addr::new(192, 168, 1, 0), 24)?;
     /// assert!(ip_network.contains(Ipv4Addr::new(192, 168, 1, 2)));
     /// assert!(!ip_network.contains(Ipv4Addr::new(192, 168, 2, 2)));
+    /// # Ok::<(), ip_network::IpNetworkError>(())
     /// ```
     pub fn contains(&self, ip: Ipv4Addr) -> bool {
         u32::from(ip) & helpers::get_bite_mask(self.netmask) == u32::from(self.network_address)
@@ -175,10 +182,11 @@ impl Ipv4Network {
     /// use ip_network::Ipv4Network;
     ///
     /// let ip = Ipv4Addr::new(192, 168, 1, 0);
-    /// let mut hosts = Ipv4Network::new(ip, 24).unwrap().hosts();
+    /// let mut hosts = Ipv4Network::new(ip, 24)?.hosts();
     /// assert_eq!(254, hosts.len());
     /// assert_eq!(hosts.next().unwrap(), Ipv4Addr::new(192, 168, 1, 1));
     /// assert_eq!(hosts.last().unwrap(), Ipv4Addr::new(192, 168, 1, 254));
+    /// # Ok::<(), ip_network::IpNetworkError>(())
     /// ```
     pub fn hosts(&self) -> impl ExactSizeIterator<Item = Ipv4Addr> {
         iterator::Ipv4RangeIterator::hosts(*self)
@@ -193,8 +201,9 @@ impl Ipv4Network {
     /// use ip_network::Ipv4Network;
     ///
     /// let ip = Ipv4Addr::new(192, 168, 1, 0);
-    /// let mut hosts = Ipv4Network::new(ip, 24).unwrap();
-    /// assert_eq!(hosts.supernet(), Some(Ipv4Network::new(Ipv4Addr::new(192, 168, 0, 0), 23).unwrap()));
+    /// let mut hosts = Ipv4Network::new(ip, 24)?;
+    /// assert_eq!(hosts.supernet(), Some(Ipv4Network::new(Ipv4Addr::new(192, 168, 0, 0), 23)?));
+    /// # Ok::<(), ip_network::IpNetworkError>(())
     /// ```
     pub fn supernet(&self) -> Option<Self> {
         if self.netmask == 0 {
@@ -213,10 +222,11 @@ impl Ipv4Network {
     /// use std::net::Ipv4Addr;
     /// use ip_network::Ipv4Network;
     ///
-    /// let ip_network = Ipv4Network::new(Ipv4Addr::new(192, 168, 1, 0), 24).unwrap();
+    /// let ip_network = Ipv4Network::new(Ipv4Addr::new(192, 168, 1, 0), 24)?;
     /// let mut iterator = ip_network.subnets();
-    /// assert_eq!(iterator.next().unwrap(), Ipv4Network::new(Ipv4Addr::new(192, 168, 1, 0), 25).unwrap());
-    /// assert_eq!(iterator.last().unwrap(), Ipv4Network::new(Ipv4Addr::new(192, 168, 1, 128), 25).unwrap());
+    /// assert_eq!(iterator.next().unwrap(), Ipv4Network::new(Ipv4Addr::new(192, 168, 1, 0), 25)?);
+    /// assert_eq!(iterator.last().unwrap(), Ipv4Network::new(Ipv4Addr::new(192, 168, 1, 128), 25)?);
+    /// # Ok::<(), ip_network::IpNetworkError>(())
     /// ```
     pub fn subnets(&self) -> impl ExactSizeIterator<Item = Ipv4Network> {
         let new_netmask = cmp::min(self.netmask + 1, Self::LENGTH);
@@ -236,9 +246,10 @@ impl Ipv4Network {
     /// use ip_network::Ipv4Network;
     ///
     /// let ip = Ipv4Addr::new(192, 168, 1, 0);
-    /// let mut iterator = Ipv4Network::new(ip, 24).unwrap().subnets_with_prefix(25);
-    /// assert_eq!(iterator.next().unwrap(), Ipv4Network::new(Ipv4Addr::new(192, 168, 1, 0), 25).unwrap());
-    /// assert_eq!(iterator.last().unwrap(), Ipv4Network::new(Ipv4Addr::new(192, 168, 1, 128), 25).unwrap());
+    /// let mut iterator = Ipv4Network::new(ip, 24)?.subnets_with_prefix(25);
+    /// assert_eq!(iterator.next().unwrap(), Ipv4Network::new(Ipv4Addr::new(192, 168, 1, 0), 25)?);
+    /// assert_eq!(iterator.last().unwrap(), Ipv4Network::new(Ipv4Addr::new(192, 168, 1, 128), 25)?);
+    /// # Ok::<(), ip_network::IpNetworkError>(())
     /// ```
     pub fn subnets_with_prefix(&self, prefix: u8) -> impl ExactSizeIterator<Item = Ipv4Network> {
         iterator::Ipv4NetworkIterator::new(*self, prefix)
@@ -254,7 +265,8 @@ impl Ipv4Network {
     /// use std::net::Ipv4Addr;
     /// use ip_network::Ipv4Network;
     ///
-    /// assert!(Ipv4Network::new(Ipv4Addr::new(0, 0, 0, 0), 0).unwrap().is_default_route());
+    /// assert!(Ipv4Network::new(Ipv4Addr::new(0, 0, 0, 0), 0)?.is_default_route());
+    /// # Ok::<(), ip_network::IpNetworkError>(())
     /// ```
     pub fn is_default_route(&self) -> bool {
         self.netmask == 0
@@ -273,7 +285,8 @@ impl Ipv4Network {
     /// use std::net::Ipv4Addr;
     /// use ip_network::Ipv4Network;
     ///
-    /// assert!(Ipv4Network::new(Ipv4Addr::new(0, 0, 0, 0), 8).unwrap().is_local_identification());
+    /// assert!(Ipv4Network::new(Ipv4Addr::new(0, 0, 0, 0), 8)?.is_local_identification());
+    /// # Ok::<(), ip_network::IpNetworkError>(())
     /// ```
     pub fn is_local_identification(&self) -> bool {
         self.network_address.octets()[0] == 0 && self.netmask >= 8
@@ -293,8 +306,8 @@ impl Ipv4Network {
     /// use std::net::Ipv4Addr;
     /// use ip_network::Ipv4Network;
     ///
-    /// let ip_network = Ipv4Network::new(Ipv4Addr::new(0, 0, 0, 0), 32).unwrap();
-    /// assert!(ip_network.is_unspecified());
+    /// assert!(Ipv4Network::new(Ipv4Addr::new(0, 0, 0, 0), 32)?.is_unspecified());
+    /// # Ok::<(), ip_network::IpNetworkError>(())
     /// ```
     pub fn is_unspecified(&self) -> bool {
         self.netmask == Self::LENGTH && self.network_address.is_unspecified()
@@ -313,8 +326,8 @@ impl Ipv4Network {
     /// use std::net::Ipv4Addr;
     /// use ip_network::Ipv4Network;
     ///
-    /// let ip_network = Ipv4Network::new(Ipv4Addr::new(127, 0, 0, 0), 8).unwrap();
-    /// assert!(ip_network.is_loopback());
+    /// assert!(Ipv4Network::new(Ipv4Addr::new(127, 0, 0, 0), 8)?.is_loopback());
+    /// # Ok::<(), ip_network::IpNetworkError>(())
     /// ```
     pub fn is_loopback(&self) -> bool {
         self.network_address.is_loopback()
@@ -333,8 +346,8 @@ impl Ipv4Network {
     /// use std::net::Ipv4Addr;
     /// use ip_network::Ipv4Network;
     ///
-    /// let ip_network = Ipv4Network::new(Ipv4Addr::new(255, 255, 255, 255), 32).unwrap();
-    /// assert!(ip_network.is_broadcast());
+    /// assert!(Ipv4Network::new(Ipv4Addr::new(255, 255, 255, 255), 32)?.is_broadcast());
+    /// # Ok::<(), ip_network::IpNetworkError>(())
     /// ```
     pub fn is_broadcast(&self) -> bool {
         self.network_address.is_broadcast()
@@ -357,8 +370,8 @@ impl Ipv4Network {
     /// use std::net::Ipv4Addr;
     /// use ip_network::Ipv4Network;
     ///
-    /// let ip_network = Ipv4Network::new(Ipv4Addr::new(192, 168, 1, 0), 24).unwrap();
-    /// assert!(ip_network.is_private());
+    /// assert!(Ipv4Network::new(Ipv4Addr::new(192, 168, 1, 0), 24)?.is_private());
+    /// # Ok::<(), ip_network::IpNetworkError>(())
     /// ```
     pub fn is_private(&self) -> bool {
         let octets = self.network_address.octets();
@@ -383,8 +396,8 @@ impl Ipv4Network {
     /// use std::net::Ipv4Addr;
     /// use ip_network::Ipv4Network;
     ///
-    /// let ip_network = Ipv4Network::new(Ipv4Addr::new(100, 64, 0, 0), 10).unwrap();
-    /// assert!(ip_network.is_shared_address_space());
+    /// assert!(Ipv4Network::new(Ipv4Addr::new(100, 64, 0, 0), 10)?.is_shared_address_space());
+    /// # Ok::<(), ip_network::IpNetworkError>(())
     /// ```
     pub fn is_shared_address_space(&self) -> bool {
         let octets = self.network_address.octets();
@@ -404,8 +417,8 @@ impl Ipv4Network {
     /// use std::net::Ipv4Addr;
     /// use ip_network::Ipv4Network;
     ///
-    /// let ip_network = Ipv4Network::new(Ipv4Addr::new(169, 254, 1, 0), 24).unwrap();
-    /// assert!(ip_network.is_link_local());
+    /// assert!(Ipv4Network::new(Ipv4Addr::new(169, 254, 1, 0), 24)?.is_link_local());
+    /// # Ok::<(), ip_network::IpNetworkError>(())
     /// ```
     pub fn is_link_local(&self) -> bool {
         self.network_address.is_link_local() && self.netmask >= 16
@@ -425,8 +438,8 @@ impl Ipv4Network {
     /// use std::net::Ipv4Addr;
     /// use ip_network::Ipv4Network;
     ///
-    /// let ip_network = Ipv4Network::new(Ipv4Addr::new(224, 168, 1, 0), 24).unwrap();
-    /// assert!(ip_network.is_multicast());
+    /// assert!(Ipv4Network::new(Ipv4Addr::new(224, 168, 1, 0), 24)?.is_multicast());
+    /// # Ok::<(), ip_network::IpNetworkError>(())
     /// ```
     pub fn is_multicast(&self) -> bool {
         self.network_address.octets()[0] & 0xf0 == 224 && self.netmask >= 4
@@ -445,8 +458,8 @@ impl Ipv4Network {
     /// use std::net::Ipv4Addr;
     /// use ip_network::Ipv4Network;
     ///
-    /// let ip_network = Ipv4Network::new(Ipv4Addr::new(198, 19, 1, 0), 24).unwrap();
-    /// assert!(ip_network.is_benchmarking());
+    /// assert!(Ipv4Network::new(Ipv4Addr::new(198, 19, 1, 0), 24)?.is_benchmarking());
+    /// # Ok::<(), ip_network::IpNetworkError>(())
     /// ```
     pub fn is_benchmarking(&self) -> bool {
         // Not necessary to check netmask
@@ -468,8 +481,8 @@ impl Ipv4Network {
     /// use std::net::Ipv4Addr;
     /// use ip_network::Ipv4Network;
     ///
-    /// let ip_network = Ipv4Network::new(Ipv4Addr::new(240, 168, 1, 0), 24).unwrap();
-    /// assert!(ip_network.is_reserved());
+    /// assert!(Ipv4Network::new(Ipv4Addr::new(240, 168, 1, 0), 24)?.is_reserved());
+    /// # Ok::<(), ip_network::IpNetworkError>(())
     /// ```
     pub fn is_reserved(&self) -> bool {
         // Not necessary to check netmask
@@ -493,8 +506,8 @@ impl Ipv4Network {
     /// use std::net::Ipv4Addr;
     /// use ip_network::Ipv4Network;
     ///
-    /// let ip_network = Ipv4Network::new(Ipv4Addr::new(192, 0, 2, 0), 24).unwrap();
-    /// assert!(ip_network.is_documentation());
+    /// assert!(Ipv4Network::new(Ipv4Addr::new(192, 0, 2, 0), 24)?.is_documentation());
+    /// # Ok::<(), ip_network::IpNetworkError>(())
     /// ```
     pub fn is_documentation(&self) -> bool {
         self.network_address.is_documentation() && self.netmask >= 24
@@ -524,11 +537,12 @@ impl Ipv4Network {
     /// use std::net::Ipv4Addr;
     /// use ip_network::Ipv4Network;
     ///
-    /// assert!(!Ipv4Network::new(Ipv4Addr::new(10, 254, 0, 0), 16).unwrap().is_global());
-    /// assert!(!Ipv4Network::new(Ipv4Addr::new(192, 168, 10, 65), 32).unwrap().is_global());
-    /// assert!(!Ipv4Network::new(Ipv4Addr::new(172, 16, 10, 65), 32).unwrap().is_global());
-    /// assert!(!Ipv4Network::new(Ipv4Addr::new(0, 0, 0, 0), 32).unwrap().is_global());
-    /// assert!(Ipv4Network::new(Ipv4Addr::new(80, 9, 12, 3), 32).unwrap().is_global());
+    /// assert!(!Ipv4Network::new(Ipv4Addr::new(10, 254, 0, 0), 16)?.is_global());
+    /// assert!(!Ipv4Network::new(Ipv4Addr::new(192, 168, 10, 65), 32)?.is_global());
+    /// assert!(!Ipv4Network::new(Ipv4Addr::new(172, 16, 10, 65), 32)?.is_global());
+    /// assert!(!Ipv4Network::new(Ipv4Addr::new(0, 0, 0, 0), 32)?.is_global());
+    /// assert!(Ipv4Network::new(Ipv4Addr::new(80, 9, 12, 3), 32)?.is_global());
+    /// # Ok::<(), ip_network::IpNetworkError>(())
     /// ```
     pub fn is_global(&self) -> bool {
         !self.is_local_identification()
@@ -559,7 +573,8 @@ impl Ipv4Network {
     ///     Ipv4Addr::new(10, 255, 255, 255),
     /// );
     ///
-    /// assert_eq!(Ipv4Network::new(Ipv4Addr::new(10, 254, 0, 0), 15).unwrap(), ranges[0]);
+    /// assert_eq!(Ipv4Network::new(Ipv4Addr::new(10, 254, 0, 0), 15)?, ranges[0]);
+    /// # Ok::<(), ip_network::IpNetworkError>(())
     /// ```
     pub fn summarize_address_range(first: Ipv4Addr, last: Ipv4Addr) -> Vec<Self> {
         let mut first_int = u32::from(first);
@@ -602,8 +617,8 @@ impl fmt::Display for Ipv4Network {
     /// use std::net::Ipv4Addr;
     /// use ip_network::Ipv4Network;
     ///
-    /// let ip_network = Ipv4Network::new(Ipv4Addr::new(192, 168, 1, 0), 24).unwrap();
-    /// assert_eq!(ip_network.to_string(), "192.168.1.0/24");
+    /// assert_eq!(Ipv4Network::new(Ipv4Addr::new(192, 168, 1, 0), 24)?.to_string(), "192.168.1.0/24");
+    /// # Ok::<(), ip_network::IpNetworkError>(())
     /// ```
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         write!(fmt, "{}/{}", self.network_address, self.netmask)
@@ -622,9 +637,10 @@ impl FromStr for Ipv4Network {
     /// use ip_network::Ipv4Network;
     /// use std::str::FromStr;
     ///
-    /// let ip_network = Ipv4Network::from_str("192.168.1.0/24").unwrap();
+    /// let ip_network = Ipv4Network::from_str("192.168.1.0/24")?;
     /// assert_eq!(ip_network.network_address(), Ipv4Addr::new(192, 168, 1, 0));
     /// assert_eq!(ip_network.netmask(), 24);
+    /// # Ok::<(), ip_network::IpNetworkParseError>(())
     /// ```
     fn from_str(s: &str) -> Result<Ipv4Network, IpNetworkParseError> {
         let (ip, netmask) =
@@ -677,10 +693,11 @@ impl IntoIterator for Ipv4Network {
     /// use ip_network::Ipv4Network;
     ///
     /// let ip = Ipv4Addr::new(192, 168, 1, 0);
-    /// let mut iter = Ipv4Network::new(ip, 24).unwrap().into_iter();
+    /// let mut iter = Ipv4Network::new(ip, 24)?.into_iter();
     /// assert_eq!(iter.next().unwrap(), Ipv4Addr::new(192, 168, 1, 0));
     /// assert_eq!(iter.next().unwrap(), Ipv4Addr::new(192, 168, 1, 1));
     /// assert_eq!(iter.last().unwrap(), Ipv4Addr::new(192, 168, 1, 255));
+    /// # Ok::<(), ip_network::IpNetworkError>(())
     /// ```
     fn into_iter(self) -> Self::IntoIter {
         Self::IntoIter::new(self.network_address, self.broadcast_address())

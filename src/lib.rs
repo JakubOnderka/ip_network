@@ -14,11 +14,12 @@
 //! use std::net::Ipv4Addr;
 //! use ip_network::Ipv4Network;
 //!
-//! let ip_network = Ipv4Network::new(Ipv4Addr::new(192, 168, 1, 0), 24).unwrap();
+//! let ip_network = Ipv4Network::new(Ipv4Addr::new(192, 168, 1, 0), 24)?;
 //! assert_eq!(Ipv4Addr::new(192, 168, 1, 0), ip_network.network_address());
 //! assert_eq!(24, ip_network.netmask());
 //! assert_eq!(254, ip_network.hosts().len());
 //! assert_eq!("192.168.1.0/24", ip_network.to_string());
+//! # Ok::<(), ip_network::IpNetworkError>(())
 //! ```
 //!
 //! [PostgreSQL CIDR type]: https://www.postgresql.org/docs/current/datatype-net-types.html#DATATYPE-CIDR

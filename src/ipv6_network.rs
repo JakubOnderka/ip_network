@@ -42,9 +42,10 @@ impl Ipv6Network {
     /// use ip_network::Ipv6Network;
     ///
     /// let ip = Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0);
-    /// let ip_network = Ipv6Network::new(ip, 32).unwrap();
+    /// let ip_network = Ipv6Network::new(ip, 32)?;
     /// assert_eq!(ip_network.network_address(), ip);
     /// assert_eq!(ip_network.netmask(), 32);
+    /// # Ok::<(), ip_network::IpNetworkError>(())
     /// ```
     #[allow(clippy::new_ret_no_self)]
     pub fn new(network_address: Ipv6Addr, netmask: u8) -> Result<Self, IpNetworkError> {
@@ -76,9 +77,10 @@ impl Ipv6Network {
     /// use ip_network::Ipv6Network;
     ///
     /// let ip = Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 1, 0, 0);
-    /// let ip_network = Ipv6Network::new_truncate(ip, 32).unwrap();
+    /// let ip_network = Ipv6Network::new_truncate(ip, 32)?;
     /// assert_eq!(ip_network.network_address(), Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0));
     /// assert_eq!(ip_network.netmask(), 32);
+    /// # Ok::<(), ip_network::IpNetworkError>(())
     /// ```
     pub fn new_truncate(network_address: Ipv6Addr, netmask: u8) -> Result<Self, IpNetworkError> {
         if netmask > Self::LENGTH {
@@ -104,8 +106,9 @@ impl Ipv6Network {
     /// use ip_network::Ipv6Network;
     ///
     /// let ip = Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0);
-    /// let ip_network = Ipv6Network::new(ip, 32).unwrap();
+    /// let ip_network = Ipv6Network::new(ip, 32)?;
     /// assert_eq!(ip_network.network_address(), ip);
+    /// # Ok::<(), ip_network::IpNetworkError>(())
     /// ```
     #[inline]
     pub fn network_address(&self) -> Ipv6Addr {
@@ -121,8 +124,9 @@ impl Ipv6Network {
     /// use ip_network::Ipv6Network;
     ///
     /// let ip = Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0);
-    /// let ip_network = Ipv6Network::new(ip, 32).unwrap();
+    /// let ip_network = Ipv6Network::new(ip, 32)?;
     /// assert_eq!(ip_network.netmask(), 32);
+    /// # Ok::<(), ip_network::IpNetworkError>(())
     /// ```
     #[inline]
     pub fn netmask(&self) -> u8 {
@@ -140,9 +144,10 @@ impl Ipv6Network {
     /// use std::net::Ipv6Addr;
     /// use ip_network::Ipv6Network;
     ///
-    /// let ip_network = Ipv6Network::new(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0), 64).unwrap();
+    /// let ip_network = Ipv6Network::new(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0), 64)?;
     /// assert!(ip_network.contains(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 1)));
     /// assert!(!ip_network.contains(Ipv6Addr::new(0x2001, 0xdb9, 0, 0, 0, 0, 0, 0)));
+    /// # Ok::<(), ip_network::IpNetworkError>(())
     /// ```
     pub fn contains(&self, ip: Ipv6Addr) -> bool {
         let truncated_ip = u128::from(ip) & helpers::get_bite_mask_u128(self.netmask);
@@ -157,8 +162,9 @@ impl Ipv6Network {
     /// use std::net::Ipv6Addr;
     /// use ip_network::Ipv6Network;
     ///
-    /// let network = Ipv6Network::new(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0), 32).unwrap();
-    /// assert_eq!(network.supernet(), Some(Ipv6Network::new(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0), 31).unwrap()));
+    /// let network = Ipv6Network::new(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0), 32)?;
+    /// assert_eq!(network.supernet(), Some(Ipv6Network::new(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0), 31)?));
+    /// # Ok::<(), ip_network::IpNetworkError>(())
     /// ```
     pub fn supernet(&self) -> Option<Self> {
         if self.netmask == 0 {
@@ -177,10 +183,11 @@ impl Ipv6Network {
     /// use std::net::Ipv6Addr;
     /// use ip_network::Ipv6Network;
     ///
-    /// let ip_network = Ipv6Network::new(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0), 32).unwrap();
+    /// let ip_network = Ipv6Network::new(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0), 32)?;
     /// let mut iterator = ip_network.subnets();
-    /// assert_eq!(iterator.next().unwrap(), Ipv6Network::new(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0), 33).unwrap());
-    /// assert_eq!(iterator.last().unwrap(), Ipv6Network::new(Ipv6Addr::new(0x2001, 0xdb8, 0x8000, 0, 0, 0, 0, 0), 33).unwrap());
+    /// assert_eq!(iterator.next().unwrap(), Ipv6Network::new(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0), 33)?);
+    /// assert_eq!(iterator.last().unwrap(), Ipv6Network::new(Ipv6Addr::new(0x2001, 0xdb8, 0x8000, 0, 0, 0, 0, 0), 33)?);
+    /// # Ok::<(), ip_network::IpNetworkError>(())
     /// ```
     pub fn subnets(&self) -> iterator::Ipv6NetworkIterator {
         let new_netmask = ::std::cmp::min(self.netmask + 1, Self::LENGTH);
@@ -203,11 +210,12 @@ impl Ipv6Network {
     /// use std::net::Ipv6Addr;
     /// use ip_network::Ipv6Network;
     ///
-    /// let network = Ipv6Network::new(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0), 32).unwrap();
+    /// let network = Ipv6Network::new(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0), 32)?;
     /// let mut iterator = network.subnets_with_prefix(33);
     /// assert_eq!(2, iterator.real_len());
-    /// assert_eq!(iterator.next().unwrap(), Ipv6Network::new(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0), 33).unwrap());
-    /// assert_eq!(iterator.last().unwrap(), Ipv6Network::new(Ipv6Addr::new(0x2001, 0xdb8, 0x8000, 0, 0, 0, 0, 0), 33).unwrap());
+    /// assert_eq!(iterator.next().unwrap(), Ipv6Network::new(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0), 33)?);
+    /// assert_eq!(iterator.last().unwrap(), Ipv6Network::new(Ipv6Addr::new(0x2001, 0xdb8, 0x8000, 0, 0, 0, 0, 0), 33)?);
+    /// # Ok::<(), ip_network::IpNetworkError>(())
     /// ```
     pub fn subnets_with_prefix(&self, prefix: u8) -> iterator::Ipv6NetworkIterator {
         iterator::Ipv6NetworkIterator::new(*self, prefix)
@@ -223,7 +231,8 @@ impl Ipv6Network {
     /// use std::net::Ipv6Addr;
     /// use ip_network::Ipv6Network;
     ///
-    /// assert!(Ipv6Network::new(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 0), 0).unwrap().is_default_route());
+    /// assert!(Ipv6Network::new(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 0), 0)?.is_default_route());
+    /// # Ok::<(), ip_network::IpNetworkError>(())
     /// ```
     pub fn is_default_route(&self) -> bool {
         self.netmask == 0
@@ -242,8 +251,9 @@ impl Ipv6Network {
     /// use std::net::Ipv6Addr;
     /// use ip_network::Ipv6Network;
     ///
-    /// assert!(!Ipv6Network::new(Ipv6Addr::new(0, 0, 0, 0, 0, 0xffff, 0xc00a, 0x2ff), 128).unwrap().is_unspecified());
-    /// assert!(Ipv6Network::new(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 0), 128).unwrap().is_unspecified());
+    /// assert!(!Ipv6Network::new(Ipv6Addr::new(0, 0, 0, 0, 0, 0xffff, 0xc00a, 0x2ff), 128)?.is_unspecified());
+    /// assert!(Ipv6Network::new(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 0), 128)?.is_unspecified());
+    /// # Ok::<(), ip_network::IpNetworkError>(())
     /// ```
     pub fn is_unspecified(&self) -> bool {
         self.netmask == Self::LENGTH && self.network_address.is_unspecified()
@@ -262,8 +272,9 @@ impl Ipv6Network {
     /// use std::net::Ipv6Addr;
     /// use ip_network::Ipv6Network;
     ///
-    /// assert!(Ipv6Network::new(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 0x1), 128).unwrap().is_loopback());
-    /// assert!(!Ipv6Network::new(Ipv6Addr::new(0, 0, 0, 0, 0, 0xffff, 0xc00a, 0x2ff), 128).unwrap().is_loopback());
+    /// assert!(Ipv6Network::new(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 0x1), 128)?.is_loopback());
+    /// assert!(!Ipv6Network::new(Ipv6Addr::new(0, 0, 0, 0, 0, 0xffff, 0xc00a, 0x2ff), 128)?.is_loopback());
+    /// # Ok::<(), ip_network::IpNetworkError>(())
     /// ```
     pub fn is_loopback(&self) -> bool {
         self.network_address.is_loopback()
@@ -286,9 +297,10 @@ impl Ipv6Network {
     /// use std::net::Ipv6Addr;
     /// use ip_network::Ipv6Network;
     ///
-    /// assert!(Ipv6Network::new(Ipv6Addr::new(0, 0, 0, 0, 0, 0xffff, 0xc00a, 0x2ff), 128).unwrap().is_global());
-    /// assert!(!Ipv6Network::new(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 0x1), 128).unwrap().is_global());
-    /// assert!(Ipv6Network::new(Ipv6Addr::new(0, 0, 0x1c9, 0, 0, 0xafc8, 0, 0x1), 128).unwrap().is_global());
+    /// assert!(Ipv6Network::new(Ipv6Addr::new(0, 0, 0, 0, 0, 0xffff, 0xc00a, 0x2ff), 128)?.is_global());
+    /// assert!(!Ipv6Network::new(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 0x1), 128)?.is_global());
+    /// assert!(Ipv6Network::new(Ipv6Addr::new(0, 0, 0x1c9, 0, 0, 0xafc8, 0, 0x1), 128)?.is_global());
+    /// # Ok::<(), ip_network::IpNetworkError>(())
     /// ```
     pub fn is_global(&self) -> bool {
         match self.multicast_scope() {
@@ -311,8 +323,9 @@ impl Ipv6Network {
     /// use std::net::Ipv6Addr;
     /// use ip_network::Ipv6Network;
     ///
-    /// assert!(Ipv6Network::new(Ipv6Addr::new(0xfc02, 0, 0, 0, 0, 0, 0, 0), 16).unwrap().is_unique_local());
-    /// assert!(!Ipv6Network::new(Ipv6Addr::new(0, 0, 0, 0, 0, 0xffff, 0xc00a, 0x2ff), 128).unwrap().is_unique_local());
+    /// assert!(Ipv6Network::new(Ipv6Addr::new(0xfc02, 0, 0, 0, 0, 0, 0, 0), 16)?.is_unique_local());
+    /// assert!(!Ipv6Network::new(Ipv6Addr::new(0, 0, 0, 0, 0, 0xffff, 0xc00a, 0x2ff), 128)?.is_unique_local());
+    /// # Ok::<(), ip_network::IpNetworkError>(())
     /// ```
     pub fn is_unique_local(&self) -> bool {
         (self.network_address.segments()[0] & 0xfe00) == 0xfc00 && self.netmask >= 7
@@ -331,8 +344,9 @@ impl Ipv6Network {
     /// use std::net::Ipv6Addr;
     /// use ip_network::Ipv6Network;
     ///
-    /// assert!(Ipv6Network::new(Ipv6Addr::new(0xfe8a, 0, 0, 0, 0, 0, 0, 0), 16).unwrap().is_unicast_link_local());
-    /// assert!(!Ipv6Network::new(Ipv6Addr::new(0, 0, 0, 0, 0, 0xffff, 0xc00a, 0x2ff), 128).unwrap().is_unicast_link_local());
+    /// assert!(Ipv6Network::new(Ipv6Addr::new(0xfe8a, 0, 0, 0, 0, 0, 0, 0), 16)?.is_unicast_link_local());
+    /// assert!(!Ipv6Network::new(Ipv6Addr::new(0, 0, 0, 0, 0, 0xffff, 0xc00a, 0x2ff), 128)?.is_unicast_link_local());
+    /// # Ok::<(), ip_network::IpNetworkError>(())
     /// ```
     pub fn is_unicast_link_local(&self) -> bool {
         (self.network_address.segments()[0] & 0xffc0) == 0xfe80 && self.netmask >= 10
@@ -348,8 +362,9 @@ impl Ipv6Network {
     /// use std::net::Ipv6Addr;
     /// use ip_network::Ipv6Network;
     ///
-    /// assert!(Ipv6Network::new(Ipv6Addr::new(0xfec2, 0, 0, 0, 0, 0, 0, 0), 16).unwrap().is_unicast_site_local());
-    /// assert!(!Ipv6Network::new(Ipv6Addr::new(0, 0, 0, 0, 0, 0xffff, 0xc00a, 0x2ff), 128).unwrap().is_unicast_site_local());
+    /// assert!(Ipv6Network::new(Ipv6Addr::new(0xfec2, 0, 0, 0, 0, 0, 0, 0), 16)?.is_unicast_site_local());
+    /// assert!(!Ipv6Network::new(Ipv6Addr::new(0, 0, 0, 0, 0, 0xffff, 0xc00a, 0x2ff), 128)?.is_unicast_site_local());
+    /// # Ok::<(), ip_network::IpNetworkError>(())
     /// ```
     pub fn is_unicast_site_local(&self) -> bool {
         (self.network_address.segments()[0] & 0xffc0) == 0xfec0 && self.netmask >= 10
@@ -368,8 +383,9 @@ impl Ipv6Network {
     /// use std::net::Ipv6Addr;
     /// use ip_network::Ipv6Network;
     ///
-    /// assert!(Ipv6Network::new(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0), 32).unwrap().is_documentation());
-    /// assert!(!Ipv6Network::new(Ipv6Addr::new(0, 0, 0, 0, 0, 0xffff, 0xc00a, 0x2ff), 128).unwrap().is_documentation());
+    /// assert!(Ipv6Network::new(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0), 32)?.is_documentation());
+    /// assert!(!Ipv6Network::new(Ipv6Addr::new(0, 0, 0, 0, 0, 0xffff, 0xc00a, 0x2ff), 128)?.is_documentation());
+    /// # Ok::<(), ip_network::IpNetworkError>(())
     /// ```
     pub fn is_documentation(&self) -> bool {
         let segments = self.network_address.segments();
@@ -396,8 +412,9 @@ impl Ipv6Network {
     /// use std::net::Ipv6Addr;
     /// use ip_network::Ipv6Network;
     ///
-    /// assert!(!Ipv6Network::new(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0), 32).unwrap().is_unicast_global());
-    /// assert!(Ipv6Network::new(Ipv6Addr::new(0, 0, 0, 0, 0, 0xffff, 0xc00a, 0x2ff), 128).unwrap().is_unicast_global());
+    /// assert!(!Ipv6Network::new(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0), 32)?.is_unicast_global());
+    /// assert!(Ipv6Network::new(Ipv6Addr::new(0, 0, 0, 0, 0, 0xffff, 0xc00a, 0x2ff), 128)?.is_unicast_global());
+    /// # Ok::<(), ip_network::IpNetworkError>(())
     /// ```
     pub fn is_unicast_global(&self) -> bool {
         !self.is_multicast()
@@ -422,8 +439,9 @@ impl Ipv6Network {
     /// use std::net::Ipv6Addr;
     /// use ip_network::Ipv6Network;
     ///
-    /// assert!(Ipv6Network::new(Ipv6Addr::new(0xff00, 0, 0, 0, 0, 0, 0, 0), 8).unwrap().is_multicast());
-    /// assert!(!Ipv6Network::new(Ipv6Addr::new(0, 0, 0, 0, 0, 0xffff, 0xc00a, 0x2ff), 128).unwrap().is_multicast());
+    /// assert!(Ipv6Network::new(Ipv6Addr::new(0xff00, 0, 0, 0, 0, 0, 0, 0), 8)?.is_multicast());
+    /// assert!(!Ipv6Network::new(Ipv6Addr::new(0, 0, 0, 0, 0, 0xffff, 0xc00a, 0x2ff), 128)?.is_multicast());
+    /// # Ok::<(), ip_network::IpNetworkError>(())
     /// ```
     pub fn is_multicast(&self) -> bool {
         self.network_address.is_multicast()
@@ -441,9 +459,10 @@ impl Ipv6Network {
     /// use std::net::Ipv6Addr;
     /// use ip_network::{Ipv6Network, Ipv6MulticastScope};
     ///
-    /// assert_eq!(Ipv6Network::new(Ipv6Addr::new(0xff0e, 0, 0, 0, 0, 0, 0, 0), 32).unwrap().multicast_scope(),
+    /// assert_eq!(Ipv6Network::new(Ipv6Addr::new(0xff0e, 0, 0, 0, 0, 0, 0, 0), 32)?.multicast_scope(),
     ///                              Some(Ipv6MulticastScope::Global));
-    /// assert_eq!(Ipv6Network::new(Ipv6Addr::new(0, 0, 0, 0, 0, 0xffff, 0xc00a, 0x2ff), 128).unwrap().multicast_scope(), None);
+    /// assert_eq!(Ipv6Network::new(Ipv6Addr::new(0, 0, 0, 0, 0, 0xffff, 0xc00a, 0x2ff), 128)?.multicast_scope(), None);
+    /// # Ok::<(), ip_network::IpNetworkError>(())
     /// ```
     pub fn multicast_scope(&self) -> Option<Ipv6MulticastScope> {
         if self.is_multicast() && self.netmask >= 16 {
@@ -472,8 +491,9 @@ impl fmt::Display for Ipv6Network {
     /// use std::net::Ipv6Addr;
     /// use ip_network::Ipv6Network;
     ///
-    /// let ip_network = Ipv6Network::new(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0), 32).unwrap();
+    /// let ip_network = Ipv6Network::new(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0), 32)?;
     /// assert_eq!(ip_network.to_string(), "2001:db8::/32");
+    /// # Ok::<(), ip_network::IpNetworkError>(())
     /// ```
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}/{}", self.network_address, self.netmask)
@@ -492,9 +512,10 @@ impl FromStr for Ipv6Network {
     /// use ip_network::Ipv6Network;
     /// use std::str::FromStr;
     ///
-    /// let ip_network = Ipv6Network::from_str("2001:db8::/32").unwrap();
+    /// let ip_network = Ipv6Network::from_str("2001:db8::/32")?;
     /// assert_eq!(ip_network.network_address(), Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0));
     /// assert_eq!(ip_network.netmask(), 32);
+    /// # Ok::<(), ip_network::IpNetworkParseError>(())
     /// ```
     fn from_str(s: &str) -> Result<Ipv6Network, IpNetworkParseError> {
         let (ip, netmask) =

@@ -25,9 +25,11 @@ impl IpNetwork {
     /// use std::str::FromStr;
     /// use ip_network::{IpNetwork, Ipv4Network};
     ///
-    /// let network_address = IpAddr::from_str("192.168.1.0").unwrap();
-    /// let ip_network = IpNetwork::new(network_address, 24).unwrap();
-    /// assert_eq!(ip_network, IpNetwork::V4(Ipv4Network::new(Ipv4Addr::new(192, 168, 1, 0), 24).unwrap()));
+    /// let network_address = IpAddr::V4(Ipv4Addr::new(192, 168, 1, 0));
+    /// let ip_network = IpNetwork::new(network_address, 24)?;
+    /// assert_eq!(ip_network.network_address(), IpAddr::V4(Ipv4Addr::new(192, 168, 1, 0)));
+    /// assert_eq!(ip_network.netmask(), 24);
+    /// # Ok::<(), ip_network::IpNetworkError>(())
     /// ```
     #[allow(clippy::new_ret_no_self)]
     pub fn new<I: Into<IpAddr>>(network_address: I, netmask: u8) -> Result<Self, IpNetworkError> {
@@ -51,9 +53,10 @@ impl IpNetwork {
     /// use ip_network::IpNetwork;
     ///
     /// let network_address = IpAddr::V4(Ipv4Addr::new(192, 168, 1, 128));
-    /// let ip_network = IpNetwork::new_truncate(network_address, 24).unwrap();
+    /// let ip_network = IpNetwork::new_truncate(network_address, 24)?;
     /// assert_eq!(ip_network.network_address(), IpAddr::V4(Ipv4Addr::new(192, 168, 1, 0)));
     /// assert_eq!(ip_network.netmask(), 24);
+    /// # Ok::<(), ip_network::IpNetworkError>(())
     /// ```
     pub fn new_truncate<I: Into<IpAddr>>(
         network_address: I,
@@ -73,8 +76,9 @@ impl IpNetwork {
     /// use std::net::{IpAddr, Ipv4Addr};
     /// use ip_network::IpNetwork;
     ///
-    /// let ip_network = IpNetwork::new(Ipv4Addr::new(192, 168, 1, 0), 24).unwrap();
+    /// let ip_network = IpNetwork::new(Ipv4Addr::new(192, 168, 1, 0), 24)?;
     /// assert_eq!(ip_network.network_address(), IpAddr::V4(Ipv4Addr::new(192, 168, 1, 0)));
+    /// # Ok::<(), ip_network::IpNetworkError>(())
     /// ```
     pub fn network_address(&self) -> IpAddr {
         match *self {
@@ -91,8 +95,9 @@ impl IpNetwork {
     /// use std::net::{IpAddr, Ipv4Addr};
     /// use ip_network::IpNetwork;
     ///
-    /// let ip_network = IpNetwork::new(Ipv4Addr::new(192, 168, 1, 0), 24).unwrap();
+    /// let ip_network = IpNetwork::new(Ipv4Addr::new(192, 168, 1, 0), 24)?;
     /// assert_eq!(ip_network.netmask(), 24);
+    /// # Ok::<(), ip_network::IpNetworkError>(())
     /// ```
     pub fn netmask(&self) -> u8 {
         match *self {
@@ -123,9 +128,10 @@ impl IpNetwork {
     /// use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
     /// use ip_network::IpNetwork;
     ///
-    /// let ip_network = IpNetwork::new(Ipv4Addr::new(192, 168, 1, 0), 24).unwrap();
+    /// let ip_network = IpNetwork::new(Ipv4Addr::new(192, 168, 1, 0), 24)?;
     /// assert!(ip_network.contains(Ipv4Addr::new(192, 168, 1, 25)));
     /// assert!(!ip_network.contains(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 1, 0, 0)));
+    /// # Ok::<(), ip_network::IpNetworkError>(())
     /// ```
     pub fn contains<I: Into<IpAddr>>(&self, ip: I) -> bool {
         match (self, ip.into()) {
@@ -185,8 +191,9 @@ impl fmt::Display for IpNetwork {
     /// use std::net::Ipv4Addr;
     /// use ip_network::{IpNetwork, Ipv4Network};
     ///
-    /// let ip_network = IpNetwork::V4(Ipv4Network::new(Ipv4Addr::new(192, 168, 1, 0), 24).unwrap());
+    /// let ip_network = IpNetwork::V4(Ipv4Network::new(Ipv4Addr::new(192, 168, 1, 0), 24)?);
     /// assert_eq!(ip_network.to_string(), "192.168.1.0/24");
+    /// # Ok::<(), ip_network::IpNetworkError>(())
     /// ```
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
