@@ -17,7 +17,7 @@ Add this to your `Cargo.toml`:
 ip_network = "0.3"
 ```
 
-this to your crate root (necessary just when your project is Rust 2015 edition):
+this to your crate root (not necessary when your project is Rust 2018 edition):
 
 ```rust
 extern crate ip_network;
@@ -80,8 +80,8 @@ ip_network = { version = "0.3", features = ["postgres"] }
 
 ## Comparison with `ipnetwork` crate
 
-Similar functionality also provide [ipnetwork](https://github.com/achanda/ipnetwork) crate. 
-This table show differences between these two crates:
+Similar functionality also provides [ipnetwork](https://github.com/achanda/ipnetwork) crate. 
+This table shows the differences between these two crates:
 
 
 | Feature              | ip_network | ipnetwork |
