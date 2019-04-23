@@ -383,6 +383,27 @@ impl Ipv4Network {
         }
     }
 
+    /// Returns [`true`] if this whole network is inside IETF Protocol Assignments range (192.0.0.0/24).
+    ///
+    /// This property is defined by [IETF RFC 6890, Section 2.1].
+    ///
+    /// [IETF RFC 6890, Section 2.1]: https://tools.ietf.org/html/rfc6890#section-2.1
+    /// [`true`]: https://doc.rust-lang.org/std/primitive.bool.html
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::net::Ipv4Addr;
+    /// use ip_network::Ipv4Network;
+    ///
+    /// assert!(Ipv4Network::new(Ipv4Addr::new(192, 0, 0, 0), 24)?.is_ietf_protocol_assignments());
+    /// # Ok::<(), ip_network::IpNetworkError>(())
+    /// ```
+    pub fn is_ietf_protocol_assignments(&self) -> bool {
+        let octets = self.network_address.octets();
+        octets[0] == 192 && octets[1] == 0 && octets[2] == 0 && self.netmask >= 24
+    }
+
     /// Returns [`true`] if this whole network is inside Shared Address Space (100.64.0.0/10).
     ///
     /// This property is defined by [IETF RFC 6598].
@@ -523,6 +544,7 @@ impl Ipv4Network {
     /// - Shared Address Space (100.64.0.0/10)
     /// - the loopback address (127.0.0.0/8)
     /// - the link-local address (169.254.0.0/16)
+    /// - IETF Protocol Assignments	(192.0.0.0/24, except 192.0.0.9/32 and 192.0.0.10/32)
     /// - the broadcast address (255.255.255.255/32)
     /// - test addresses used for documentation (192.0.2.0/24, 198.51.100.0/24 and 203.0.113.0/24)
     /// - benchmarking (198.18.0.0/15)
@@ -545,8 +567,15 @@ impl Ipv4Network {
     /// # Ok::<(), ip_network::IpNetworkError>(())
     /// ```
     pub fn is_global(&self) -> bool {
+        let octets = self.network_address.octets();
+        // These address are only two globally routable from IETF Protocol Assignments.
+        if self.netmask == 32 && (octets == [192, 168, 0, 9] || octets == [192, 168, 0, 10]) {
+            return true;
+        }
+
         !self.is_local_identification()
             && !self.is_private()
+            && !self.is_ietf_protocol_assignments()
             && !self.is_shared_address_space()
             && !self.is_loopback()
             && !self.is_link_local()
@@ -948,6 +977,8 @@ mod tests {
         assert!(!is_global(Ipv4Addr::new(240, 0, 0, 0), 4));
         assert!(!is_global(Ipv4Addr::new(240, 0, 0, 0), 8));
         assert!(!is_global(Ipv4Addr::new(255, 0, 0, 0), 8));
+
+        assert!(!is_global(Ipv4Addr::new(192, 0, 0, 0), 24)); // IETF Protocol Assignments
     }
 
     #[test]
