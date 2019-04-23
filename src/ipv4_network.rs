@@ -488,7 +488,8 @@ impl Ipv4Network {
         octets[0] == 198 && octets[1] & 0xfe == 18
     }
 
-    /// Returns [`true`] if this whole network is inside reserved address range (240.0.0.0/4).
+    /// Returns [`true`] if this whole network is inside reserved address range (240.0.0.0/4), except
+    /// broadcast address (255.255.255.255/32).
     ///
     /// Reserved network addresses have a most significant octet between 240 and 255,
     /// and is defined by [IETF RFC 1112].
@@ -503,11 +504,12 @@ impl Ipv4Network {
     /// use ip_network::Ipv4Network;
     ///
     /// assert!(Ipv4Network::new(Ipv4Addr::new(240, 168, 1, 0), 24)?.is_reserved());
+    /// assert!(!Ipv4Network::new(Ipv4Addr::new(255, 255, 255, 255), 32)?.is_reserved());
     /// # Ok::<(), ip_network::IpNetworkError>(())
     /// ```
     pub fn is_reserved(&self) -> bool {
         // Not necessary to check netmask
-        self.network_address.octets()[0] & 0xf0 == 240
+        self.network_address.octets()[0] & 0xf0 == 240 && !self.network_address.is_broadcast()
     }
 
     /// Returns [`true`] if this network is in a range designated for documentation.
