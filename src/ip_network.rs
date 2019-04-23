@@ -6,7 +6,7 @@ use crate::{IpNetworkError, IpNetworkParseError};
 use crate::helpers;
 use crate::{Ipv4Network, Ipv6Network};
 
-/// Holds IPv4 or IPv6 network
+/// Holds IPv4 or IPv6 network.
 #[derive(Clone, Copy, Eq, PartialEq, Debug, Hash, PartialOrd, Ord)]
 pub enum IpNetwork {
     V4(Ipv4Network),

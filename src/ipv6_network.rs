@@ -6,7 +6,7 @@ use crate::{IpNetworkError, IpNetworkParseError};
 use crate::helpers;
 use crate::iterator;
 
-/// IPv6 Multicast Address Scopes
+/// IPv6 Multicast Address Scopes.
 #[derive(Copy, PartialEq, Eq, Clone, Hash, Debug)]
 pub enum Ipv6MulticastScope {
     InterfaceLocal,
@@ -18,7 +18,7 @@ pub enum Ipv6MulticastScope {
     Global,
 }
 
-/// IPv6 Network
+/// IPv6 Network.
 #[derive(Clone, Copy, Debug, Eq, PartialOrd, Ord)]
 pub struct Ipv6Network {
     network_address: Ipv6Addr,

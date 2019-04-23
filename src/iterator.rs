@@ -11,7 +11,7 @@ const POINTER_WIDTH: u32 = 64;
 #[cfg(target_pointer_width = "128")]
 const POINTER_WIDTH: u32 = 128;
 
-/// IPv4 range iterator
+/// IPv4 range iterator.
 pub struct Ipv4RangeIterator {
     current: u32,
     to: u32,
@@ -98,7 +98,7 @@ impl Iterator for Ipv4RangeIterator {
 
 impl ExactSizeIterator for Ipv4RangeIterator {}
 
-/// Iterates over new created IPv4 network from given network
+/// Iterates over new created IPv4 network from given network.
 pub struct Ipv4NetworkIterator {
     current: u32,
     to: u32,
@@ -176,7 +176,7 @@ impl Iterator for Ipv4NetworkIterator {
 
 impl ExactSizeIterator for Ipv4NetworkIterator {}
 
-/// Iterates over new created IPv6 network from given network
+/// Iterates over new created IPv6 network from given network.
 pub struct Ipv6NetworkIterator {
     current: u128,
     to: u128,

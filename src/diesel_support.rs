@@ -235,17 +235,21 @@ mod tests {
 
     #[test]
     fn function_family() {
-        let query = test::table
-            .select(family(test::ip_network));
+        let query = test::table.select(family(test::ip_network));
         let string_query = debug_query::<Pg, _>(&query).to_string();
-        assert_eq!("SELECT family(\"test\".\"ip_network\") FROM \"test\" -- binds: []" , string_query);
+        assert_eq!(
+            "SELECT family(\"test\".\"ip_network\") FROM \"test\" -- binds: []",
+            string_query
+        );
     }
 
     #[test]
     fn function_masklen() {
-        let query = test::table
-            .select(masklen(test::ip_network));
+        let query = test::table.select(masklen(test::ip_network));
         let string_query = debug_query::<Pg, _>(&query).to_string();
-        assert_eq!("SELECT masklen(\"test\".\"ip_network\") FROM \"test\" -- binds: []" , string_query);
+        assert_eq!(
+            "SELECT masklen(\"test\".\"ip_network\") FROM \"test\" -- binds: []",
+            string_query
+        );
     }
 }

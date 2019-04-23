@@ -7,7 +7,7 @@ use crate::{IpNetworkError, IpNetworkParseError};
 use crate::helpers;
 use crate::iterator;
 
-/// IPv4 Network
+/// IPv4 Network.
 #[derive(Clone, Copy, Debug, Eq, PartialOrd, Ord)]
 pub struct Ipv4Network {
     network_address: Ipv4Addr,
@@ -539,7 +539,7 @@ impl Ipv4Network {
     /// Returns [`true`] if the network appears to be globally routable.
     /// See [IANA IPv4 Special-Purpose Address Registry][ipv4-sr].
     ///
-    /// The following return false:
+    /// The following return [`false`]:
     ///
     /// - local identification (0.0.0.0/8)
     /// - private address (10.0.0.0/8, 172.16.0.0/12 and 192.168.0.0/16)
@@ -554,6 +554,7 @@ impl Ipv4Network {
     ///
     /// [ipv4-sr]: https://www.iana.org/assignments/iana-ipv4-special-registry/iana-ipv4-special-registry.xhtml
     /// [`true`]: https://doc.rust-lang.org/std/primitive.bool.html
+    /// [`false`]: https://doc.rust-lang.org/std/primitive.bool.html
     ///
     /// # Examples
     ///
