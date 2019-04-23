@@ -353,6 +353,7 @@ mod tests {
 
     #[test]
     #[should_panic] // because range is bigger than `usize` on 64bit machine
+    #[cfg(not(miri))] // currently, miri doesnt support should_panic tests
     fn ipv6_network_iterator_whole_range_len() {
         let ip = Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 0);
         let network = Ipv6Network::new(ip, 0).unwrap();

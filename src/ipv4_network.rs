@@ -951,22 +951,23 @@ mod tests {
     }
 
     #[test]
-    fn hashmap() {
-        use std::collections::HashMap;
+    fn hash_same_for_same_input() {
+        use std::hash::{Hash, Hasher};
+        use std::collections::hash_map::DefaultHasher;
 
+        let mut hasher = DefaultHasher::new();
         let ip = Ipv4Addr::new(127, 0, 0, 0);
         let network = Ipv4Network::new(ip, 8).unwrap();
+        network.hash(&mut hasher);
+        let first_hash = hasher.finish();
 
-        let mut networks = HashMap::new();
-        networks.insert(network, 256);
+        let mut hasher = DefaultHasher::new();
+        let ip = Ipv4Addr::new(127, 0, 0, 0);
+        let network = Ipv4Network::new(ip, 8).unwrap();
+        network.hash(&mut hasher);
+        let second_hash = hasher.finish();
 
-        let ip_contains = Ipv4Addr::new(127, 0, 0, 0);
-        let network_contains = Ipv4Network::new(ip_contains, 8).unwrap();
-        assert!(networks.contains_key(&network_contains));
-
-        let ip_not_contains = Ipv4Addr::new(127, 0, 0, 0);
-        let network_not_contains = Ipv4Network::new(ip_not_contains, 9).unwrap();
-        assert!(!networks.contains_key(&network_not_contains));
+        assert_eq!(first_hash, second_hash);
     }
 
     #[test]
