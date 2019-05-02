@@ -1,8 +1,43 @@
 use std::fmt;
-use std::str::{self, FromStr};
+use std::str;
 use serde::de::{Deserialize, Deserializer, EnumAccess, Error, Unexpected, VariantAccess, Visitor};
 use serde::ser::{Serialize, Serializer};
 use crate::{IpNetwork, Ipv4Network, Ipv6Network};
+
+macro_rules! parse_impl {
+    ($expecting:tt $ty:ty) => {
+        impl<'de> Deserialize<'de> for $ty {
+            fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+            where
+                D: Deserializer<'de>,
+            {
+                if deserializer.is_human_readable() {
+                    struct IpNetworkVisitor;
+
+                    impl<'de> Visitor<'de> for IpNetworkVisitor {
+                        type Value = $ty;
+
+                        fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                            formatter.write_str($expecting)
+                        }
+
+                        fn visit_str<E>(self, s: &str) -> Result<Self::Value, E>
+                        where
+                            E: Error,
+                        {
+                            s.parse().map_err(serde::de::Error::custom)
+                        }
+                    }
+
+                    deserializer.deserialize_str(IpNetworkVisitor)
+                } else {
+                    let (network_address, netmask) = <(_, u8)>::deserialize(deserializer)?;
+                    Self::new(network_address, netmask).map_err(serde::de::Error::custom)
+                }
+            }
+        }
+    };
+}
 
 impl Serialize for IpNetwork {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
@@ -30,14 +65,32 @@ impl<'de> Deserialize<'de> for IpNetwork {
         D: Deserializer<'de>,
     {
         if deserializer.is_human_readable() {
-            let s = <&str>::deserialize(deserializer)?;
-            IpNetwork::from_str(s).map_err(serde::de::Error::custom)
+            struct IpNetworkVisitor;
+
+            impl<'de> Visitor<'de> for IpNetworkVisitor {
+                type Value = IpNetwork;
+
+                fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                    formatter.write_str("IP network")
+                }
+
+                fn visit_str<E>(self, s: &str) -> Result<Self::Value, E>
+                where
+                    E: Error,
+                {
+                    s.parse().map_err(serde::de::Error::custom)
+                }
+            }
+
+            deserializer.deserialize_str(IpNetworkVisitor)
         } else {
             enum IpNetworkKind {
                 V4,
                 V6,
             }
+
             static VARIANTS: &[&str] = &["V4", "V6"];
+
             impl<'de> Deserialize<'de> for IpNetworkKind {
                 fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
                 where
@@ -84,11 +137,14 @@ impl<'de> Deserialize<'de> for IpNetwork {
             }
 
             struct EnumVisitor;
+
             impl<'de> Visitor<'de> for EnumVisitor {
                 type Value = IpNetwork;
+
                 fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
                     formatter.write_str("IP network")
                 }
+
                 fn visit_enum<A>(self, data: A) -> Result<Self::Value, A::Error>
                 where
                     A: EnumAccess<'de>,
@@ -99,6 +155,7 @@ impl<'de> Deserialize<'de> for IpNetwork {
                     }
                 }
             }
+
             deserializer.deserialize_enum("IpNetwork", VARIANTS, EnumVisitor)
         }
     }
@@ -117,20 +174,7 @@ impl Serialize for Ipv4Network {
     }
 }
 
-impl<'de> Deserialize<'de> for Ipv4Network {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        if deserializer.is_human_readable() {
-            let s = <&str>::deserialize(deserializer)?;
-            Ipv4Network::from_str(s).map_err(serde::de::Error::custom)
-        } else {
-            let (network_address, netmask) = <(_, u8)>::deserialize(deserializer)?;
-            Ipv4Network::new(network_address, netmask).map_err(serde::de::Error::custom)
-        }
-    }
-}
+parse_impl!("IPv4 network" Ipv4Network);
 
 impl Serialize for Ipv6Network {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
@@ -145,20 +189,7 @@ impl Serialize for Ipv6Network {
     }
 }
 
-impl<'de> Deserialize<'de> for Ipv6Network {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        if deserializer.is_human_readable() {
-            let s = <&str>::deserialize(deserializer)?;
-            Ipv6Network::from_str(s).map_err(serde::de::Error::custom)
-        } else {
-            let (network_address, netmask) = <(_, u8)>::deserialize(deserializer)?;
-            Ipv6Network::new(network_address, netmask).map_err(serde::de::Error::custom)
-        }
-    }
-}
+parse_impl!("IPv6 network" Ipv6Network);
 
 #[cfg(test)]
 mod tests {
