@@ -43,7 +43,7 @@ impl<'de> Deserialize<'de> for IpNetwork {
                 where
                     E: Error,
                 {
-                    s.parse().map_err(serde::de::Error::custom)
+                    s.parse().map_err(Error::custom)
                 }
             }
 
@@ -160,14 +160,14 @@ macro_rules! ser_de_impl {
                         where
                             E: Error,
                         {
-                            s.parse().map_err(serde::de::Error::custom)
+                            s.parse().map_err(Error::custom)
                         }
                     }
 
                     deserializer.deserialize_str(IpNetworkVisitor)
                 } else {
                     let (network_address, netmask) = <(_, u8)>::deserialize(deserializer)?;
-                    Self::new(network_address, netmask).map_err(serde::de::Error::custom)
+                    Self::new(network_address, netmask).map_err(Error::custom)
                 }
             }
         }
