@@ -4,41 +4,6 @@ use serde::de::{Deserialize, Deserializer, EnumAccess, Error, Unexpected, Varian
 use serde::ser::{Serialize, Serializer};
 use crate::{IpNetwork, Ipv4Network, Ipv6Network};
 
-macro_rules! parse_impl {
-    ($expecting:tt $ty:ty) => {
-        impl<'de> Deserialize<'de> for $ty {
-            fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-            where
-                D: Deserializer<'de>,
-            {
-                if deserializer.is_human_readable() {
-                    struct IpNetworkVisitor;
-
-                    impl<'de> Visitor<'de> for IpNetworkVisitor {
-                        type Value = $ty;
-
-                        fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                            formatter.write_str($expecting)
-                        }
-
-                        fn visit_str<E>(self, s: &str) -> Result<Self::Value, E>
-                        where
-                            E: Error,
-                        {
-                            s.parse().map_err(serde::de::Error::custom)
-                        }
-                    }
-
-                    deserializer.deserialize_str(IpNetworkVisitor)
-                } else {
-                    let (network_address, netmask) = <(_, u8)>::deserialize(deserializer)?;
-                    Self::new(network_address, netmask).map_err(serde::de::Error::custom)
-                }
-            }
-        }
-    };
-}
-
 impl Serialize for IpNetwork {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -161,35 +126,56 @@ impl<'de> Deserialize<'de> for IpNetwork {
     }
 }
 
-impl Serialize for Ipv4Network {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        if serializer.is_human_readable() {
-            serializer.serialize_str(&self.to_string())
-        } else {
-            (self.network_address(), self.netmask()).serialize(serializer)
+macro_rules! ser_de_impl {
+    ($expecting:tt $ty:ty) => {
+        impl Serialize for $ty {
+            fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+            where
+                S: Serializer,
+            {
+                if serializer.is_human_readable() {
+                    serializer.serialize_str(&self.to_string())
+                } else {
+                    (self.network_address(), self.netmask()).serialize(serializer)
+                }
+            }
         }
-    }
+
+        impl<'de> Deserialize<'de> for $ty {
+            fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+            where
+                D: Deserializer<'de>,
+            {
+                if deserializer.is_human_readable() {
+                    struct IpNetworkVisitor;
+
+                    impl<'de> Visitor<'de> for IpNetworkVisitor {
+                        type Value = $ty;
+
+                        fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                            formatter.write_str($expecting)
+                        }
+
+                        fn visit_str<E>(self, s: &str) -> Result<Self::Value, E>
+                        where
+                            E: Error,
+                        {
+                            s.parse().map_err(serde::de::Error::custom)
+                        }
+                    }
+
+                    deserializer.deserialize_str(IpNetworkVisitor)
+                } else {
+                    let (network_address, netmask) = <(_, u8)>::deserialize(deserializer)?;
+                    Self::new(network_address, netmask).map_err(serde::de::Error::custom)
+                }
+            }
+        }
+    };
 }
 
-parse_impl!("IPv4 network" Ipv4Network);
-
-impl Serialize for Ipv6Network {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        if serializer.is_human_readable() {
-            serializer.serialize_str(&self.to_string())
-        } else {
-            (self.network_address(), self.netmask()).serialize(serializer)
-        }
-    }
-}
-
-parse_impl!("IPv6 network" Ipv6Network);
+ser_de_impl!("IPv4 network" Ipv4Network);
+ser_de_impl!("IPv6 network" Ipv6Network);
 
 #[cfg(test)]
 mod tests {
