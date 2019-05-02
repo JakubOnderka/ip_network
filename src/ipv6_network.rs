@@ -87,8 +87,7 @@ impl Ipv6Network {
             return Err(IpNetworkError::NetmaskError(netmask));
         }
 
-        let network_address_u128 =
-            u128::from(network_address) & helpers::get_bite_mask_u128(netmask);
+        let network_address_u128 = u128::from(network_address) & helpers::bite_mask_u128(netmask);
         let network_address = Ipv6Addr::from(network_address_u128);
 
         Ok(Self {
@@ -150,7 +149,7 @@ impl Ipv6Network {
     /// # Ok::<(), ip_network::IpNetworkError>(())
     /// ```
     pub fn contains(&self, ip: Ipv6Addr) -> bool {
-        let truncated_ip = u128::from(ip) & helpers::get_bite_mask_u128(self.netmask);
+        let truncated_ip = u128::from(ip) & helpers::bite_mask_u128(self.netmask);
         truncated_ip == u128::from(self.network_address)
     }
 

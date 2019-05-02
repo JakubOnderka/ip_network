@@ -2,7 +2,7 @@ pub fn bit_length(number: u32) -> u8 {
     32 - number.leading_zeros() as u8
 }
 
-pub fn get_bite_mask(mask: u8) -> u32 {
+pub fn bite_mask(mask: u8) -> u32 {
     debug_assert!(mask <= 32);
     match mask {
         0 => 0,
@@ -10,7 +10,7 @@ pub fn get_bite_mask(mask: u8) -> u32 {
     }
 }
 
-pub fn get_bite_mask_u128(mask: u8) -> u128 {
+pub fn bite_mask_u128(mask: u8) -> u128 {
     debug_assert!(mask <= 128);
     match mask {
         0 => 0,
@@ -35,26 +35,26 @@ pub fn split_ip_netmask(input: &str) -> Option<(&str, &str)> {
 
 #[cfg(test)]
 mod tests {
-    use super::{get_bite_mask, get_bite_mask_u128, split_ip_netmask};
+    use super::{bite_mask, bite_mask_u128, split_ip_netmask};
 
     #[test]
     fn get_bite_mask_32() {
-        assert_eq!(u32::max_value(), get_bite_mask(32));
+        assert_eq!(u32::max_value(), bite_mask(32));
     }
 
     #[test]
     fn get_bite_mask_0() {
-        assert_eq!(0, get_bite_mask(0));
+        assert_eq!(0, bite_mask(0));
     }
 
     #[test]
     fn get_bite_mask_u128_0() {
-        assert_eq!(0, get_bite_mask_u128(0));
+        assert_eq!(0, bite_mask_u128(0));
     }
 
     #[test]
     fn get_bite_mask_u128_128() {
-        assert_eq!(u128::max_value(), get_bite_mask_u128(128));
+        assert_eq!(u128::max_value(), bite_mask_u128(128));
     }
 
     #[test]

@@ -75,7 +75,7 @@ impl Ipv4Network {
         }
 
         let network_address =
-            Ipv4Addr::from(u32::from(network_address) & helpers::get_bite_mask(netmask));
+            Ipv4Addr::from(u32::from(network_address) & helpers::bite_mask(netmask));
 
         Ok(Self {
             network_address,
@@ -113,7 +113,7 @@ impl Ipv4Network {
     /// # Ok::<(), ip_network::IpNetworkError>(())
     /// ```
     pub fn broadcast_address(&self) -> Ipv4Addr {
-        Ipv4Addr::from(u32::from(self.network_address) | !helpers::get_bite_mask(self.netmask))
+        Ipv4Addr::from(u32::from(self.network_address) | !helpers::bite_mask(self.netmask))
     }
 
     /// Returns network mask as integer.
@@ -146,7 +146,7 @@ impl Ipv4Network {
     /// # Ok::<(), ip_network::IpNetworkError>(())
     /// ```
     pub fn full_netmask(&self) -> Ipv4Addr {
-        Ipv4Addr::from(helpers::get_bite_mask(self.netmask))
+        Ipv4Addr::from(helpers::bite_mask(self.netmask))
     }
 
     /// Returns [`true`] if given [`IPv4Addr`] is inside this network.
@@ -166,7 +166,7 @@ impl Ipv4Network {
     /// # Ok::<(), ip_network::IpNetworkError>(())
     /// ```
     pub fn contains(&self, ip: Ipv4Addr) -> bool {
-        u32::from(ip) & helpers::get_bite_mask(self.netmask) == u32::from(self.network_address)
+        u32::from(ip) & helpers::bite_mask(self.netmask) == u32::from(self.network_address)
     }
 
     /// Returns iterator over host IP addresses in range (without network and broadcast address). You

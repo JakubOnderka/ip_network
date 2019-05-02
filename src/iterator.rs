@@ -130,7 +130,7 @@ impl Ipv4NetworkIterator {
 
         let current = u32::from(network.network_address());
         let mask =
-            !helpers::get_bite_mask(32 - (new_netmask - network.netmask())) << (32 - new_netmask);
+            !helpers::bite_mask(32 - (new_netmask - network.netmask())) << (32 - new_netmask);
         let to = current | mask;
 
         Self {
@@ -207,7 +207,7 @@ impl Ipv6NetworkIterator {
         assert!(network.netmask() < new_netmask);
 
         let current = u128::from(network.network_address());
-        let mask = !helpers::get_bite_mask_u128(128 - (new_netmask - network.netmask()))
+        let mask = !helpers::bite_mask_u128(128 - (new_netmask - network.netmask()))
             << (128 - new_netmask);
         let to = current | mask;
 
