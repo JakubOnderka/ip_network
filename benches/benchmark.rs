@@ -64,11 +64,10 @@ fn collapse_addresses(c: &mut Criterion) {
         "2603:1046:1500:30::/64",
         "2603:1046:1500:4::/64",
         "2603:1046:1500:8::/64",
-    ];
-    let ipv6_addresses: Vec<_> = ipv6_addresses
-        .iter()
-        .map(|s| Ipv6Network::from_str(s).unwrap())
-        .collect();
+    ]
+    .iter()
+    .map(|s| Ipv6Network::from_str(s).unwrap())
+    .collect::<Vec<_>>();
 
     c.bench_function("collapse_addresses ipv4", move |b| {
         b.iter(|| {

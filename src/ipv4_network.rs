@@ -7,6 +7,7 @@ use crate::{IpNetworkError, IpNetworkParseError};
 use crate::helpers;
 use crate::iterator;
 use std::collections::BTreeMap;
+use std::collections::btree_map::Entry;
 
 /// IPv4 Network.
 #[derive(Clone, Copy, Debug, Eq, PartialOrd, Ord)]
@@ -655,14 +656,13 @@ impl Ipv4Network {
                 netmask: 0,
             });
 
-            match subnets.get(&supernet) {
-                None => {
-                    subnets.insert(supernet, net);
+            match subnets.entry(supernet) {
+                Entry::Vacant(vacant) => {
+                    vacant.insert(net);
                 }
-                Some(existing) => {
-                    if *existing != net {
-                        // Merge consecutive subnets
-                        subnets.remove(&supernet);
+                Entry::Occupied(occupied) => {
+                    if *occupied.get() != net {
+                        occupied.remove();
                         to_merge.push(supernet);
                     }
                 }
