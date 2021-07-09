@@ -36,7 +36,7 @@ features = ["postgres"]
 version = "1.0"
 
 [dev-dependencies.criterion]
-version = "0.2.9"
+version = "0.3.4"
 
 [package.metadata.docs.rs]
 features = ["serde", "postgres", "diesel"]
