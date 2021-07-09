@@ -6,6 +6,7 @@ use std::hash::{Hash, Hasher};
 use crate::{IpNetworkError, IpNetworkParseError};
 use crate::helpers;
 use crate::iterator;
+use std::collections::BTreeMap;
 
 /// IPv4 Network.
 #[derive(Clone, Copy, Debug, Eq, PartialOrd, Ord)]
@@ -638,6 +639,51 @@ impl Ipv4Network {
 
         vector
     }
+
+    /// Return an iterator of the collapsed Ipv4Networks.
+    ///
+    /// Implementation of this method was inspired by Python [`ipaddress.collapse_addresses`]
+    ///
+    /// [`ipaddress.summarize_address_range`]: https://docs.python.org/3/library/ipaddress.html#ipaddress.collapse_addresses
+    pub fn collapse_addresses(addresses: &[Self]) -> Vec<Self> {
+        let mut subnets = BTreeMap::new();
+
+        let mut to_merge = addresses.to_vec();
+        while let Some(net) = to_merge.pop() {
+            let supernet = net.supernet().unwrap_or(Ipv4Network {
+                network_address: Ipv4Addr::UNSPECIFIED,
+                netmask: 0,
+            });
+
+            match subnets.get(&supernet) {
+                None => {
+                    subnets.insert(supernet, net);
+                }
+                Some(existing) => {
+                    if *existing != net {
+                        // Merge consecutive subnets
+                        subnets.remove(&supernet);
+                        to_merge.push(supernet);
+                    }
+                }
+            }
+        }
+
+        let mut last: Option<&Self> = None;
+        let mut output = vec![];
+        for net in subnets.values() {
+            if let Some(last) = last {
+                // Since they are sorted, last.network_address <= net.network_address is a given.
+                if last.broadcast_address() >= net.broadcast_address() {
+                    continue;
+                }
+            }
+            output.push(net.to_owned());
+            last = Some(net);
+        }
+
+        output
+    }
 }
 
 impl fmt::Display for Ipv4Network {
@@ -740,6 +786,7 @@ impl IntoIterator for Ipv4Network {
 mod tests {
     use std::net::Ipv4Addr;
     use crate::{IpNetworkError, Ipv4Network};
+    use std::str::FromStr;
 
     fn return_test_ipv4_network() -> Ipv4Network {
         Ipv4Network::new(Ipv4Addr::new(192, 168, 0, 0), 16).unwrap()
@@ -1041,6 +1088,130 @@ mod tests {
             Ipv4Addr::new(0, 0, 0, 0),
         );
         assert_eq!(0, networks.len());
+    }
+
+    #[test]
+    fn collapse_addresses() {
+        let addresses = [
+            Ipv4Network::from_str("192.0.2.0/26").unwrap(),
+            Ipv4Network::from_str("192.0.2.64/26").unwrap(),
+            Ipv4Network::from_str("192.0.2.128/26").unwrap(),
+            Ipv4Network::from_str("192.0.2.192/26").unwrap(),
+        ];
+        let collapsed = Ipv4Network::collapse_addresses(&addresses);
+        assert_eq!(1, collapsed.len());
+        assert_eq!(Ipv4Network::from_str("192.0.2.0/24").unwrap(), collapsed[0]);
+    }
+
+    #[test]
+    fn collapse_addresses_2() {
+        let addresses = [
+            Ipv4Network::from_str("192.0.2.0/25").unwrap(),
+            Ipv4Network::from_str("192.0.2.128/25").unwrap(),
+        ];
+        let collapsed = Ipv4Network::collapse_addresses(&addresses);
+        assert_eq!(1, collapsed.len());
+        assert_eq!(Ipv4Network::from_str("192.0.2.0/24").unwrap(), collapsed[0]);
+    }
+
+    #[test]
+    fn collapse_addresses_3() {
+        // test only IP addresses including some duplicates
+        let addresses = [
+            Ipv4Network::from_str("1.1.1.0/32").unwrap(),
+            Ipv4Network::from_str("1.1.1.1/32").unwrap(),
+            Ipv4Network::from_str("1.1.1.2/32").unwrap(),
+            Ipv4Network::from_str("1.1.1.3/32").unwrap(),
+            Ipv4Network::from_str("1.1.1.4/32").unwrap(),
+            Ipv4Network::from_str("1.1.1.0/32").unwrap(),
+        ];
+        let collapsed = Ipv4Network::collapse_addresses(&addresses);
+        assert_eq!(2, collapsed.len());
+        assert_eq!(Ipv4Network::from_str("1.1.1.0/30").unwrap(), collapsed[0]);
+        assert_eq!(Ipv4Network::from_str("1.1.1.4/32").unwrap(), collapsed[1]);
+    }
+
+    #[test]
+    fn collapse_addresses_4() {
+        // test a mix of IP addresses and networks including some duplicates
+        let addresses = [
+            Ipv4Network::from_str("1.1.1.0/32").unwrap(),
+            Ipv4Network::from_str("1.1.1.1/32").unwrap(),
+            Ipv4Network::from_str("1.1.1.2/32").unwrap(),
+            Ipv4Network::from_str("1.1.1.3/32").unwrap(),
+        ];
+        let collapsed = Ipv4Network::collapse_addresses(&addresses);
+        assert_eq!(1, collapsed.len());
+        assert_eq!(Ipv4Network::from_str("1.1.1.0/30").unwrap(), collapsed[0]);
+    }
+
+    #[test]
+    fn collapse_addresses_5() {
+        // test only IP networks
+        let addresses = [
+            Ipv4Network::from_str("1.1.0.0/24").unwrap(),
+            Ipv4Network::from_str("1.1.1.0/24").unwrap(),
+            Ipv4Network::from_str("1.1.2.0/24").unwrap(),
+            Ipv4Network::from_str("1.1.3.0/24").unwrap(),
+            Ipv4Network::from_str("1.1.4.0/24").unwrap(),
+            Ipv4Network::from_str("1.1.0.0/22").unwrap(),
+        ];
+        let collapsed = Ipv4Network::collapse_addresses(&addresses);
+        assert_eq!(2, collapsed.len());
+        assert_eq!(Ipv4Network::from_str("1.1.0.0/22").unwrap(), collapsed[0]);
+        assert_eq!(Ipv4Network::from_str("1.1.4.0/24").unwrap(), collapsed[1]);
+    }
+
+    #[test]
+    fn collapse_addresses_5_order() {
+        let addresses = [
+            Ipv4Network::from_str("1.1.3.0/24").unwrap(),
+            Ipv4Network::from_str("1.1.4.0/24").unwrap(),
+            Ipv4Network::from_str("1.1.0.0/22").unwrap(),
+            Ipv4Network::from_str("1.1.2.0/24").unwrap(),
+            Ipv4Network::from_str("1.1.0.0/24").unwrap(),
+            Ipv4Network::from_str("1.1.1.0/24").unwrap(),
+        ];
+
+        let collapsed = Ipv4Network::collapse_addresses(&addresses);
+        assert_eq!(2, collapsed.len());
+        assert_eq!(Ipv4Network::from_str("1.1.0.0/22").unwrap(), collapsed[0]);
+        assert_eq!(Ipv4Network::from_str("1.1.4.0/24").unwrap(), collapsed[1]);
+    }
+
+    #[test]
+    fn collapse_addresses_6() {
+        //  test that two addresses are supernet'ed properly
+        let addresses = [
+            Ipv4Network::from_str("1.1.0.0/24").unwrap(),
+            Ipv4Network::from_str("1.1.1.0/24").unwrap(),
+        ];
+        let collapsed = Ipv4Network::collapse_addresses(&addresses);
+        assert_eq!(1, collapsed.len());
+        assert_eq!(Ipv4Network::from_str("1.1.0.0/23").unwrap(), collapsed[0]);
+    }
+
+    #[test]
+    fn collapse_addresses_7() {
+        // test same IP networks
+        let addresses = [
+            Ipv4Network::from_str("1.1.1.1/32").unwrap(),
+            Ipv4Network::from_str("1.1.1.1/32").unwrap(),
+        ];
+        let collapsed = Ipv4Network::collapse_addresses(&addresses);
+        assert_eq!(1, collapsed.len());
+        assert_eq!(Ipv4Network::from_str("1.1.1.1/32").unwrap(), collapsed[0]);
+    }
+
+    #[test]
+    fn collapse_addresses_8() {
+        let addresses = [
+            Ipv4Network::from_str("0.0.0.0/0").unwrap(),
+            Ipv4Network::from_str("1.1.1.1/32").unwrap(),
+        ];
+        let collapsed = Ipv4Network::collapse_addresses(&addresses);
+        assert_eq!(1, collapsed.len());
+        assert_eq!(Ipv4Network::from_str("0.0.0.0/0").unwrap(), collapsed[0]);
     }
 
     #[test]

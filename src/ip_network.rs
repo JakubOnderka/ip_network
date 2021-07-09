@@ -180,6 +180,29 @@ impl IpNetwork {
             IpNetwork::V6(ref ip_network) => ip_network.is_global(),
         }
     }
+
+    /// Return an iterator of the collapsed IpNetworks.
+    pub fn collapse_addresses(addresses: &[Self]) -> Vec<Self> {
+        let mut ipv4_networks = vec![];
+        let mut ipv6_networks = vec![];
+        for address in addresses {
+            match address {
+                IpNetwork::V4(ip_network) => ipv4_networks.push(*ip_network),
+                IpNetwork::V6(ip_network) => ipv6_networks.push(*ip_network),
+            }
+        }
+
+        let mut collapsed = Ipv4Network::collapse_addresses(&ipv4_networks)
+            .into_iter()
+            .map(IpNetwork::from)
+            .collect::<Vec<_>>();
+        collapsed.extend(
+            Ipv6Network::collapse_addresses(&ipv6_networks)
+                .into_iter()
+                .map(IpNetwork::from),
+        );
+        collapsed
+    }
 }
 
 impl fmt::Display for IpNetwork {
@@ -355,6 +378,7 @@ impl PartialOrd<IpNetwork> for Ipv6Network {
 mod tests {
     use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
     use crate::{IpNetwork, IpNetworkParseError, IpNetworkError, Ipv4Network, Ipv6Network};
+    use std::str::FromStr;
 
     fn return_test_ipv4_network() -> Ipv4Network {
         Ipv4Network::new(Ipv4Addr::new(192, 168, 0, 0), 16).unwrap()
@@ -565,5 +589,21 @@ mod tests {
         let ip_network_v6 = IpNetwork::V6(return_test_ipv6_network());
         assert!(ip_network_v4 < ip_network_v6);
         assert!(ip_network_v6 > ip_network_v4);
+    }
+
+    #[test]
+    fn collapse_addresses() {
+        let addresses: Vec<_> = [
+            "192.0.2.0/25",
+            "192.0.2.128/25",
+            "2001::/100",
+            "2001::/120",
+            "2001::/96",
+        ]
+        .iter()
+        .map(|i| IpNetwork::from_str(i).unwrap())
+        .collect();
+        let collapsed = IpNetwork::collapse_addresses(&addresses);
+        assert_eq!(2, collapsed.len());
     }
 }

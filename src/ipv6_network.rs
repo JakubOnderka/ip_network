@@ -5,6 +5,7 @@ use std::hash::{Hash, Hasher};
 use crate::{IpNetworkError, IpNetworkParseError};
 use crate::helpers;
 use crate::iterator;
+use std::collections::BTreeMap;
 
 /// IPv6 Multicast Address Scopes.
 #[derive(Copy, PartialEq, Eq, Clone, Hash, Debug)]
@@ -496,6 +497,51 @@ impl Ipv6Network {
             None
         }
     }
+
+    /// Return an iterator of the collapsed Ipv6Networks.
+    ///
+    /// Implementation of this method was inspired by Python [`ipaddress.collapse_addresses`]
+    ///
+    /// [`ipaddress.summarize_address_range`]: https://docs.python.org/3/library/ipaddress.html#ipaddress.collapse_addresses
+    pub fn collapse_addresses(addresses: &[Self]) -> Vec<Self> {
+        let mut subnets = BTreeMap::new();
+
+        let mut to_merge = addresses.to_vec();
+        while let Some(net) = to_merge.pop() {
+            let supernet = net.supernet().unwrap_or(Ipv6Network {
+                network_address: Ipv6Addr::UNSPECIFIED,
+                netmask: 0,
+            });
+
+            match subnets.get(&supernet) {
+                None => {
+                    subnets.insert(supernet, net);
+                }
+                Some(existing) => {
+                    if *existing != net {
+                        // Merge consecutive subnets
+                        subnets.remove(&supernet);
+                        to_merge.push(supernet);
+                    }
+                }
+            }
+        }
+
+        let mut last: Option<&Self> = None;
+        let mut output = vec![];
+        for net in subnets.values() {
+            if let Some(last) = last {
+                // Since they are sorted, last.network_address <= net.network_address is a given.
+                if last.last_address() >= net.last_address() {
+                    continue;
+                }
+            }
+            output.push(net.to_owned());
+            last = Some(net);
+        }
+
+        output
+    }
 }
 
 impl fmt::Display for Ipv6Network {
@@ -575,6 +621,7 @@ impl Hash for Ipv6Network {
 mod tests {
     use std::net::Ipv6Addr;
     use crate::{Ipv6Network, IpNetworkError, Ipv6MulticastScope};
+    use std::str::FromStr;
 
     fn return_test_ipv6_network() -> Ipv6Network {
         Ipv6Network::new(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0), 32).unwrap()
@@ -758,6 +805,18 @@ mod tests {
             Some(Ipv6MulticastScope::Global),
             multicast_scope("fffe::/16")
         );
+    }
+
+    #[test]
+    fn collapse_addresses() {
+        let addresses = [
+            Ipv6Network::from_str("2001::/100").unwrap(),
+            Ipv6Network::from_str("2001::/120").unwrap(),
+            Ipv6Network::from_str("2001::/96").unwrap(),
+        ];
+        let collapsed = Ipv6Network::collapse_addresses(&addresses);
+        assert_eq!(1, collapsed.len());
+        assert_eq!(Ipv6Network::from_str("2001::/96").unwrap(), collapsed[0]);
     }
 
     #[test]
