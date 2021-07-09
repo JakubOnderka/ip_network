@@ -114,6 +114,23 @@ impl Ipv6Network {
         self.network_address
     }
 
+    /// Returns last IP address in range. Similar as `broadcast_address` for IPv4.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::net::Ipv6Addr;
+    /// use ip_network::Ipv6Network;
+    ///
+    /// let ip = Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0);
+    /// let ip_network = Ipv6Network::new(ip, 32)?;
+    /// assert_eq!(ip_network.last_address(), Ipv6Addr::new(0x2001, 0xdb8, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff));
+    /// # Ok::<(), ip_network::IpNetworkError>(())
+    /// ```
+    pub fn last_address(&self) -> Ipv6Addr {
+        Ipv6Addr::from(u128::from(self.network_address) | !helpers::bite_mask_u128(self.netmask))
+    }
+
     /// Returns network mask.
     ///
     /// # Examples
