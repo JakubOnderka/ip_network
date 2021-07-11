@@ -271,7 +271,7 @@ impl From<Ipv4Addr> for IpNetwork {
 }
 
 impl From<Ipv6Addr> for IpNetwork {
-    /// Converts `Ipv46ddr` to `IpNetwork` with netmask 128.
+    /// Converts `Ipv6Addr` to `IpNetwork` with netmask 128.
     #[inline]
     fn from(ip: Ipv6Addr) -> Self {
         IpNetwork::V6(Ipv6Network::from(ip))

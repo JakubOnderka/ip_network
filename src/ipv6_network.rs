@@ -28,7 +28,7 @@ pub struct Ipv6Network {
 }
 
 impl Ipv6Network {
-    /// IPv4 address length in bits.
+    /// IPv6 address length in bits.
     pub const LENGTH: u8 = 128;
 
     /// Constructs new `Ipv6Network` based on [`Ipv6Addr`] and `netmask`.
