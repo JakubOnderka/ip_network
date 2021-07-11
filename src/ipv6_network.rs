@@ -505,6 +505,31 @@ impl Ipv6Network {
         }
     }
 
+    /// Converts string in format X:X::X/Y (CIDR notation) to `Ipv6Network`, but truncating host bits.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::net::Ipv6Addr;
+    /// use ip_network::Ipv6Network;
+    ///
+    /// let ip_network = Ipv6Network::from_str_truncate("2001:db8::1/32")?;
+    /// assert_eq!(ip_network.network_address(), Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0));
+    /// assert_eq!(ip_network.netmask(), 32);
+    /// # Ok::<(), ip_network::IpNetworkParseError>(())
+    /// ```
+    pub fn from_str_truncate(s: &str) -> Result<Self, IpNetworkParseError> {
+        let (ip, netmask) =
+            helpers::split_ip_netmask(s).ok_or(IpNetworkParseError::InvalidFormatError)?;
+
+        let network_address =
+            Ipv6Addr::from_str(ip).map_err(|_| IpNetworkParseError::AddrParseError)?;
+        let netmask =
+            u8::from_str(netmask).map_err(|_| IpNetworkParseError::InvalidNetmaskFormat)?;
+
+        Self::new_truncate(network_address, netmask).map_err(IpNetworkParseError::IpNetworkError)
+    }
+
     /// Return an iterator of the collapsed Ipv6Networks.
     ///
     /// Implementation of this method was inspired by Python [`ipaddress.collapse_addresses`]

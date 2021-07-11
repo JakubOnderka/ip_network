@@ -181,6 +181,30 @@ impl IpNetwork {
         }
     }
 
+    /// Converts string in format IPv4 (X.X.X.X/Y) or IPv6 (X:X::X/Y) CIDR notation to `IpNetwork`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::net::Ipv4Addr;
+    /// use ip_network::{IpNetwork, Ipv4Network};
+    ///
+    /// let ip_network = IpNetwork::from_str_truncate("192.168.1.1/24").unwrap();
+    /// assert_eq!(ip_network, IpNetwork::V4(Ipv4Network::new(Ipv4Addr::new(192, 168, 1, 0), 24).unwrap()));
+    /// ```
+    pub fn from_str_truncate(s: &str) -> Result<Self, IpNetworkParseError> {
+        let (ip, netmask) =
+            helpers::split_ip_netmask(s).ok_or(IpNetworkParseError::InvalidFormatError)?;
+
+        let network_address =
+            IpAddr::from_str(ip).map_err(|_| IpNetworkParseError::AddrParseError)?;
+        let netmask =
+            u8::from_str(netmask).map_err(|_| IpNetworkParseError::InvalidNetmaskFormat)?;
+
+        IpNetwork::new_truncate(network_address, netmask)
+            .map_err(IpNetworkParseError::IpNetworkError)
+    }
+
     /// Return an iterator of the collapsed IpNetworks.
     pub fn collapse_addresses(addresses: &[Self]) -> Vec<Self> {
         let mut ipv4_networks = vec![];
@@ -245,20 +269,12 @@ impl FromStr for IpNetwork {
         let (ip, netmask) =
             helpers::split_ip_netmask(s).ok_or(IpNetworkParseError::InvalidFormatError)?;
 
+        let network_address =
+            IpAddr::from_str(ip).map_err(|_| IpNetworkParseError::AddrParseError)?;
         let netmask =
             u8::from_str(netmask).map_err(|_| IpNetworkParseError::InvalidNetmaskFormat)?;
 
-        if let Ok(network_address) = Ipv4Addr::from_str(ip) {
-            let network = Ipv4Network::new(network_address, netmask)
-                .map_err(IpNetworkParseError::IpNetworkError)?;
-            Ok(IpNetwork::V4(network))
-        } else if let Ok(network_address) = Ipv6Addr::from_str(ip) {
-            let network = Ipv6Network::new(network_address, netmask)
-                .map_err(IpNetworkParseError::IpNetworkError)?;
-            Ok(IpNetwork::V6(network))
-        } else {
-            Err(IpNetworkParseError::AddrParseError)
-        }
+        IpNetwork::new(network_address, netmask).map_err(IpNetworkParseError::IpNetworkError)
     }
 }
 

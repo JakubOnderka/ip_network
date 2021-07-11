@@ -2,7 +2,7 @@
 extern crate criterion;
 
 use std::net::{Ipv4Addr, Ipv6Addr};
-use ip_network::{Ipv4Network, Ipv6Network};
+use ip_network::{Ipv4Network, Ipv6Network, IpNetwork};
 use criterion::Criterion;
 use std::str::FromStr;
 
@@ -12,6 +12,9 @@ fn parse(c: &mut Criterion) {
     });
     c.bench_function("parse ipv6", |b| {
         b.iter(|| "::1/128".parse::<Ipv6Network>().unwrap())
+    });
+    c.bench_function("parse ipv6 IpNetwork", |b| {
+        b.iter(|| "::1/128".parse::<IpNetwork>().unwrap())
     });
 }
 

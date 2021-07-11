@@ -698,6 +698,31 @@ impl Ipv4Network {
         }
         output
     }
+
+    /// Converts string in format X.X.X.X/Y (CIDR notation) to `Ipv4Network`, but truncating host bits.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::net::Ipv4Addr;
+    /// use ip_network::Ipv4Network;
+    ///
+    /// let ip_network = Ipv4Network::from_str_truncate("192.168.1.255/24")?;
+    /// assert_eq!(ip_network.network_address(), Ipv4Addr::new(192, 168, 1, 0));
+    /// assert_eq!(ip_network.netmask(), 24);
+    /// # Ok::<(), ip_network::IpNetworkParseError>(())
+    /// ```
+    pub fn from_str_truncate(s: &str) -> Result<Self, IpNetworkParseError> {
+        let (ip, netmask) =
+            helpers::split_ip_netmask(s).ok_or(IpNetworkParseError::InvalidFormatError)?;
+
+        let network_address =
+            Ipv4Addr::from_str(ip).map_err(|_| IpNetworkParseError::AddrParseError)?;
+        let netmask =
+            u8::from_str(netmask).map_err(|_| IpNetworkParseError::InvalidNetmaskFormat)?;
+
+        Self::new_truncate(network_address, netmask).map_err(IpNetworkParseError::IpNetworkError)
+    }
 }
 
 impl fmt::Display for Ipv4Network {
