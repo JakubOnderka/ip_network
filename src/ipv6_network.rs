@@ -531,11 +531,7 @@ impl Ipv6Network {
 
         let mut to_merge = addresses.to_vec();
         while let Some(net) = to_merge.pop() {
-            let supernet = net.supernet().unwrap_or(Ipv6Network {
-                network_address: Ipv6Addr::UNSPECIFIED,
-                netmask: 0,
-            });
-
+            let supernet = net.supernet().unwrap_or(Ipv6Network::ANY);
             match subnets.entry(supernet) {
                 Entry::Vacant(vacant) => {
                     vacant.insert(net);
@@ -549,19 +545,16 @@ impl Ipv6Network {
             }
         }
 
-        let mut last: Option<&Self> = None;
-        let mut output = vec![];
-        for net in subnets.values() {
-            if let Some(last) = last {
+        let mut output: Vec<Ipv6Network> = vec![];
+        for net in subnets.into_values() {
+            if let Some(last) = output.last() {
                 // Since they are sorted, last.network_address <= net.network_address is a given.
                 if last.last_address() >= net.last_address() {
                     continue;
                 }
             }
-            output.push(net.to_owned());
-            last = Some(net);
+            output.push(net);
         }
-
         output
     }
 }

@@ -672,11 +672,7 @@ impl Ipv4Network {
 
         let mut to_merge = addresses.to_vec();
         while let Some(net) = to_merge.pop() {
-            let supernet = net.supernet().unwrap_or(Ipv4Network {
-                network_address: Ipv4Addr::UNSPECIFIED,
-                netmask: 0,
-            });
-
+            let supernet = net.supernet().unwrap_or(Ipv4Network::ANY);
             match subnets.entry(supernet) {
                 Entry::Vacant(vacant) => {
                     vacant.insert(net);
@@ -690,19 +686,16 @@ impl Ipv4Network {
             }
         }
 
-        let mut last: Option<&Self> = None;
-        let mut output = vec![];
-        for net in subnets.values() {
-            if let Some(last) = last {
+        let mut output: Vec<Ipv4Network> = vec![];
+        for net in subnets.into_values() {
+            if let Some(last) = output.last() {
                 // Since they are sorted, last.network_address <= net.network_address is a given.
                 if last.broadcast_address() >= net.broadcast_address() {
                     continue;
                 }
             }
-            output.push(net.to_owned());
-            last = Some(net);
+            output.push(net);
         }
-
         output
     }
 }
