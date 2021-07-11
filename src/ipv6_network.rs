@@ -31,8 +31,8 @@ impl Ipv6Network {
     /// IPv6 address length in bits.
     pub const LENGTH: u8 = 128;
 
-    /// Default route, IP network ::/0
-    pub const ANY: Self = Self {
+    /// Default route that contains all IP addresses, IP network ::/0
+    pub const DEFAULT_ROUTE: Self = Self {
         network_address: Ipv6Addr::UNSPECIFIED,
         netmask: 0,
     };
@@ -556,7 +556,7 @@ impl Ipv6Network {
 
         let mut to_merge = addresses.to_vec();
         while let Some(net) = to_merge.pop() {
-            let supernet = net.supernet().unwrap_or(Ipv6Network::ANY);
+            let supernet = net.supernet().unwrap_or(Ipv6Network::DEFAULT_ROUTE);
             match subnets.entry(supernet) {
                 Entry::Vacant(vacant) => {
                     vacant.insert(net);
@@ -663,9 +663,17 @@ mod tests {
     use std::net::Ipv6Addr;
     use crate::{Ipv6Network, IpNetworkError, Ipv6MulticastScope};
     use std::str::FromStr;
+    use std::hash::{Hash, Hasher};
+    use std::collections::hash_map::DefaultHasher;
 
     fn return_test_ipv6_network() -> Ipv6Network {
         Ipv6Network::new(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0), 32).unwrap()
+    }
+
+    #[test]
+    fn default_route() {
+        let network = Ipv6Network::DEFAULT_ROUTE;
+        assert!(network.is_default_route());
     }
 
     #[test]
@@ -878,5 +886,19 @@ mod tests {
         let ipv6_network = Ipv6Network::from(ip);
         assert_eq!(ip, ipv6_network.network_address());
         assert_eq!(128, ipv6_network.netmask());
+    }
+
+    #[test]
+    fn hash() {
+        let network1 = Ipv6Network::from_str("2001::/100").unwrap();
+        let network2 = Ipv6Network::from_str("2001::/120").unwrap();
+
+        let mut hasher1 = DefaultHasher::new();
+        network1.hash(&mut hasher1);
+
+        let mut hasher2 = DefaultHasher::new();
+        network2.hash(&mut hasher2);
+
+        assert_ne!(hasher1.finish(), hasher2.finish());
     }
 }

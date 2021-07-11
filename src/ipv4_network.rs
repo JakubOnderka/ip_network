@@ -20,8 +20,8 @@ impl Ipv4Network {
     /// IPv4 address length in bits.
     pub const LENGTH: u8 = 32;
 
-    /// Default route, IP network 0.0.0.0/0
-    pub const ANY: Self = Self {
+    /// Default route that contains all IP addresses, IP network 0.0.0.0/0
+    pub const DEFAULT_ROUTE: Self = Self {
         network_address: Ipv4Addr::UNSPECIFIED,
         netmask: 0,
     };
@@ -674,7 +674,7 @@ impl Ipv4Network {
 
         let mut to_merge = addresses.to_vec();
         while let Some(net) = to_merge.pop() {
-            let supernet = net.supernet().unwrap_or(Ipv4Network::ANY);
+            let supernet = net.supernet().unwrap_or(Ipv4Network::DEFAULT_ROUTE);
             match subnets.entry(supernet) {
                 Entry::Vacant(vacant) => {
                     vacant.insert(net);
@@ -829,9 +829,17 @@ mod tests {
     use std::net::Ipv4Addr;
     use crate::{IpNetworkError, Ipv4Network};
     use std::str::FromStr;
+    use std::collections::hash_map::DefaultHasher;
+    use std::hash::{Hash, Hasher};
 
     fn return_test_ipv4_network() -> Ipv4Network {
         Ipv4Network::new(Ipv4Addr::new(192, 168, 0, 0), 16).unwrap()
+    }
+
+    #[test]
+    fn default_route() {
+        let network = Ipv4Network::DEFAULT_ROUTE;
+        assert!(network.is_default_route());
     }
 
     #[test]
@@ -1262,5 +1270,19 @@ mod tests {
         let ipv4_network = Ipv4Network::from(ip);
         assert_eq!(ip, ipv4_network.network_address());
         assert_eq!(32, ipv4_network.netmask());
+    }
+
+    #[test]
+    fn hash() {
+        let network1 = Ipv4Network::from_str("192.0.2.0/26").unwrap();
+        let network2 = Ipv4Network::from_str("192.0.2.64/26").unwrap();
+
+        let mut hasher1 = DefaultHasher::new();
+        network1.hash(&mut hasher1);
+
+        let mut hasher2 = DefaultHasher::new();
+        network2.hash(&mut hasher2);
+
+        assert_ne!(hasher1.finish(), hasher2.finish());
     }
 }
