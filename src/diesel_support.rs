@@ -191,8 +191,9 @@ mod tests {
     }
 
     fn test_output() -> Output<'static, Vec<u8>, Pg> {
-        use std::mem;
-        Output::new(Vec::new(), unsafe { mem::uninitialized() })
+        let uninit = std::mem::MaybeUninit::uninit();
+        let fake_metadata_lookup = unsafe { uninit.assume_init() };
+        Output::new(Vec::new(), fake_metadata_lookup)
     }
 
     #[test]
