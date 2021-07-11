@@ -158,7 +158,10 @@ impl Iterator for Ipv4NetworkIterator {
                 None => self.is_done = true,
             };
 
-            Some(Self::Item::new(Ipv4Addr::from(output), self.new_netmask).unwrap())
+            Some(Self::Item {
+                network_address: Ipv4Addr::from(output),
+                netmask: self.new_netmask,
+            })
         } else {
             None
         }
@@ -244,7 +247,10 @@ impl Iterator for Ipv6NetworkIterator {
                 None => self.is_done = true,
             };
 
-            Some(Self::Item::new(Ipv6Addr::from(output), self.new_netmask).unwrap())
+            Some(Self::Item {
+                network_address: Ipv6Addr::from(output),
+                netmask: self.new_netmask,
+            })
         } else {
             None
         }
@@ -254,7 +260,7 @@ impl Iterator for Ipv6NetworkIterator {
         let remaining = self.real_len();
 
         if 128 - remaining.leading_zeros() > POINTER_WIDTH {
-            (::std::usize::MAX, None)
+            (usize::MAX, None)
         } else {
             let remaining_u64 = remaining as u64;
             (remaining_u64 as usize, Some(remaining_u64 as usize))
@@ -368,7 +374,7 @@ mod tests {
         let network = Ipv6Network::new(ip, 0).unwrap();
         let iterator = Ipv6NetworkIterator::new(network, 128);
 
-        assert_eq!(iterator.real_len(), u128::max_value());
+        assert_eq!(iterator.real_len(), u128::MAX);
     }
 
     #[test]

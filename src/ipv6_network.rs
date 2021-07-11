@@ -23,8 +23,8 @@ pub enum Ipv6MulticastScope {
 /// IPv6 Network.
 #[derive(Clone, Copy, Debug, Eq, PartialOrd, Ord)]
 pub struct Ipv6Network {
-    network_address: Ipv6Addr,
-    netmask: u8,
+    pub(crate) network_address: Ipv6Addr,
+    pub(crate) netmask: u8,
 }
 
 impl Ipv6Network {
