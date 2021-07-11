@@ -7,7 +7,7 @@ pub const IPV4_TYPE: u8 = 2;
 pub const IPV6_TYPE: u8 = 3;
 
 #[inline]
-pub fn from_sql_ipv4_network(raw: &[u8]) -> Result<Ipv4Network, Box<Error + Sync + Send>> {
+pub fn from_sql_ipv4_network(raw: &[u8]) -> Result<Ipv4Network, Box<dyn Error + Sync + Send>> {
     assert!(raw.len() >= 7);
 
     if raw[0] != IPV4_TYPE {
@@ -28,7 +28,7 @@ pub fn from_sql_ipv4_network(raw: &[u8]) -> Result<Ipv4Network, Box<Error + Sync
 }
 
 #[inline]
-pub fn from_sql_ipv6_network(raw: &[u8]) -> Result<Ipv6Network, Box<Error + Sync + Send>> {
+pub fn from_sql_ipv6_network(raw: &[u8]) -> Result<Ipv6Network, Box<dyn Error + Sync + Send>> {
     assert!(raw.len() >= 20);
 
     if raw[0] != IPV6_TYPE {
