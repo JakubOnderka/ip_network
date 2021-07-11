@@ -12,13 +12,9 @@ impl Serialize for IpNetwork {
         if serializer.is_human_readable() {
             serializer.serialize_str(&self.to_string())
         } else {
-            match *self {
-                IpNetwork::V4(ref a) => {
-                    serializer.serialize_newtype_variant("IpNetwork", 0, "V4", a)
-                }
-                IpNetwork::V6(ref a) => {
-                    serializer.serialize_newtype_variant("IpNetwork", 1, "V6", a)
-                }
+            match self {
+                IpNetwork::V4(a) => serializer.serialize_newtype_variant("IpNetwork", 0, "V4", a),
+                IpNetwork::V6(a) => serializer.serialize_newtype_variant("IpNetwork", 1, "V6", a),
             }
         }
     }
