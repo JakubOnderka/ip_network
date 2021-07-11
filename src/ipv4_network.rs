@@ -620,19 +620,21 @@ impl Ipv4Network {
         let mut first_int = u32::from(first);
         let last_int = u32::from(last);
 
-        let mut vector = Vec::with_capacity(1);
+        let mut vector = vec![];
 
         while first_int <= last_int {
-            let bit_length_diff;
-            if last_int - first_int == std::u32::MAX {
-                bit_length_diff = Self::LENGTH;
+            let bit_length_diff = if last_int - first_int == u32::MAX {
+                Self::LENGTH
             } else {
-                bit_length_diff = helpers::bit_length(last_int - first_int + 1) - 1
-            }
+                helpers::bit_length(last_int - first_int + 1) - 1
+            };
 
             let nbits = cmp::min(first_int.trailing_zeros() as u8, bit_length_diff);
 
-            vector.push(Self::new(Ipv4Addr::from(first_int), Self::LENGTH - nbits).unwrap());
+            vector.push(Self {
+                network_address: Ipv4Addr::from(first_int),
+                netmask: Self::LENGTH - nbits,
+            });
 
             if nbits == Self::LENGTH {
                 break;
