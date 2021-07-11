@@ -689,7 +689,8 @@ impl Ipv4Network {
         }
 
         let mut output: Vec<Ipv4Network> = vec![];
-        for net in subnets.into_values() {
+        // into_values() is unstable
+        for (_, net) in subnets.into_iter() {
             if let Some(last) = output.last() {
                 // Since they are sorted, last.network_address <= net.network_address is a given.
                 if last.broadcast_address() >= net.broadcast_address() {

@@ -571,7 +571,8 @@ impl Ipv6Network {
         }
 
         let mut output: Vec<Ipv6Network> = vec![];
-        for net in subnets.into_values() {
+        // into_values() is unstable
+        for (_, net) in subnets.into_iter() {
             if let Some(last) = output.last() {
                 // Since they are sorted, last.network_address <= net.network_address is a given.
                 if last.last_address() >= net.last_address() {
