@@ -20,6 +20,12 @@ impl Ipv4Network {
     /// IPv4 address length in bits.
     pub const LENGTH: u8 = 32;
 
+    /// Default route, IP network 0.0.0.0/0
+    pub const ANY: Self = Self {
+        network_address: Ipv4Addr::UNSPECIFIED,
+        netmask: 0,
+    };
+
     /// Constructs new `Ipv4Network` based on [`Ipv4Addr`] and `netmask`.
     ///
     /// Returns error if netmask is bigger than 32 or if host bits are set in `network_address`.

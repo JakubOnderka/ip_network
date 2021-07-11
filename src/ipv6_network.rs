@@ -31,6 +31,12 @@ impl Ipv6Network {
     /// IPv6 address length in bits.
     pub const LENGTH: u8 = 128;
 
+    /// Default route, IP network ::/0
+    pub const ANY: Self = Self {
+        network_address: Ipv6Addr::UNSPECIFIED,
+        netmask: 0,
+    };
+
     /// Constructs new `Ipv6Network` based on [`Ipv6Addr`] and `netmask`.
     ///
     /// Returns error if netmask is bigger than 128 or if host bits are set in `network_address`.
