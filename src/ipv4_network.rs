@@ -12,8 +12,8 @@ use std::collections::btree_map::Entry;
 /// IPv4 Network.
 #[derive(Clone, Copy, Debug, Eq, PartialOrd, Ord)]
 pub struct Ipv4Network {
-    network_address: Ipv4Addr,
-    netmask: u8,
+    pub(crate) network_address: Ipv4Addr,
+    pub(crate) netmask: u8,
 }
 
 impl Ipv4Network {
