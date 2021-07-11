@@ -6,7 +6,7 @@ pub fn bite_mask(mask: u8) -> u32 {
     debug_assert!(mask <= 32);
     match mask {
         0 => 0,
-        n => (!0 << (32 - n)),
+        n => !0 << (32 - n),
     }
 }
 
@@ -14,7 +14,7 @@ pub fn bite_mask_u128(mask: u8) -> u128 {
     debug_assert!(mask <= 128);
     match mask {
         0 => 0,
-        n => (!0 << (128 - n)),
+        n => !0 << (128 - n),
     }
 }
 
@@ -39,7 +39,7 @@ mod tests {
 
     #[test]
     fn get_bite_mask_32() {
-        assert_eq!(u32::max_value(), bite_mask(32));
+        assert_eq!(u32::MAX, bite_mask(32));
     }
 
     #[test]
@@ -54,7 +54,7 @@ mod tests {
 
     #[test]
     fn get_bite_mask_u128_128() {
-        assert_eq!(u128::max_value(), bite_mask_u128(128));
+        assert_eq!(u128::MAX, bite_mask_u128(128));
     }
 
     #[test]
