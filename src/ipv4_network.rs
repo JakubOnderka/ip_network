@@ -651,7 +651,22 @@ impl Ipv4Network {
     ///
     /// Implementation of this method was inspired by Python [`ipaddress.collapse_addresses`]
     ///
-    /// [`ipaddress.summarize_address_range`]: https://docs.python.org/3/library/ipaddress.html#ipaddress.collapse_addresses
+    /// [`ipaddress.collapse_addresses`]: https://docs.python.org/3/library/ipaddress.html#ipaddress.collapse_addresses
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::net::Ipv4Addr;
+    /// use ip_network::Ipv4Network;
+    ///
+    /// let collapsed = Ipv4Network::collapse_addresses(&[
+    ///     Ipv4Network::new(Ipv4Addr::new(192, 0, 2, 0), 25)?,
+    ///     Ipv4Network::new(Ipv4Addr::new(192, 0, 2, 128), 25)?,
+    /// ]);
+    ///
+    /// assert_eq!(Ipv4Network::new(Ipv4Addr::new(192, 0, 2, 0), 24)?, collapsed[0]);
+    /// # Ok::<(), ip_network::IpNetworkError>(())
+    /// ```
     pub fn collapse_addresses(addresses: &[Self]) -> Vec<Self> {
         let mut subnets = BTreeMap::new();
 

@@ -509,7 +509,23 @@ impl Ipv6Network {
     ///
     /// Implementation of this method was inspired by Python [`ipaddress.collapse_addresses`]
     ///
-    /// [`ipaddress.summarize_address_range`]: https://docs.python.org/3/library/ipaddress.html#ipaddress.collapse_addresses
+    /// [`ipaddress.collapse_addresses`]: https://docs.python.org/3/library/ipaddress.html#ipaddress.collapse_addresses
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::net::Ipv6Addr;
+    /// use ip_network::Ipv6Network;
+    /// use std::str::FromStr;
+    ///
+    /// let collapsed = Ipv6Network::collapse_addresses(&[
+    ///     Ipv6Network::from_str("2001::/120")?,
+    ///     Ipv6Network::from_str("2001::/96")?,
+    /// ]);
+    ///
+    /// assert_eq!(Ipv6Network::from_str("2001::/96")?, collapsed[0]);
+    /// # Ok::<(), ip_network::IpNetworkParseError>(())
+    /// ```
     pub fn collapse_addresses(addresses: &[Self]) -> Vec<Self> {
         let mut subnets = BTreeMap::new();
 
