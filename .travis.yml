@@ -5,24 +5,18 @@ cache: cargo
 addons:
   apt:
     packages:
-      - libcurl4-openssl-dev
-      - libelf-dev
-      - libdw-dev
-      - binutils-dev
-      - cmake
-    sources:
-      - kalakris-cmake
+      - libssl-dev
 
 rust:
   - nightly
   - beta
   - stable
 
-before_script:
-  - |
-      rustup component add rustfmt &&
-      which cargo-coveralls || cargo install cargo-travis &&
-      export PATH=$HOME/.cargo/bin:$PATH
+before_script: |
+  rustup component add rustfmt
+  if [[ "$TRAVIS_RUST_VERSION" == stable ]]; then
+    cargo install cargo-tarpaulin
+  fi
 
 script:
   - cargo fmt -- --check
@@ -31,9 +25,7 @@ script:
   - cargo test --features postgres
   - cargo test --features diesel
 
-after_success:
-  - cargo coveralls
-
-env:
-  global:
-    - TRAVIS_CARGO_NIGHTLY_FEATURE=""
+after_success: |
+  if [[ "$TRAVIS_RUST_VERSION" == stable ]]; then
+    cargo tarpaulin --all-features --ciserver travis-ci --coveralls $TRAVIS_JOB_ID
+  fi
