@@ -4,7 +4,7 @@ ip_network
 IPv4 and IPv6 network structs.
 
 [![Documentation](https://docs.rs/ip_network/badge.svg)](https://docs.rs/ip_network)
-[![Build Status](https://travis-ci.org/JakubOnderka/ip_network.svg?branch=master)](https://travis-ci.org/JakubOnderka/ip_network)
+[![Build Status](https://travis-ci.com/JakubOnderka/ip_network.svg?branch=master)](https://travis-ci.com/JakubOnderka/ip_network)
 [![Coverage Status](https://coveralls.io/repos/github/JakubOnderka/ip_network/badge.svg?branch=master)](https://coveralls.io/github/JakubOnderka/ip_network?branch=master)
 [![Crates.io](https://img.shields.io/crates/v/ip_network.svg)](https://crates.io/crates/ip_network)
 
@@ -14,7 +14,7 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-ip_network = "0.3"
+ip_network = "0.4"
 ```
 
 this to your crate root (not necessary when your project is Rust 2018 edition):
@@ -52,7 +52,7 @@ just add `serde` feature to package in your `Cargo.toml`:
 
 ```toml
 [dependencies]
-ip_network = { version = "0.3", features = ["serde"] }
+ip_network = { version = "0.4", features = ["serde"] }
 ``` 
 
 ### Diesel support
@@ -62,7 +62,7 @@ just add `diesel` feature to package in your `Cargo.toml`:
 
 ```toml
 [dependencies]
-ip_network = { version = "0.3", features = ["diesel"] }
+ip_network = { version = "0.4", features = ["diesel"] }
 ``` 
 
 You can then use `ip_network::diesel_support::PqCidrExtensionMethods` trait for CIDR operators support.
@@ -75,7 +75,7 @@ just add `postgres` feature to package in your `Cargo.toml`:
 
 ```toml
 [dependencies]
-ip_network = { version = "0.3", features = ["postgres"] }
+ip_network = { version = "0.4", features = ["postgres"] }
 ``` 
 
 ## Comparison with `ipnetwork` crate
