@@ -1,6 +1,6 @@
 [package]
 name = "ip_network"
-version = "0.3.4"
+version = "0.4.0"
 authors = ["Jakub Onderka <ahoj@jakubonderka.cz>"]
 license = "BSD-2-Clause"
 keywords = ["ip", "ipv4", "ipv6", "network", "address"]
@@ -16,8 +16,7 @@ edition = "2018"
 exclude = [".travis.yml"]
 
 [badges]
-travis-ci = { repository = "JakubOnderka/ip_network" }
-coveralls = { repository = "JakubOnderka/ip_network" }
+maintenance = { status = "actively-developed" }
 
 [dependencies.serde]
 version = "1.0"
