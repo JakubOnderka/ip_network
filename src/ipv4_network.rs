@@ -580,7 +580,7 @@ impl Ipv4Network {
     pub fn is_global(&self) -> bool {
         let octets = self.network_address.octets();
         // These address are only two globally routable from IETF Protocol Assignments.
-        if self.netmask == 32 && (octets == [192, 168, 0, 9] || octets == [192, 168, 0, 10]) {
+        if self.netmask == 32 && (octets == [192, 0, 0, 9] || octets == [192, 0, 0, 10]) {
             return true;
         }
 
