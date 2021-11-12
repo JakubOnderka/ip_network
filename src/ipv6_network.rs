@@ -5,8 +5,8 @@ use std::hash::{Hash, Hasher};
 use crate::{IpNetworkError, IpNetworkParseError};
 use crate::helpers;
 use crate::iterator;
-use std::collections::BTreeMap;
-use std::collections::btree_map::Entry;
+use std::collections::HashMap;
+use std::collections::hash_map::Entry;
 
 /// IPv6 Multicast Address Scopes.
 #[derive(Copy, PartialEq, Eq, Clone, Hash, Debug)]
@@ -552,7 +552,7 @@ impl Ipv6Network {
     /// # Ok::<(), ip_network::IpNetworkParseError>(())
     /// ```
     pub fn collapse_addresses(addresses: &[Self]) -> Vec<Self> {
-        let mut subnets = BTreeMap::new();
+        let mut subnets = HashMap::new();
 
         let mut to_merge = addresses.to_vec();
         while let Some(net) = to_merge.pop() {
@@ -571,8 +571,10 @@ impl Ipv6Network {
         }
 
         let mut output: Vec<Ipv6Network> = vec![];
-        // into_values() is unstable
-        for (_, net) in subnets.into_iter() {
+        let mut values = subnets.into_values().collect::<Vec<_>>();
+        values.sort_unstable();
+
+        for net in values {
             if let Some(last) = output.last() {
                 // Since they are sorted, last.network_address <= net.network_address is a given.
                 if last.last_address() >= net.last_address() {

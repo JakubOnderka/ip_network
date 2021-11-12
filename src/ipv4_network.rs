@@ -6,8 +6,8 @@ use std::hash::{Hash, Hasher};
 use crate::{IpNetworkError, IpNetworkParseError};
 use crate::helpers;
 use crate::iterator;
-use std::collections::BTreeMap;
-use std::collections::btree_map::Entry;
+use std::collections::HashMap;
+use std::collections::hash_map::Entry;
 
 /// IPv4 Network.
 #[derive(Clone, Copy, Debug, Eq, PartialOrd, Ord)]
@@ -670,7 +670,7 @@ impl Ipv4Network {
     /// # Ok::<(), ip_network::IpNetworkError>(())
     /// ```
     pub fn collapse_addresses(addresses: &[Self]) -> Vec<Self> {
-        let mut subnets = BTreeMap::new();
+        let mut subnets = HashMap::new();
 
         let mut to_merge = addresses.to_vec();
         while let Some(net) = to_merge.pop() {
@@ -689,8 +689,10 @@ impl Ipv4Network {
         }
 
         let mut output: Vec<Ipv4Network> = vec![];
-        // into_values() is unstable
-        for (_, net) in subnets.into_iter() {
+        let mut values = subnets.into_values().collect::<Vec<_>>();
+        values.sort_unstable();
+
+        for net in values {
             if let Some(last) = output.last() {
                 // Since they are sorted, last.network_address <= net.network_address is a given.
                 if last.broadcast_address() >= net.broadcast_address() {
@@ -1262,6 +1264,16 @@ mod tests {
         let collapsed = Ipv4Network::collapse_addresses(&addresses);
         assert_eq!(1, collapsed.len());
         assert_eq!(Ipv4Network::from_str("0.0.0.0/0").unwrap(), collapsed[0]);
+    }
+
+    #[test]
+    fn collapse_addresses_9() {
+        let addresses = [
+            Ipv4Network::from_str("1.228.0.0/16").unwrap(),
+            Ipv4Network::from_str("1.230.0.0/15").unwrap(),
+        ];
+        let collapsed = Ipv4Network::collapse_addresses(&addresses);
+        assert_eq!(2, collapsed.len());
     }
 
     #[test]
