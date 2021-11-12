@@ -571,7 +571,7 @@ impl Ipv6Network {
         }
 
         let mut output: Vec<Ipv6Network> = vec![];
-        let mut values = subnets.into_values().collect::<Vec<_>>();
+        let mut values = subnets.values().collect::<Vec<_>>();
         values.sort_unstable();
 
         for net in values {
@@ -581,7 +581,7 @@ impl Ipv6Network {
                     continue;
                 }
             }
-            output.push(net);
+            output.push(*net);
         }
         output
     }

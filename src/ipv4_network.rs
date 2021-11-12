@@ -689,7 +689,7 @@ impl Ipv4Network {
         }
 
         let mut output: Vec<Ipv4Network> = vec![];
-        let mut values = subnets.into_values().collect::<Vec<_>>();
+        let mut values = subnets.values().collect::<Vec<_>>();
         values.sort_unstable();
 
         for net in values {
@@ -699,7 +699,7 @@ impl Ipv4Network {
                     continue;
                 }
             }
-            output.push(net);
+            output.push(*net);
         }
         output
     }
