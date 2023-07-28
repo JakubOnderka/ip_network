@@ -226,6 +226,8 @@ impl Iterator for Ipv6RangeIterator {
     }
 }
 
+impl ExactSizeIterator for Ipv6RangeIterator {}
+
 /// Iterates over new created IPv6 network from given network.
 pub struct Ipv6NetworkIterator {
     current: u128,
@@ -321,7 +323,7 @@ impl ExactSizeIterator for Ipv6NetworkIterator {}
 mod tests {
     use std::net::{Ipv4Addr, Ipv6Addr};
     use crate::{Ipv4Network, Ipv6Network};
-    use super::{Ipv4NetworkIterator, Ipv4RangeIterator, Ipv6NetworkIterator};
+    use super::{Ipv4NetworkIterator, Ipv4RangeIterator, Ipv6NetworkIterator, Ipv6RangeIterator};
 
     #[test]
     fn ipv4_range_iterator() {
@@ -387,6 +389,57 @@ mod tests {
         let network = Ipv4Network::new(Ipv4Addr::new(127, 0, 0, 0), 32).unwrap();
         let iterator = Ipv4NetworkIterator::new(network, 32);
         assert_eq!(0, iterator.len());
+    }
+
+    #[test]
+    fn ipv6_range_iterator() {
+        let mut iterator = Ipv6RangeIterator::new(
+            Ipv6Addr::new(0x2001, 0, 0, 0, 0, 0, 2, 0),
+            Ipv6Addr::new(0x2001, 0, 0, 0, 0, 0, 2, 0x00FF),
+        );
+        assert_eq!(
+            iterator.next().unwrap(),
+            Ipv6Addr::new(0x2001, 0, 0, 0, 0, 0, 2, 0)
+        );
+        assert_eq!(
+            iterator.next().unwrap(),
+            Ipv6Addr::new(0x2001, 0, 0, 0, 0, 0, 2, 0x0001)
+        );
+        assert_eq!(
+            iterator.last().unwrap(),
+            Ipv6Addr::new(0x2001, 0, 0, 0, 0, 0, 2, 0x00FF)
+        );
+    }
+
+    #[test]
+    fn ipv64_range_iterator_length() {
+        let mut iterator = Ipv6RangeIterator::new(
+            Ipv6Addr::new(0x2001, 0, 0, 0, 0, 0, 0x0002, 0),
+            Ipv6Addr::new(0x2001, 0, 0, 0, 0, 0, 0x0002, 0x00FF),
+        );
+        assert_eq!(iterator.len(), 256);
+        iterator.next().unwrap();
+        assert_eq!(iterator.len(), 255);
+        assert_eq!(iterator.collect::<Vec<_>>().len(), 255);
+    }
+
+    #[test]
+    fn ipv6_range_iterator_same_values() {
+        let mut iterator = Ipv6RangeIterator::new(
+            Ipv6Addr::new(
+                0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
+            ),
+            Ipv6Addr::new(
+                0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
+            ),
+        );
+        assert_eq!(iterator.len(), 1);
+        assert_eq!(
+            iterator.next().unwrap(),
+            Ipv6Addr::new(0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF)
+        );
+        assert!(iterator.next().is_none());
+        assert_eq!(iterator.len(), 0);
     }
 
     #[test]
