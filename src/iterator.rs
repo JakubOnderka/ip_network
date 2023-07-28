@@ -179,6 +179,53 @@ impl Iterator for Ipv4NetworkIterator {
 
 impl ExactSizeIterator for Ipv4NetworkIterator {}
 
+pub struct Ipv6RangeIterator {
+    current: u128,
+    to: u128,
+    is_done: bool,
+}
+
+impl Ipv6RangeIterator {
+    pub fn new(from: Ipv6Addr, to: Ipv6Addr) -> Self {
+        let current = u128::from(from);
+        let to = u128::from(to);
+        assert!(to >= current);
+        Self {
+            current,
+            to,
+            is_done: false,
+        }
+    }
+}
+
+impl Iterator for Ipv6RangeIterator {
+    type Item = Ipv6Addr;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.current <= self.to && !self.is_done {
+            let output = self.current;
+
+            match self.current.checked_add(1) {
+                Some(x) => self.current = x,
+                None => self.is_done = true,
+            };
+
+            Some(Self::Item::from(output))
+        } else {
+            None
+        }
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        if self.is_done {
+            return (0, Some(0));
+        }
+
+        let remaining = (self.to - self.current + 1) as usize;
+        (remaining, Some(remaining))
+    }
+}
+
 /// Iterates over new created IPv6 network from given network.
 pub struct Ipv6NetworkIterator {
     current: u128,
