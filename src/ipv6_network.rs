@@ -660,6 +660,15 @@ impl Hash for Ipv6Network {
     }
 }
 
+impl IntoIterator for Ipv6Network {
+    type Item = Ipv6Addr;
+    type IntoIter = iterator::Ipv6RangeIterator;
+
+    fn into_iter(self) -> Self::IntoIter {
+        Self::IntoIter::new(self.network_address, self.last_address())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use std::net::Ipv6Addr;
