@@ -201,7 +201,7 @@ impl Ipv6RangeIterator {
     ///
     /// let mut iterator = Ipv6RangeIterator::new(
     ///     Ipv6Addr::new(0x2001, 0, 0, 0, 0, 0, 0x0002, 0),
-    ///     Ipv6Addr::new(0x2001, 0, 0, 0, 0, 0, 0x0002, 0x00FF)
+    ///     Ipv6Addr::new(0x2001, 0, 0, 0, 0, 0, 0x0002, 0x00ff)
     /// );
     /// assert_eq!(
     ///     iterator.next().unwrap(),
@@ -213,7 +213,7 @@ impl Ipv6RangeIterator {
     /// );
     /// assert_eq!(
     ///     iterator.last().unwrap(),
-    ///     Ipv6Addr::new(0x2001, 0, 0, 0, 0, 0, 0x0002, 0x00FF)
+    ///     Ipv6Addr::new(0x2001, 0, 0, 0, 0, 0, 0x0002, 0x00ff)
     /// );
     /// ```
     pub fn new(from: Ipv6Addr, to: Ipv6Addr) -> Self {
@@ -425,7 +425,7 @@ mod tests {
     fn ipv6_range_iterator() {
         let mut iterator = Ipv6RangeIterator::new(
             Ipv6Addr::new(0x2001, 0, 0, 0, 0, 0, 0x0002, 0),
-            Ipv6Addr::new(0x2001, 0, 0, 0, 0, 0, 0x0002, 0x00FF),
+            Ipv6Addr::new(0x2001, 0, 0, 0, 0, 0, 0x0002, 0x00ff),
         );
         assert_eq!(
             iterator.next().unwrap(),
@@ -437,7 +437,7 @@ mod tests {
         );
         assert_eq!(
             iterator.last().unwrap(),
-            Ipv6Addr::new(0x2001, 0, 0, 0, 0, 0, 0x0002, 0x00FF)
+            Ipv6Addr::new(0x2001, 0, 0, 0, 0, 0, 0x0002, 0x00ff)
         );
     }
 
@@ -445,7 +445,7 @@ mod tests {
     fn ipv64_range_iterator_length() {
         let mut iterator = Ipv6RangeIterator::new(
             Ipv6Addr::new(0x2001, 0, 0, 0, 0, 0, 0x0002, 0),
-            Ipv6Addr::new(0x2001, 0, 0, 0, 0, 0, 0x0002, 0x00FF),
+            Ipv6Addr::new(0x2001, 0, 0, 0, 0, 0, 0x0002, 0x00ff),
         );
         assert_eq!(iterator.len(), 256);
         iterator.next().unwrap();
@@ -457,16 +457,16 @@ mod tests {
     fn ipv6_range_iterator_same_values() {
         let mut iterator = Ipv6RangeIterator::new(
             Ipv6Addr::new(
-                0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
+                0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff,
             ),
             Ipv6Addr::new(
-                0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
+                0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff,
             ),
         );
         assert_eq!(iterator.len(), 1);
         assert_eq!(
             iterator.next().unwrap(),
-            Ipv6Addr::new(0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF)
+            Ipv6Addr::new(0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff)
         );
         assert!(iterator.next().is_none());
         assert_eq!(iterator.len(), 0);
