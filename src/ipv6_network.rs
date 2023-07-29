@@ -743,6 +743,16 @@ mod tests {
     }
 
     #[test]
+    fn iterator() {
+        let ip_network = Ipv6Network::new(
+            Ipv6Addr::new(0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0, 0),
+            112,
+        )
+        .unwrap();
+        assert_eq!(ip_network.into_iter().len(), 16 * 16 * 16 * 16);
+    }
+
+    #[test]
     fn subnets() {
         let mut subnets = return_test_ipv6_network().subnets();
         assert_eq!(subnets.len(), 2);
