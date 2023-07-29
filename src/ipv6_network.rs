@@ -664,6 +664,21 @@ impl IntoIterator for Ipv6Network {
     type Item = Ipv6Addr;
     type IntoIter = iterator::Ipv6RangeIterator;
 
+    /// Returns iterator over all IP addresses in range including network and last addresses.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::net::Ipv6Addr;
+    /// use ip_network::Ipv6Network;
+    ///
+    /// let ip = Ipv6Addr::new(0x2001, 0, 0, 0, 0, 0, 0x0002, 0);
+    /// let mut iter = Ipv6Network::new(ip, 120)?.into_iter();
+    /// assert_eq!(iter.next().unwrap(), Ipv6Addr::new(0x2001, 0, 0, 0, 0, 0, 0x0002, 0));
+    /// assert_eq!(iter.next().unwrap(), Ipv6Addr::new(0x2001, 0, 0, 0, 0, 0, 0x0002, 1));
+    /// assert_eq!(iter.last().unwrap(), Ipv6Addr::new(0x2001, 0, 0, 0, 0, 0, 0x0002, 0x00ff));
+    /// # Ok::<(), ip_network::IpNetworkError>(())
+    /// ```
     fn into_iter(self) -> Self::IntoIter {
         Self::IntoIter::new(self.network_address, self.last_address())
     }
@@ -750,6 +765,21 @@ mod tests {
         )
         .unwrap();
         assert_eq!(ip_network.into_iter().len(), 16 * 16 * 16 * 16);
+    }
+
+    #[test]
+    fn iterator_for() {
+        let ip_network = Ipv6Network::new(
+            Ipv6Addr::new(0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0, 0),
+            112,
+        )
+        .unwrap();
+
+        let mut i = 0;
+        for _ in ip_network {
+            i += 1;
+        }
+        assert_eq!(i, 16 * 16 * 16 * 16);
     }
 
     #[test]
