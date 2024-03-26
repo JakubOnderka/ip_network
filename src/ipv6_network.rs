@@ -56,12 +56,14 @@ impl Ipv6Network {
     /// # Ok::<(), ip_network::IpNetworkError>(())
     /// ```
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(network_address: Ipv6Addr, netmask: u8) -> Result<Self, IpNetworkError> {
+    pub const fn new(network_address: Ipv6Addr, netmask: u8) -> Result<Self, IpNetworkError> {
         if netmask > Self::LENGTH {
             return Err(IpNetworkError::NetmaskError(netmask));
         }
 
-        if u128::from(network_address).trailing_zeros() < u32::from(Self::LENGTH - netmask) {
+        if u128::from_be_bytes(network_address.octets()).trailing_zeros()
+            < (Self::LENGTH - netmask) as u32
+        {
             return Err(IpNetworkError::HostBitsSet);
         }
 
