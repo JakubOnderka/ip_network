@@ -179,6 +179,85 @@ impl Iterator for Ipv4NetworkIterator {
 
 impl ExactSizeIterator for Ipv4NetworkIterator {}
 
+/// IPv6 range iterator.
+pub struct Ipv6RangeIterator {
+    current: u128,
+    to: u128,
+    is_done: bool,
+}
+
+impl Ipv6RangeIterator {
+    /// Constructs new `Ipv6RangeIterator` for given range, both `from` and `to` address are inclusive.
+    ///
+    /// # Panics
+    ///
+    /// When `to` address is bigger or same than `from` address.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::net::Ipv6Addr;
+    /// use ip_network::iterator::Ipv6RangeIterator;
+    ///
+    /// let mut iterator = Ipv6RangeIterator::new(
+    ///     Ipv6Addr::new(0x2001, 0, 0, 0, 0, 0, 0x0002, 0),
+    ///     Ipv6Addr::new(0x2001, 0, 0, 0, 0, 0, 0x0002, 0x00ff)
+    /// );
+    /// assert_eq!(
+    ///     iterator.next().unwrap(),
+    ///     Ipv6Addr::new(0x2001, 0, 0, 0, 0, 0, 0x0002, 0)
+    /// );
+    /// assert_eq!(
+    ///     iterator.next().unwrap(),
+    ///     Ipv6Addr::new(0x2001, 0, 0, 0, 0, 0, 0x0002, 0x0001)
+    /// );
+    /// assert_eq!(
+    ///     iterator.last().unwrap(),
+    ///     Ipv6Addr::new(0x2001, 0, 0, 0, 0, 0, 0x0002, 0x00ff)
+    /// );
+    /// ```
+    pub fn new(from: Ipv6Addr, to: Ipv6Addr) -> Self {
+        let current = u128::from(from);
+        let to = u128::from(to);
+        assert!(to >= current);
+        Self {
+            current,
+            to,
+            is_done: false,
+        }
+    }
+}
+
+impl Iterator for Ipv6RangeIterator {
+    type Item = Ipv6Addr;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.current <= self.to && !self.is_done {
+            let output = self.current;
+
+            match self.current.checked_add(1) {
+                Some(x) => self.current = x,
+                None => self.is_done = true,
+            };
+
+            Some(Self::Item::from(output))
+        } else {
+            None
+        }
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        if self.is_done {
+            return (0, Some(0));
+        }
+
+        let remaining = (self.to - self.current + 1) as usize;
+        (remaining, Some(remaining))
+    }
+}
+
+impl ExactSizeIterator for Ipv6RangeIterator {}
+
 /// Iterates over new created IPv6 network from given network.
 pub struct Ipv6NetworkIterator {
     current: u128,
@@ -274,7 +353,7 @@ impl ExactSizeIterator for Ipv6NetworkIterator {}
 mod tests {
     use std::net::{Ipv4Addr, Ipv6Addr};
     use crate::{Ipv4Network, Ipv6Network};
-    use super::{Ipv4NetworkIterator, Ipv4RangeIterator, Ipv6NetworkIterator};
+    use super::{Ipv4NetworkIterator, Ipv4RangeIterator, Ipv6NetworkIterator, Ipv6RangeIterator};
 
     #[test]
     fn ipv4_range_iterator() {
@@ -340,6 +419,57 @@ mod tests {
         let network = Ipv4Network::new(Ipv4Addr::new(127, 0, 0, 0), 32).unwrap();
         let iterator = Ipv4NetworkIterator::new(network, 32);
         assert_eq!(0, iterator.len());
+    }
+
+    #[test]
+    fn ipv6_range_iterator() {
+        let mut iterator = Ipv6RangeIterator::new(
+            Ipv6Addr::new(0x2001, 0, 0, 0, 0, 0, 0x0002, 0),
+            Ipv6Addr::new(0x2001, 0, 0, 0, 0, 0, 0x0002, 0x00ff),
+        );
+        assert_eq!(
+            iterator.next().unwrap(),
+            Ipv6Addr::new(0x2001, 0, 0, 0, 0, 0, 0x0002, 0)
+        );
+        assert_eq!(
+            iterator.next().unwrap(),
+            Ipv6Addr::new(0x2001, 0, 0, 0, 0, 0, 0x0002, 0x0001)
+        );
+        assert_eq!(
+            iterator.last().unwrap(),
+            Ipv6Addr::new(0x2001, 0, 0, 0, 0, 0, 0x0002, 0x00ff)
+        );
+    }
+
+    #[test]
+    fn ipv64_range_iterator_length() {
+        let mut iterator = Ipv6RangeIterator::new(
+            Ipv6Addr::new(0x2001, 0, 0, 0, 0, 0, 0x0002, 0),
+            Ipv6Addr::new(0x2001, 0, 0, 0, 0, 0, 0x0002, 0x00ff),
+        );
+        assert_eq!(iterator.len(), 256);
+        iterator.next().unwrap();
+        assert_eq!(iterator.len(), 255);
+        assert_eq!(iterator.collect::<Vec<_>>().len(), 255);
+    }
+
+    #[test]
+    fn ipv6_range_iterator_same_values() {
+        let mut iterator = Ipv6RangeIterator::new(
+            Ipv6Addr::new(
+                0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff,
+            ),
+            Ipv6Addr::new(
+                0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff,
+            ),
+        );
+        assert_eq!(iterator.len(), 1);
+        assert_eq!(
+            iterator.next().unwrap(),
+            Ipv6Addr::new(0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff)
+        );
+        assert!(iterator.next().is_none());
+        assert_eq!(iterator.len(), 0);
     }
 
     #[test]
