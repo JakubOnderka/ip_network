@@ -1,6 +1,6 @@
 [package]
 name = "ip_network"
-version = "0.4.1"
+version = "0.4.2"
 authors = ["Jakub Onderka <ahoj@jakubonderka.cz>"]
 license = "BSD-2-Clause"
 keywords = ["ip", "ipv4", "ipv6", "network", "address"]
