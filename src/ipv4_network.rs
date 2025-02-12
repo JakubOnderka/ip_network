@@ -179,6 +179,27 @@ impl Ipv4Network {
         u32::from(ip) & helpers::bite_mask(self.netmask) == u32::from(self.network_address)
     }
 
+    /// Returns [`true`] if given [`Ipv4Network`] is inside this network.
+    ///
+    /// [`true`]: https://doc.rust-lang.org/std/primitive.bool.html
+    ///
+    /// # Examples
+    /// ```
+    /// use std::net::Ipv4Addr;
+    /// use ip_network::Ipv4Network;
+    ///
+    /// let ip_network = Ipv4Network::new(Ipv4Addr::new(192, 168, 1, 0), 24)?;
+    /// assert!(ip_network.overlaps(Ipv4Network::new(Ipv4Addr::new(192, 168, 0, 0), 16)?));
+    /// assert!(!ip_network.overlaps(Ipv4Network::new(Ipv4Addr::new(192, 169, 0, 0), 16)?));
+    /// # Ok::<(), ip_network::IpNetworkError>(())
+    /// ````
+    pub fn overlaps(&self, other: Ipv4Network) -> bool {
+        other.contains(self.network_address())
+            || other.contains(self.broadcast_address())
+            || self.contains(other.network_address())
+            || self.contains(other.broadcast_address())
+    }
+
     /// Returns iterator over host IP addresses in range (without network and broadcast address). You
     /// can also use this method to check how much hosts address are in range by calling [`len()`] method
     /// on iterator (see Examples).
@@ -950,6 +971,15 @@ mod tests {
         assert!(ip_network.contains(Ipv4Addr::new(192, 168, 0, 0)));
         assert!(ip_network.contains(Ipv4Addr::new(192, 168, 255, 255)));
         assert!(!ip_network.contains(Ipv4Addr::new(192, 169, 0, 0)));
+    }
+
+    #[test]
+    fn overlaps() {
+        let ip_network = return_test_ipv4_network();
+        assert!(!ip_network.overlaps(Ipv4Network::new(Ipv4Addr::new(192, 167, 0, 0), 16).unwrap()));
+        assert!(ip_network.overlaps(Ipv4Network::new(Ipv4Addr::new(192, 168, 0, 0), 32).unwrap()));
+        assert!(ip_network.overlaps(Ipv4Network::new(Ipv4Addr::new(192, 168, 0, 0), 16).unwrap()));
+        assert!(!ip_network.overlaps(Ipv4Network::new(Ipv4Addr::new(192, 169, 0, 0), 16).unwrap()));
     }
 
     #[test]

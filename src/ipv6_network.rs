@@ -180,6 +180,27 @@ impl Ipv6Network {
         truncated_ip == u128::from(self.network_address)
     }
 
+    /// Returns [`true`] if given [`Ipv6Network`] is inside this network.
+    ///
+    /// [`true`]: https://doc.rust-lang.org/std/primitive.bool.html
+    ///
+    /// # Examples
+    /// ```
+    /// use std::net::Ipv6Addr;
+    /// use ip_network::Ipv6Network;
+    ///
+    /// let ip_network = Ipv6Network::new(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0), 32)?;
+    /// assert!(ip_network.overlaps(Ipv6Network::new(Ipv6Addr::new(0x2001, 0, 0, 0, 0, 0, 0, 0), 16)?));
+    /// assert!(!ip_network.overlaps(Ipv6Network::new(Ipv6Addr::new(0x2001, 0x0db9, 0, 0, 0, 0, 0, 0), 32)?));
+    /// # Ok::<(), ip_network::IpNetworkError>(())
+    /// ````
+    pub fn overlaps(&self, other: Ipv6Network) -> bool {
+        other.contains(self.network_address())
+            || other.contains(self.last_address())
+            || self.contains(other.network_address())
+            || self.contains(other.last_address())
+    }
+
     /// Returns network with smaller netmask by one. If netmask is already zero, `None` will be returned.
     ///
     /// # Examples
@@ -718,6 +739,22 @@ mod tests {
             0x2001, 0x0db8, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff
         )));
         assert!(!ip_network.contains(Ipv6Addr::new(0x2001, 0x0db9, 0, 0, 0, 0, 0, 0)));
+    }
+
+    #[test]
+    fn overlaps() {
+        let ip_network = return_test_ipv6_network();
+        assert!(!ip_network.overlaps(
+            Ipv6Network::new(Ipv6Addr::new(0x2001, 0x0db7, 0, 0, 0, 0, 0, 0), 32).unwrap()
+        ));
+        assert!(ip_network.overlaps(
+            Ipv6Network::new(Ipv6Addr::new(0x2001, 0x0db8, 0, 0, 0, 0, 0, 0), 32).unwrap()
+        ));
+        assert!(ip_network
+            .overlaps(Ipv6Network::new(Ipv6Addr::new(0x2001, 0, 0, 0, 0, 0, 0, 0), 16).unwrap()));
+        assert!(!ip_network.overlaps(
+            Ipv6Network::new(Ipv6Addr::new(0x2001, 0x0db9, 0, 0, 0, 0, 0, 0), 32).unwrap()
+        ));
     }
 
     #[test]
