@@ -1,10 +1,14 @@
-use std::cmp::Ordering;
-use std::fmt;
-use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
-use std::str::FromStr;
-use crate::{IpNetworkError, IpNetworkParseError};
 use crate::helpers;
+use crate::{IpNetworkError, IpNetworkParseError};
 use crate::{Ipv4Network, Ipv6Network};
+#[cfg(feature = "alloc")]
+use alloc::vec;
+#[cfg(feature = "alloc")]
+use alloc::vec::Vec;
+use core::cmp::Ordering;
+use core::fmt;
+use core::net::{IpAddr, Ipv4Addr, Ipv6Addr};
+use core::str::FromStr;
 
 /// Holds IPv4 or IPv6 network.
 #[derive(Clone, Copy, Eq, PartialEq, Debug, Hash, PartialOrd, Ord)]
@@ -141,7 +145,7 @@ impl IpNetwork {
         }
     }
 
-    /// Returns `true` if the network is default route, that contains all IP addresses.
+    /// Returns `true` if the network is the default route, that contains all IP addresses.
     pub fn is_default_route(&self) -> bool {
         match self {
             IpNetwork::V4(ip_network) => ip_network.is_default_route(),
@@ -149,7 +153,7 @@ impl IpNetwork {
         }
     }
 
-    /// Returns `true` if the network is part of multicast network range.
+    /// Returns `true` if the network is part of a multicast network range.
     pub fn is_multicast(&self) -> bool {
         match self {
             IpNetwork::V4(ip_network) => ip_network.is_multicast(),
@@ -157,7 +161,7 @@ impl IpNetwork {
         }
     }
 
-    /// Returns `true` if this is a part of network reserved for documentation.
+    /// Returns `true` if this is a part of the network reserved for documentation.
     pub fn is_documentation(&self) -> bool {
         match self {
             IpNetwork::V4(ip_network) => ip_network.is_documentation(),
@@ -165,7 +169,7 @@ impl IpNetwork {
         }
     }
 
-    /// Returns `true` if this network is inside loopback address range.
+    /// Returns `true` if this network is inside the loopback address range.
     pub fn is_loopback(&self) -> bool {
         match self {
             IpNetwork::V4(ip_network) => ip_network.is_loopback(),
@@ -206,6 +210,7 @@ impl IpNetwork {
     }
 
     /// Return an iterator of the collapsed IpNetworks.
+    #[cfg(feature = "std")]
     pub fn collapse_addresses(addresses: &[Self]) -> Vec<Self> {
         let mut ipv4_networks = vec![];
         let mut ipv6_networks = vec![];
@@ -392,9 +397,12 @@ impl PartialOrd<IpNetwork> for Ipv6Network {
 
 #[cfg(test)]
 mod tests {
-    use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
-    use crate::{IpNetwork, IpNetworkParseError, IpNetworkError, Ipv4Network, Ipv6Network};
-    use std::str::FromStr;
+    extern crate std;
+    extern crate alloc;
+
+    use crate::{IpNetwork, IpNetworkError, IpNetworkParseError, Ipv4Network, Ipv6Network};
+    use alloc::string::ToString;
+    use core::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 
     fn return_test_ipv4_network() -> Ipv4Network {
         Ipv4Network::new(Ipv4Addr::new(192, 168, 0, 0), 16).unwrap()
@@ -607,8 +615,11 @@ mod tests {
         assert!(ip_network_v6 > ip_network_v4);
     }
 
+    #[cfg(feature = "std")]
     #[test]
     fn collapse_addresses() {
+        use core::str::FromStr;
+
         let addresses: Vec<_> = [
             "192.0.2.0/25",
             "192.0.2.128/25",

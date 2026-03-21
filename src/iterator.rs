@@ -1,4 +1,4 @@
-use std::net::{Ipv4Addr, Ipv6Addr};
+use core::net::{Ipv4Addr, Ipv6Addr};
 use crate::{Ipv4Network, Ipv6Network};
 use crate::helpers;
 
@@ -19,7 +19,7 @@ pub struct Ipv4RangeIterator {
 }
 
 impl Ipv4RangeIterator {
-    /// Constructs new `Ipv4RangeIterator` for given range, both `from` and `to` address are inclusive.
+    /// Constructs a new `Ipv4RangeIterator` for a given range, both `from` and `to` address are inclusive.
     ///
     /// # Panics
     ///
@@ -50,11 +50,11 @@ impl Ipv4RangeIterator {
         }
     }
 
-    /// Constructs new `Ipv4RangeIterator` that iterates host (without network and broadcast address)
+    /// Constructs a new `Ipv4RangeIterator` that iterates host (without network and broadcast address)
     /// IPs in Ipv4Network.
     pub fn hosts(network: Ipv4Network) -> Self {
         if network.netmask() >= 31 {
-            // Network doesn't contains any host IPs, create empty iterator.
+            // Network doesn't contain any host IPs, create empty iterator.
             Self {
                 current: 0,
                 to: 0,
@@ -272,7 +272,10 @@ impl ExactSizeIterator for Ipv6NetworkIterator {}
 
 #[cfg(test)]
 mod tests {
-    use std::net::{Ipv4Addr, Ipv6Addr};
+    extern crate std;
+
+    use std::vec::Vec;
+    use core::net::{Ipv4Addr, Ipv6Addr};
     use crate::{Ipv4Network, Ipv6Network};
     use super::{Ipv4NetworkIterator, Ipv4RangeIterator, Ipv6NetworkIterator};
 

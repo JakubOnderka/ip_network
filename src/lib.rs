@@ -24,6 +24,12 @@
 //!
 //! [PostgreSQL CIDR type]: https://www.postgresql.org/docs/current/datatype-net-types.html#DATATYPE-CIDR
 
+// Set `no_std` where `std` feature is disabled
+#![cfg_attr(not(feature = "std"), no_std)]
+
+#[cfg(feature = "alloc")]
+extern crate alloc;
+
 #[cfg(feature = "diesel")]
 #[macro_use]
 extern crate diesel;
@@ -44,8 +50,8 @@ mod postgres_support;
 #[cfg(feature = "serde")]
 mod serde_support;
 
-use std::error::Error;
-use std::fmt;
+use core::error::Error;
+use core::fmt;
 
 pub use self::ip_network::IpNetwork;
 pub use self::ipv4_network::Ipv4Network;
@@ -54,9 +60,9 @@ pub use self::ipv6_network::{Ipv6MulticastScope, Ipv6Network};
 /// Errors when creating new IPv4 or IPv6 networks.
 #[derive(Debug, PartialEq)]
 pub enum IpNetworkError {
-    /// Network mask is bigger than possible for given IP version (32 for IPv4, 128 for IPv6).
+    /// Network mask is bigger than possible for a given IP version (32 for IPv4, 128 for IPv6).
     NetmaskError(u8),
-    /// Host bits are set in given network IP address.
+    /// Host bits are set in a given network IP address.
     HostBitsSet,
 }
 
@@ -75,9 +81,9 @@ impl fmt::Display for IpNetworkError {
 /// Errors from IPv4 or IPv6 network parsing.
 #[derive(Debug, PartialEq)]
 pub enum IpNetworkParseError {
-    /// Network mask is not valid integer between 0 and 255.
+    /// Network mask is not a valid integer between 0 and 255.
     InvalidNetmaskFormat,
-    /// Network address has invalid format (not X/Y).
+    /// Network address has an invalid format (not X/Y).
     InvalidFormatError,
     /// Invalid IP address syntax (IPv4 or IPv6).
     AddrParseError,

@@ -20,6 +20,7 @@ before_script: |
 
 script:
   - cargo fmt -- --check
+  - cargo test --no-default-features
   - cargo test
   - cargo test --features serde
   - cargo test --features postgres
